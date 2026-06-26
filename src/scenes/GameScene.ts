@@ -103,11 +103,12 @@ export class GameScene extends Phaser.Scene {
     this.stars = this.add.group();
     this.cursors = this.input.keyboard!.createCursorKeys();
 
+    // Plain pointer movement moves the unicorn — no click/drag needed.
+    // (On touch devices pointermove only fires while a finger is down, so this
+    //  still behaves as drag-to-move there.)
     this.input.on("pointermove", (p: Phaser.Input.Pointer) => {
-      if (p.isDown || this.sys.game.device.input.touch === false) {
-        this.pointerActive = true;
-        this.target = { x: p.worldX, y: p.worldY };
-      }
+      this.pointerActive = true;
+      this.target = { x: p.worldX, y: p.worldY };
     });
     this.input.on("pointerdown", (p: Phaser.Input.Pointer) => {
       this.pointerActive = true;
