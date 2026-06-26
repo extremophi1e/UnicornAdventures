@@ -9,7 +9,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "atlas": "node scripts/build-atlas.mjs",
-    "audio": "node scripts/build-audio.mjs"
+    "audio": "node scripts/build-audio.mjs",
+    "icons": "node scripts/build-icons.mjs"
   },
   "dependencies": {
     "phaser": "^4.0.0"
