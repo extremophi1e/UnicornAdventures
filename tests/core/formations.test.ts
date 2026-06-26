@@ -80,4 +80,40 @@ describe("layoutFormation", () => {
     const right = Math.max(...xs);
     expect(Math.abs(left - (field.width - right))).toBeLessThan(1);
   });
+
+  describe("aspect-aware widening (wide screens)", () => {
+    const wideField = { width: 1100, height: 1280 };
+    const t = TEMPLATES.twoRows;
+    const assigned = assignTypes(t, "uniform", ["donut"], createRng(1));
+
+    it("horizontal span at width 1100 is GREATER than at width 720", () => {
+      const placedNarrow = layoutFormation(t, assigned, field);
+      const placedWide = layoutFormation(t, assigned, wideField);
+
+      const spanOf = (placed: ReturnType<typeof layoutFormation>) => {
+        const xs = placed.map((p) => p.pos.x);
+        return Math.max(...xs) - Math.min(...xs);
+      };
+
+      expect(spanOf(placedWide)).toBeGreaterThan(spanOf(placedNarrow));
+    });
+
+    it("stays centered at width 1100 (left margin ≈ right margin)", () => {
+      const placed = layoutFormation(t, assigned, wideField);
+      const xs = placed.map((p) => p.pos.x);
+      const left = Math.min(...xs);
+      const right = Math.max(...xs);
+      expect(Math.abs(left - (wideField.width - right))).toBeLessThan(1);
+    });
+
+    it("stays fully in-bounds at width 1100", () => {
+      const placed = layoutFormation(t, assigned, wideField);
+      for (const p of placed) {
+        expect(p.pos.x).toBeGreaterThanOrEqual(0);
+        expect(p.pos.x).toBeLessThanOrEqual(wideField.width);
+        expect(p.pos.y).toBeGreaterThanOrEqual(0);
+        expect(p.pos.y).toBeLessThanOrEqual(wideField.height);
+      }
+    });
+  });
 });

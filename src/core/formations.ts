@@ -51,12 +51,20 @@ export function layoutFormation(
   field: Playfield,
   opts: { topMargin?: number; cellSize?: number } = {},
 ): PlacedEnemy[] {
-  const cellSize = opts.cellSize ?? 110;
+  const baseCell = opts.cellSize ?? 110;
   const topMargin = opts.topMargin ?? 180;
-  const totalWidth = (template.cols - 1) * cellSize;
+  const FILL = 0.82;       // target fraction of width the formation should span on wide screens
+  const MAX_FACTOR = 1.7;  // cap spread so small formations don't get too sparse
+  const cols = template.cols;
+  let xCell = baseCell;
+  if (cols > 1) {
+    const target = (field.width * FILL) / (cols - 1);
+    xCell = Math.min(Math.max(target, baseCell), baseCell * MAX_FACTOR);
+  }
+  const totalWidth = (cols - 1) * xCell;
   const originX = (field.width - totalWidth) / 2;
   return template.cells.map((c, i) => ({
-    pos: { x: originX + c.gx * cellSize, y: topMargin + c.gy * cellSize },
+    pos: { x: originX + c.gx * xCell, y: topMargin + c.gy * baseCell },
     type: assigned[i],
   }));
 }
