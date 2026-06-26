@@ -21,8 +21,9 @@ A gentle, no-fail Galaga-style game made for Zoe.
 
 ## Controls
 - Move the unicorn: drag (touch), move the mouse, or arrow keys. It shoots by itself.
-- Two games: **Play** (the shooter — 12 levels + friendly bosses; the unicorn shoots by itself) and **Rainbow Catch** (catch the falling treats — it speeds up the more you catch and slows when you miss; endless, no-fail).
+- Three games: **Play** (the shooter — 12 levels + friendly bosses; the unicorn shoots by itself), **Rainbow Catch** (catch the falling treats — it speeds up the more you catch and slows when you miss; endless, no-fail), and **Pop the Cuties** (tap to pop cute floating emoji; upbeat music, no-fail).
 
 ## Notes
 - No accounts, ads, purchases, or data collection. Nothing is saved (always starts at Level 1).
 - Items & enemies use Google's animated [Noto emoji](https://googlefonts.github.io/noto-emoji-animation/) (Apache-2.0), decoded into sprite sheets by `scripts/build-emoji.mjs` (`npm run emoji`). The sparkle burst still uses the OpenMoji atlas (`src/render/sprites.ts`). The unicorn is a separate animated sheet.
+- Asset-build scripts: `npm run audio` (SFX), `npm run catch-audio` (Rainbow Catch music), `npm run pop-audio` (Pop the Cuties music — downloads "Monkeys Spinning Monkeys" by Kevin MacLeod, CC-BY 4.0). Replace `public/audio/popmusic.mp3` with your own track if desired.
