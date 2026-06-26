@@ -24,20 +24,23 @@ const FRAME_SIZE = 72;     // px/frame — matches the old OpenMoji cell so scen
 const TARGET_FRAMES = 24;  // sampled frames per emoji (down from the source's ~70-84)
 const MAX_ROW = 2016;      // grid width cap (mobile texture safety)
 
-// item/enemy type -> Noto codepoint. cupcake/lollipop aren't in the animated
-// set, so they're substituted: cupcake -> birthday cake, lollipop -> cookie.
+// item/enemy type -> Noto codepoint. The keys are stable internal IDs (used across
+// CatchScene/GameScene/levels); the visible emoji is whatever codepoint they map to.
+// The old food emoji (ice cream / donut / cake / cookie) play an "eaten" animation
+// that ends transparent, so each falling item visibly vanished — replaced here with
+// cute things whose animations loop in place without disappearing.
 const TYPES = {
   cloud: "2601_fe0f",
   star: "2b50",
-  icecream: "1f366",
+  icecream: "1f337", // tulip
   balloon: "1f388",
   heart: "1f496",
   flower: "1f338",
-  donut: "1f369",
+  donut: "1f41e",    // ladybug
   butterfly: "1f98b",
   gem: "1f48e",
-  cupcake: "1f382",  // birthday cake
-  lollipop: "1f36a", // cookie
+  cupcake: "1f340",  // four-leaf clover
+  lollipop: "1f431", // cat face
 };
 
 function fetchBuffer(url, redirects = 0) {

@@ -17,11 +17,11 @@ export const EMOJI: Record<string, EmojiDef> = {
   balloon: { key: "emoji-balloon", sheet: "emoji/balloon.png", anim: "emoji-balloon", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 17 },
   heart: { key: "emoji-heart", sheet: "emoji/heart.png", anim: "emoji-heart", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 27 },
   flower: { key: "emoji-flower", sheet: "emoji/flower.png", anim: "emoji-flower", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 7 },
-  donut: { key: "emoji-donut", sheet: "emoji/donut.png", anim: "emoji-donut", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 8 },
+  donut: { key: "emoji-donut", sheet: "emoji/donut.png", anim: "emoji-donut", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 6 },
   butterfly: { key: "emoji-butterfly", sheet: "emoji/butterfly.png", anim: "emoji-butterfly", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 10 },
   gem: { key: "emoji-gem", sheet: "emoji/gem.png", anim: "emoji-gem", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 20 },
-  cupcake: { key: "emoji-cupcake", sheet: "emoji/cupcake.png", anim: "emoji-cupcake", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 10 },
-  lollipop: { key: "emoji-lollipop", sheet: "emoji/lollipop.png", anim: "emoji-lollipop", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 14 },
+  cupcake: { key: "emoji-cupcake", sheet: "emoji/cupcake.png", anim: "emoji-cupcake", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 15 },
+  lollipop: { key: "emoji-lollipop", sheet: "emoji/lollipop.png", anim: "emoji-lollipop", frameWidth: 72, frameHeight: 72, frameCount: 24, frameRate: 9 },
 };
 
 export const EMOJI_DEFS: EmojiDef[] = Object.values(EMOJI);
