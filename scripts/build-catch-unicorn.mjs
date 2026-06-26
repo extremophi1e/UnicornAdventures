@@ -22,6 +22,7 @@ const OUT_PNG = join(OUT_PNG_DIR, "sheet.png");
 const OUT_TS = join(ROOT, "src", "render", "catchUnicorn.ts");
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+const MAX_ROW_WIDTH = 2048;
 
 async function main() {
   if (!existsSync(SRC)) {
@@ -43,21 +44,27 @@ async function main() {
     .raw()
     .toBuffer({ resolveWithObject: true });
 
+  const totalHeight = fh * n;
+  if (data.length !== fw * totalHeight * 4) throw new Error(`unexpected raw buffer: ${data.length} != ${fw * totalHeight * 4}`);
+
+  const cols = Math.max(1, Math.floor(MAX_ROW_WIDTH / fw));
+  const rows = Math.ceil(n / cols);
+
   const composites = [];
   for (let i = 0; i < n; i++) {
-    const frame = await sharp(data, { raw: { width: fw, height: fh * n, channels: 4 } })
+    const frame = await sharp(data, { raw: { width: fw, height: totalHeight, channels: 4 } })
       .extract({ left: 0, top: i * fh, width: fw, height: fh })
-      .png()
+      .raw()
       .toBuffer();
-    composites.push({ input: frame, left: i * fw, top: 0 });
+    composites.push({ input: frame, raw: { width: fw, height: fh, channels: 4 }, left: (i % cols) * fw, top: Math.floor(i / cols) * fh });
   }
 
   if (!existsSync(OUT_PNG_DIR)) mkdirSync(OUT_PNG_DIR, { recursive: true });
   const sheet = await sharp({
-    create: { width: fw * n, height: fh, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+    create: { width: fw * cols, height: fh * rows, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
   }).composite(composites).png().toBuffer();
   await writeFile(OUT_PNG, sheet);
-  console.log(`Wrote ${OUT_PNG} (${sheet.length} bytes, ${fw * n}x${fh})`);
+  console.log(`Wrote ${OUT_PNG} (${sheet.length} bytes, ${fw * cols}x${fh * rows}, ${cols}x${rows} grid)`);
 
   // frameRate from the average GIF frame delay (fallback 12 fps), clamped sane.
   const delays = Array.isArray(meta.delay) && meta.delay.length ? meta.delay : null;
