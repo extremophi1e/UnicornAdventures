@@ -18,7 +18,7 @@ Attribution: "Music by Kevin MacLeod — incompetech.com"
 | catch2.mp3 | Cheery Monday     | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cheery%20Monday.mp3     | CC-BY 4.0 |
 | catch3.mp3 | Pleasant Porridge | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Pleasant%20Porridge.mp3 | CC-BY 4.0 |
 | title.mp3  | Bit Quest         | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bit%20Quest.mp3         | CC-BY 4.0 |
-| popmusic.mp3 | Monkeys Spinning Monkeys | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Monkeys%20Spinning%20Monkeys.mp3 | CC-BY 4.0 |
+| popmusic.mp3 | Wallpaper                | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wallpaper.mp3                | CC-BY 4.0 |
 
 ## Sound Effects
 

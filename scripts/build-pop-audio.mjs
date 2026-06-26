@@ -15,8 +15,8 @@ const OUT_DIR = join(__dirname, "..", "public", "audio");
 
 const TRACK = {
   file: "popmusic.mp3",
-  title: "Monkeys Spinning Monkeys",
-  url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Monkeys%20Spinning%20Monkeys.mp3",
+  title: "Wallpaper",
+  url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wallpaper.mp3",
 };
 
 function download(url, dest, redirects = 0) {
