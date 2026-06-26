@@ -38,6 +38,7 @@ export class TitleScene extends Phaser.Scene {
 
     this.makeButton(W / 2, 720, "🌈  Rainbow Shoot", 0x9b6bff, () => this.scene.start("Game"));
     this.makeButton(W / 2, 880, "🌈  Rainbow Catch", 0x7ed957, () => this.scene.start("Catch"));
+    this.makeButton(W / 2, 1040, "🫧  Pop the Cuties", 0xff5fa2, () => this.scene.start("Pop"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
