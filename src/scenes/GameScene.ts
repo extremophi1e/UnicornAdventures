@@ -199,6 +199,7 @@ export class GameScene extends Phaser.Scene {
     this.fx.banner("Yay! 🌈");
     this.formationIndex = 0;
     if (this.levelIndex >= 12) {
+      this.fx.finale("Zoe"); this.sound2.tada();
       this.time.delayedCall(1500, () => this.scene.start("Rainbow"));
       return;
     }
@@ -252,9 +253,9 @@ export class GameScene extends Phaser.Scene {
       .fillStyle(0xff5fa2, 1).fillRoundedRect(120, 120, (this.scale.width - 240) * frac, 28, 14);
 
     if (this.bossCtl.state === "defeated") {
-      this.fx.popAt(this.boss.x, this.boss.y);
       this.boss.destroy(); this.bossBar!.destroy();
-      this.boss = undefined; this.bossCtl = undefined;
+      this.boss = undefined; this.bossCtl = undefined; this.bossBar = undefined;
+      this.fx.bigParty(); this.sound2.tada();
       this.onLevelCleared();
     }
   }

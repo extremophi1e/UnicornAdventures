@@ -20,4 +20,20 @@ export class Celebrations {
     const t = this.scene.add.text(W / 2, 360, text, { fontSize: "60px", color, fontStyle: "bold" }).setOrigin(0.5).setScale(0);
     this.scene.tweens.add({ targets: t, scale: 1, yoyo: true, hold: 600, duration: 300, onComplete: () => t.destroy() });
   }
+
+  bigParty() {
+    const W = this.scene.scale.width, H = this.scene.scale.height;
+    const n = settings.calm ? 20 : 70;
+    for (let i = 0; i < n; i++) {
+      const x = Math.random() * W;
+      const s = this.scene.add.image(x, -20, ATLAS_KEY, frameFor("sparkle")).setScale(0.5 + Math.random());
+      this.scene.tweens.add({ targets: s, y: H + 40, alpha: 0, duration: 1200 + Math.random() * 1200, onComplete: () => s.destroy() });
+    }
+    if (!settings.calm) this.scene.cameras.main.shake(250, 0.004); // screen-shake only when not calm, only here
+  }
+
+  finale(name = "Zoe") {
+    this.bigParty();
+    this.banner(`YOU DID IT, ${name.toUpperCase()}! 🦄🌈`, "#ff3f8a");
+  }
 }
