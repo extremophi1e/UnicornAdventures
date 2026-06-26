@@ -4,8 +4,16 @@ import { TEMPLATES } from "./formations";
 import { budgetForDepth, typeCountForDepth } from "./difficulty";
 import { pick } from "./rng";
 
-const TEMPLATE_COST: Record<string, number> = {
+export const TEMPLATE_COST: Record<string, number> = {
+  // original templates
   block3x3: 6, twoRows: 6, arch: 5, heart: 7, diamond: 6, vRows4: 10,
+  // new templates (cost ≈ enemy-cell count / 3, kept in 5–10 range)
+  vee:     7,  // 13 cells
+  pillars: 10, // 20 cells
+  ring:    8,  // 16 cells
+  zigzag:  8,  // 15 cells
+  xshape:  5,  // 9 cells
+  pyramid: 7,  // 16 cells (1+3+5+7)
 };
 const TYPINGS: TypingRule[] = ["uniform", "byRow", "byCol", "cluster"];
 

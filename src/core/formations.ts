@@ -17,6 +17,51 @@ export const TEMPLATES: Record<string, FormationTemplate> = {
   heart: grid("heart", 5, 4, [".#.#.", "#####", ".###.", "..#.."]),
   diamond: grid("diamond", 5, 5, ["..#..", ".###.", "#####", ".###.", "..#.."]),
   vRows4: grid("vRows4", 7, 4, ["#######", "#######", "#######", "#######"]),
+  // --- new formations ---
+  // V-shape / wedge pointing down
+  vee: grid("vee", 7, 4, [
+    "#.....#",
+    ".#...#.",
+    "..#.#..",
+    "...#...",
+  ]),
+  // Three tall pillars
+  pillars: grid("pillars", 7, 5, [
+    "#.#.#.#",
+    "#.#.#.#",
+    "#.#.#.#",
+    "#.#.#.#",
+    "#.#.#.#",
+  ]),
+  // Hollow ring / frame
+  ring: grid("ring", 5, 5, [
+    "#####",
+    "#...#",
+    "#...#",
+    "#...#",
+    "#####",
+  ]),
+  // Zigzag across two rows
+  zigzag: grid("zigzag", 7, 3, [
+    "#.#.#.#",
+    ".#.#.#.",
+    "#.#.#.#",
+  ]),
+  // X / cross shape
+  xshape: grid("xshape", 5, 5, [
+    "#...#",
+    ".#.#.",
+    "..#..",
+    ".#.#.",
+    "#...#",
+  ]),
+  // Pyramid / triangle pointing up
+  pyramid: grid("pyramid", 7, 4, [
+    "...#...",
+    "..###..",
+    ".#####.",
+    "#######",
+  ]),
 };
 
 export function assignTypes(

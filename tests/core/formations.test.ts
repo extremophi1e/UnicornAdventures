@@ -16,6 +16,20 @@ describe("TEMPLATES", () => {
       }
     }
   });
+
+  it("ALL templates (including new ones) have non-empty, in-bounds cells", () => {
+    for (const id of Object.keys(TEMPLATES)) {
+      const t = TEMPLATES[id];
+      expect(t, `${id} should be defined`).toBeDefined();
+      expect(t.cells.length, `${id} should have cells`).toBeGreaterThan(0);
+      for (const c of t.cells) {
+        expect(c.gx, `${id} cell gx in bounds`).toBeGreaterThanOrEqual(0);
+        expect(c.gx, `${id} cell gx < cols`).toBeLessThan(t.cols);
+        expect(c.gy, `${id} cell gy in bounds`).toBeGreaterThanOrEqual(0);
+        expect(c.gy, `${id} cell gy < rows`).toBeLessThan(t.rows);
+      }
+    }
+  });
 });
 
 describe("assignTypes", () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { budgetForDepth, typeCountForDepth } from "../../src/core/difficulty";
-import { generateRainbowWave } from "../../src/core/rainbow";
+import { generateRainbowWave, TEMPLATE_COST } from "../../src/core/rainbow";
 import { TEMPLATES } from "../../src/core/formations";
 import { createRng } from "../../src/core/rng";
 
@@ -15,6 +15,14 @@ describe("difficulty", () => {
       const n = typeCountForDepth(d);
       expect(n).toBeGreaterThanOrEqual(1);
       expect(n).toBeLessThanOrEqual(3);
+    }
+  });
+});
+
+describe("TEMPLATE_COST", () => {
+  it("has an entry for every template in TEMPLATES", () => {
+    for (const k of Object.keys(TEMPLATES)) {
+      expect(TEMPLATE_COST[k], `TEMPLATE_COST["${k}"] should be defined`).toBeDefined();
     }
   });
 });
