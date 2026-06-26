@@ -131,11 +131,11 @@ export class GameScene extends Phaser.Scene {
       // Per-particle tint: each dot picks one of the rainbow colours -> a clearly
       // multi-coloured trail (white texture so the tint shows true colours).
       tint: RAINBOW_STAR_COLORS,
-      lifespan: 520,
-      scale: { start: 0.85, end: 0 },
-      alpha: { start: 0.95, end: 0 },
-      speed: 14,
-      frequency: 26,
+      lifespan: 600,
+      scale: { start: 1.4, end: 0.25 }, // big & visible, fades but never vanishes to nothing mid-trail
+      alpha: { start: 1, end: 0 },
+      speed: 10,
+      frequency: 22, // denser trail
       quantity: 1,
       blendMode: Phaser.BlendModes.NORMAL,
       emitting: false,
