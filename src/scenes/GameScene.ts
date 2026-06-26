@@ -50,10 +50,13 @@ function addGlowOnce(
   };
   if (typeof anyObj.enableFilters !== "function") return;
   anyObj.enableFilters();
-  const list = anyObj.filters?.internal ?? anyObj.filters?.external;
+  // Use the EXTERNAL filter list so the glow extends BEYOND the sprite and fades,
+  // rather than the internal list which clips to the sprite's box (a hard "border").
+  const list = anyObj.filters?.external ?? anyObj.filters?.internal;
   if (list && typeof list.addGlow === "function") {
     // addGlow(color, outerStrength, innerStrength, scale, knockout, quality, distance)
-    list.addGlow(color, outerStrength, 0, 1, false, 0.1, 16);
+    // Soft halo: low outer strength, no inner fill, high quality (smooth), wide distance (gentle falloff).
+    list.addGlow(color, outerStrength, 0, 1, false, 0.5, 28);
   }
 }
 
@@ -107,7 +110,7 @@ export class GameScene extends Phaser.Scene {
     // Unicorn = tinted body (no drawn wings — they read as stray triangles).
     const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
     // ── Item 4: Glow on unicorn body (guarded for Canvas) ───────────────────
-    addGlowOnce(body, 0xffffff, 8);
+    addGlowOnce(body, 0xffffff, 2);
     this.unicorn = this.add.container(this.target.x, this.target.y, [body]);
 
     // ── Item 5: Alive pulse tween on unicorn container ───────────────────────
@@ -212,7 +215,7 @@ export class GameScene extends Phaser.Scene {
         img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
         this.enemies.add(img);
         // ── Item 4: Glow on enemy (first creation only) ───────────────────
-        addGlowOnce(img, 0xffeedd, 8);
+        addGlowOnce(img, 0xffeedd, 2);
         // ── Item 5: Per-enemy random phase for sine pulse ─────────────────
         img.setData("phase", Math.random() * Math.PI * 2);
       } else {
@@ -293,7 +296,7 @@ export class GameScene extends Phaser.Scene {
       c = this.add.image(x, -40, ATLAS_KEY, frameFor(type)).setScale(1.0);
       this.collectibles.add(c);
       // ── Item 4: Glow on collectible (first creation only) ───────────────
-      addGlowOnce(c, 0xffd700, 8);
+      addGlowOnce(c, 0xffd700, 2);
     } else {
       c.setPosition(x, -40)
        .setTexture(ATLAS_KEY, frameFor(type))
