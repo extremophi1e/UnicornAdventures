@@ -31,6 +31,7 @@ export class GameScene extends Phaser.Scene {
   protected formationIndex = 0;
   protected t = 0;
   protected isStory = true;
+  protected transitioning = false;
 
   constructor(key = "Game") {
     super(key);
@@ -117,6 +118,7 @@ export class GameScene extends Phaser.Scene {
       img.setData("drift", spec.drift);
       this.enemies.add(img);
     }
+    this.transitioning = false;
   }
 
   protected updateEnemies(dt: number) {
@@ -161,7 +163,8 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    if (activeEnemies.length - hits.length <= 0 && this.enemies.countActive() === 0) {
+    if (!this.transitioning && activeEnemies.length - hits.length <= 0 && this.enemies.countActive() === 0) {
+      this.transitioning = true;
       this.onFormationCleared();
     }
   }
