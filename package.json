@@ -7,12 +7,14 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "atlas": "node scripts/build-atlas.mjs"
   },
   "dependencies": {
     "phaser": "^4.0.0"
   },
   "devDependencies": {
+    "sharp": "^0.35.2",
     "typescript": "^5.5.0",
     "vite": "^6.0.0",
     "vite-plugin-pwa": "^0.21.0",
