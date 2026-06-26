@@ -225,7 +225,7 @@ function makeMusic(progression, opts = {}) {
       const freq = note(midiN + octaveShift);
       const noteStart = chordStart + ai * noteDurMusic;
       const noteStartSample = Math.floor(noteStart * SAMPLE_RATE);
-      const nSamples = Math.floor(SAMPLE_RATE * noteDurMusic * 0.9);
+      const nSamples = Math.floor(SAMPLE_RATE * noteDurMusic * 0.65);
       for (let s = 0; s < nSamples; s++) {
         const globalIdx = noteStartSample + s;
         if (globalIdx >= out.length) break;
@@ -255,7 +255,7 @@ function makeMusic(progression, opts = {}) {
     [57, 60, 64], // A minor
     [53, 57, 60], // F major
   ];
-  const samples = makeMusic(progression, { totalSec: 14, bpm: 116, ampPad: 0.10, ampArp: 0.12 });
+  const samples = makeMusic(progression, { totalSec: 14, bpm: 160, ampPad: 0.10, ampArp: 0.12 });
   const mp3 = encodeToMp3(samples);
   const outPath = path.join(OUT_DIR, "music1.mp3");
   fs.writeFileSync(outPath, mp3);
@@ -270,7 +270,7 @@ function makeMusic(progression, opts = {}) {
     [52, 55, 59], // E minor
     [48, 52, 55], // C major (low root)
   ];
-  const samples = makeMusic(progression, { totalSec: 14, bpm: 130, ampPad: 0.09, ampArp: 0.13, octaveShift: 12 });
+  const samples = makeMusic(progression, { totalSec: 14, bpm: 180, ampPad: 0.09, ampArp: 0.13, octaveShift: 12 });
   const mp3 = encodeToMp3(samples);
   const outPath = path.join(OUT_DIR, "music2.mp3");
   fs.writeFileSync(outPath, mp3);
@@ -285,7 +285,7 @@ function makeMusic(progression, opts = {}) {
     [50, 53, 57], // D minor
     [46, 50, 53], // Bb major
   ];
-  const samples = makeMusic(progression, { totalSec: 16, bpm: 104, ampPad: 0.11, ampArp: 0.11, octaveShift: 12 });
+  const samples = makeMusic(progression, { totalSec: 16, bpm: 148, ampPad: 0.11, ampArp: 0.11, octaveShift: 12 });
   const mp3 = encodeToMp3(samples);
   const outPath = path.join(OUT_DIR, "music3.mp3");
   fs.writeFileSync(outPath, mp3);
@@ -300,7 +300,7 @@ function makeMusic(progression, opts = {}) {
     [60, 64, 67], // C major
     [55, 59, 62], // G major
   ];
-  const samples = makeMusic(progression, { totalSec: 15, bpm: 108, ampPad: 0.09, ampArp: 0.11, octaveShift: 24 });
+  const samples = makeMusic(progression, { totalSec: 15, bpm: 152, ampPad: 0.09, ampArp: 0.11, octaveShift: 24 });
   const mp3 = encodeToMp3(samples);
   const outPath = path.join(OUT_DIR, "music4.mp3");
   fs.writeFileSync(outPath, mp3);
