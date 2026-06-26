@@ -1,13 +1,33 @@
 import Phaser from "phaser";
 import { settings } from "../state/settings";
 
+const MUSIC_KEYS = ["music1", "music2", "music3", "music4"] as const;
+type MusicKey = (typeof MUSIC_KEYS)[number];
+
 export class Sound {
+  private _lastMusicKey: MusicKey | null = null;
+
   constructor(private scene: Phaser.Scene) {}
-  playMusic(): void {
+
+  private _pickNextTrack(): MusicKey {
+    const candidates = MUSIC_KEYS.filter((k) => k !== this._lastMusicKey);
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  private _playTrack(key: MusicKey): void {
     const vol = settings.calm ? 0.25 : 0.5;
-    const m = this.scene.sound.add("music", { loop: true, volume: vol });
+    this._lastMusicKey = key;
+    const m = this.scene.sound.add(key, { loop: false, volume: vol });
+    m.once("complete", () => {
+      this._playTrack(this._pickNextTrack());
+    });
     m.play();
   }
+
+  playMusic(): void {
+    this._playTrack(this._pickNextTrack());
+  }
+
   pop(): void {
     this.scene.sound.play("pop", { volume: settings.calm ? 0.3 : 0.6 });
   }

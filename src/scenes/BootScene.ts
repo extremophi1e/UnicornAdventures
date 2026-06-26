@@ -7,7 +7,10 @@ export class BootScene extends Phaser.Scene {
   }
   preload() {
     this.load.atlas(ATLAS_KEY, "atlas/openmoji.png", "atlas/openmoji.json");
-    this.load.audio("music", ["audio/music.mp3"]);
+    this.load.audio("music1", ["audio/music1.mp3"]);
+    this.load.audio("music2", ["audio/music2.mp3"]);
+    this.load.audio("music3", ["audio/music3.mp3"]);
+    this.load.audio("music4", ["audio/music4.mp3"]);
     this.load.audio("pop", ["audio/pop.mp3"]);
     this.load.audio("fanfare", ["audio/fanfare.mp3"]);
     this.load.audio("tada", ["audio/tada.mp3"]);

@@ -163,75 +163,155 @@ function note(midiNote) {
   console.log(`tada.mp3  → ${mp3.length} bytes`);
 }
 
-// ----- MUSIC -------------------------------------------------------------
-// ~10 s gentle loopable melody: simple sine arpeggio over C-G-Am-F progression
-// Chord progression: C(0-2.5s) G(2.5-5s) Am(5-7.5s) F(7.5-10s)
-{
-  const totalSec = 10;
+// ----- MUSIC TRACKS -------------------------------------------------------
+// Four distinct gentle loopable tracks: sine pad + arpeggio, different keys/moods.
+// Each ~14 s, amplitude quiet enough to loop under gameplay.
+
+/**
+ * makeMusic(progression, opts) — synthesise one gentle background music track.
+ *
+ * @param {number[][]} progression  Array of chord tone MIDI arrays, one per chord.
+ * @param {{
+ *   totalSec?: number,   total track duration (default 14)
+ *   bpm?: number,        arpeggio speed in beats-per-minute (default 120)
+ *   ampPad?: number,     pad layer amplitude (default 0.10)
+ *   ampArp?: number,     arpeggio layer amplitude (default 0.12)
+ *   octaveShift?: number arp octave offset (default +1, i.e. 12 semitones up)
+ * }} opts
+ * @returns {Float32Array}
+ */
+function makeMusic(progression, opts = {}) {
+  const {
+    totalSec = 14,
+    bpm = 120,
+    ampPad = 0.10,
+    ampArp = 0.12,
+    octaveShift = 12,
+  } = opts;
+
   const totalSamples = Math.ceil(SAMPLE_RATE * totalSec);
   const out = new Float32Array(totalSamples);
 
-  // Chord tones [root, third, fifth] in MIDI
-  const chords = [
-    [60, 64, 67], // C major
-    [55, 59, 62], // G major
-    [57, 60, 64], // A minor
-    [53, 57, 60], // F major
-  ];
-  const chordDur = 2.5; // seconds each
+  const chordCount = progression.length;
+  const chordDur = totalSec / chordCount;
 
-  // For each chord, play a gentle sine arpeggio (root, third, fifth, third repeated)
-  const arpPattern = [0, 1, 2, 1]; // indices into chord tones
-  const noteDurMusic = 0.28;
-  const ampMusic = 0.12; // quiet — loops under gameplay
+  // Arpeggio note duration based on BPM (quarter note)
+  const noteDurMusic = 60 / bpm;
+  // Arp pattern: root, third, fifth, third
+  const arpPattern = [0, 1, 2, 1];
 
-  for (let ci = 0; ci < chords.length; ci++) {
+  for (let ci = 0; ci < chordCount; ci++) {
+    const chordTones = progression[ci];
     const chordStart = ci * chordDur;
-    // Fill with sustained low root (pad)
-    const root = chords[ci][0];
-    for (let s = 0; s < Math.floor(SAMPLE_RATE * chordDur); s++) {
+
+    // Sustained pad: low root sine
+    const root = chordTones[0];
+    const padSamples = Math.floor(SAMPLE_RATE * chordDur);
+    for (let s = 0; s < padSamples; s++) {
       const t = s / SAMPLE_RATE;
       const globalIdx = Math.floor(chordStart * SAMPLE_RATE) + s;
-      if (globalIdx < out.length) {
-        out[globalIdx] +=
-          ampMusic *
-          0.4 *
-          Math.sin(2 * Math.PI * note(root) * t) *
-          Math.min(1, t / 0.05) * // tiny attack
-          Math.min(1, (chordDur - t) / 0.1); // tiny release
-      }
+      if (globalIdx >= out.length) break;
+      out[globalIdx] +=
+        ampPad *
+        Math.sin(2 * Math.PI * note(root) * t) *
+        Math.min(1, t / 0.05) *             // 50 ms attack
+        Math.min(1, (chordDur - t) / 0.08); // 80 ms release
     }
 
-    // Arpeggio notes
-    const arpPerChord = 8; // 8 notes per chord = ~0.3 s each
+    // Arpeggio notes over the chord
+    const arpPerChord = Math.max(1, Math.floor(chordDur / noteDurMusic));
     for (let ai = 0; ai < arpPerChord; ai++) {
-      const midiN = chords[ci][arpPattern[ai % arpPattern.length]];
-      const freq = note(midiN + 12); // up an octave for melody
-      const noteStart = chordStart + ai * (chordDur / arpPerChord);
+      const midiN = chordTones[arpPattern[ai % arpPattern.length]];
+      const freq = note(midiN + octaveShift);
+      const noteStart = chordStart + ai * noteDurMusic;
       const noteStartSample = Math.floor(noteStart * SAMPLE_RATE);
-      const nSamples = Math.floor(SAMPLE_RATE * noteDurMusic);
+      const nSamples = Math.floor(SAMPLE_RATE * noteDurMusic * 0.9);
       for (let s = 0; s < nSamples; s++) {
         const globalIdx = noteStartSample + s;
         if (globalIdx >= out.length) break;
         const t = s / SAMPLE_RATE;
         const env =
-          Math.min(1, t / 0.015) * // 15 ms attack
-          Math.exp(-3 * (t / noteDurMusic)); // decay
-        out[globalIdx] += ampMusic * env * Math.sin(2 * Math.PI * freq * t);
+          Math.min(1, t / 0.015) *                      // 15 ms attack
+          Math.exp(-3 * (t / (noteDurMusic * 0.9)));     // decay
+        out[globalIdx] += ampArp * env * Math.sin(2 * Math.PI * freq * t);
       }
     }
   }
 
-  // Smooth the very end to avoid click on loop
-  const fadeLen = Math.floor(SAMPLE_RATE * 0.05);
+  // End fade: smooth the last 80 ms to avoid loop click
+  const fadeLen = Math.floor(SAMPLE_RATE * 0.08);
   for (let i = 0; i < fadeLen; i++) {
     out[out.length - 1 - i] *= i / fadeLen;
   }
 
-  const mp3 = encodeToMp3(out);
-  const outPath = path.join(OUT_DIR, "music.mp3");
+  return out;
+}
+
+// Track 1 — C major, happy (C–G–Am–F), moderate tempo
+{
+  const progression = [
+    [60, 64, 67], // C major
+    [55, 59, 62], // G major
+    [57, 60, 64], // A minor
+    [53, 57, 60], // F major
+  ];
+  const samples = makeMusic(progression, { totalSec: 14, bpm: 116, ampPad: 0.10, ampArp: 0.12 });
+  const mp3 = encodeToMp3(samples);
+  const outPath = path.join(OUT_DIR, "music1.mp3");
   fs.writeFileSync(outPath, mp3);
-  console.log(`music.mp3  → ${mp3.length} bytes`);
+  console.log(`music1.mp3  → ${mp3.length} bytes  (C major – happy)`);
+}
+
+// Track 2 — G major, bright (G–D–Em–C), slightly faster
+{
+  const progression = [
+    [55, 59, 62], // G major
+    [50, 54, 57], // D major
+    [52, 55, 59], // E minor
+    [48, 52, 55], // C major (low root)
+  ];
+  const samples = makeMusic(progression, { totalSec: 14, bpm: 130, ampPad: 0.09, ampArp: 0.13, octaveShift: 12 });
+  const mp3 = encodeToMp3(samples);
+  const outPath = path.join(OUT_DIR, "music2.mp3");
+  fs.writeFileSync(outPath, mp3);
+  console.log(`music2.mp3  → ${mp3.length} bytes  (G major – bright)`);
+}
+
+// Track 3 — F major, warm (F–C–Dm–Bb), slower and mellower
+{
+  const progression = [
+    [53, 57, 60], // F major
+    [60, 64, 67], // C major
+    [50, 53, 57], // D minor
+    [46, 50, 53], // Bb major
+  ];
+  const samples = makeMusic(progression, { totalSec: 16, bpm: 104, ampPad: 0.11, ampArp: 0.11, octaveShift: 12 });
+  const mp3 = encodeToMp3(samples);
+  const outPath = path.join(OUT_DIR, "music3.mp3");
+  fs.writeFileSync(outPath, mp3);
+  console.log(`music3.mp3  → ${mp3.length} bytes  (F major – warm)`);
+}
+
+// Track 4 — A minor, dreamy (Am–F–C–G), gentle tempo with higher octave arp
+{
+  const progression = [
+    [57, 60, 64], // A minor
+    [53, 57, 60], // F major
+    [60, 64, 67], // C major
+    [55, 59, 62], // G major
+  ];
+  const samples = makeMusic(progression, { totalSec: 15, bpm: 108, ampPad: 0.09, ampArp: 0.11, octaveShift: 24 });
+  const mp3 = encodeToMp3(samples);
+  const outPath = path.join(OUT_DIR, "music4.mp3");
+  fs.writeFileSync(outPath, mp3);
+  console.log(`music4.mp3  → ${mp3.length} bytes  (A minor – dreamy)`);
+}
+
+// Remove old single music.mp3 if it still exists
+const oldMusic = path.join(OUT_DIR, "music.mp3");
+if (fs.existsSync(oldMusic)) {
+  fs.unlinkSync(oldMusic);
+  console.log("music.mp3  → removed (replaced by music1–4)");
 }
 
 console.log("\nAll audio files written to public/audio/");
