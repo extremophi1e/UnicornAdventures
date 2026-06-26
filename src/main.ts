@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { BootScene } from "./scenes/BootScene";
+import { TitleScene } from "./scenes/TitleScene";
 import { computeLogicalWidth, LOGICAL_HEIGHT } from "./core/viewport";
 export { computeLogicalWidth, LOGICAL_HEIGHT } from "./core/viewport";
 
@@ -13,7 +14,7 @@ const game = new Phaser.Game({
     width: computeLogicalWidth(window.innerWidth, window.innerHeight),
     height: LOGICAL_HEIGHT,
   },
-  scene: [BootScene],
+  scene: [BootScene, TitleScene],
 });
 
 function applySize() {
