@@ -3,6 +3,13 @@ import { Background } from "./ui/Background";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { AutoFire, resolveTarget, type AimInput, type Bounds } from "../core/input";
 import { Sound } from "../audio/sound";
+import { getLevel } from "../core/levels";
+import { TEMPLATES, assignTypes, layoutFormation } from "../core/formations";
+import { findStarEnemyHits, type Circle } from "../core/collision";
+import { nearestEnemy, steerVelocity } from "../core/magnetism";
+import { createRng } from "../core/rng";
+import { Celebrations } from "./ui/Celebrations";
+import type { PlacedEnemy } from "../core/types";
 
 const STAR_SPEED = 900; // px/s upward
 const KEY_SPEED = 700;
@@ -17,6 +24,13 @@ export class GameScene extends Phaser.Scene {
   protected autofire = new AutoFire(FIRE_INTERVAL);
   protected cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   protected pointerActive = false;
+
+  protected enemies!: Phaser.GameObjects.Group;
+  protected fx!: Celebrations;
+  protected levelIndex = 1;
+  protected formationIndex = 0;
+  protected t = 0;
+  protected isStory = true;
 
   constructor(key = "Game") {
     super(key);
@@ -53,6 +67,10 @@ export class GameScene extends Phaser.Scene {
       this.pointerActive = true;
       this.target = { x: p.worldX, y: p.worldY };
     });
+
+    this.enemies = this.add.group();
+    this.fx = new Celebrations(this);
+    this.spawnFormation();
   }
 
   protected bounds(): Bounds {
@@ -83,6 +101,99 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  protected currentFormations() {
+    return getLevel(this.levelIndex).formations;
+  }
+
+  protected spawnFormation() {
+    const spec = this.currentFormations()[this.formationIndex];
+    const tpl = TEMPLATES[spec.templateId];
+    const rng = createRng(this.levelIndex * 100 + this.formationIndex);
+    const assigned = assignTypes(tpl, spec.typing, spec.types, rng);
+    const placed: PlacedEnemy[] = layoutFormation(tpl, assigned, { width: this.scale.width, height: this.scale.height });
+    for (const pe of placed) {
+      const img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
+      img.setData("baseX", pe.pos.x);
+      img.setData("drift", spec.drift);
+      this.enemies.add(img);
+    }
+  }
+
+  protected updateEnemies(dt: number) {
+    this.t += dt;
+    (this.enemies.getChildren() as Phaser.GameObjects.Image[]).forEach((e) => {
+      if (!e.active) return;
+      const drift = e.getData("drift");
+      e.x = e.getData("baseX") + Math.sin(this.t * drift.swaySpeed) * drift.swayAmplitude;
+    });
+
+    const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Image[]).filter((s) => s.active);
+    const activeEnemies = (this.enemies.getChildren() as Phaser.GameObjects.Image[]).filter((e) => e.active);
+
+    // Bullet magnetism: steer each star toward nearest enemy.
+    activeStars.forEach((s) => {
+      const idx = nearestEnemy({ x: s.x, y: s.y }, activeEnemies.map((e) => ({ x: e.x, y: e.y })), 160);
+      if (idx >= 0) {
+        const v = steerVelocity({ x: (s.getData("vx") ?? 0), y: -1 }, { x: s.x, y: s.y }, { x: activeEnemies[idx].x, y: activeEnemies[idx].y }, 6, dt);
+        s.x += v.x * dt * 300;
+        s.setData("vx", v.x);
+      }
+    });
+
+    const starCircles: Circle[] = activeStars.map((s) => ({ x: s.x, y: s.y, r: 22 }));
+    const enemyCircles: Circle[] = activeEnemies.map((e) => ({ x: e.x, y: e.y, r: 55 })); // generous
+    const hits = findStarEnemyHits(starCircles, enemyCircles);
+    for (const h of hits) {
+      const e = activeEnemies[h.enemyIndex];
+      this.fx.popAt(e.x, e.y);
+      this.sound2.pop();
+      this.enemies.killAndHide(e);
+      this.stars.killAndHide(activeStars[h.starIndex]);
+    }
+
+    // harmless bounce: enemy touching unicorn just sparkles and drifts back, no penalty
+    const ux = this.unicorn.x, uy = this.unicorn.y;
+    activeEnemies.forEach((e) => {
+      const dx = e.x - ux, dy = e.y - uy;
+      if (dx * dx + dy * dy < 90 * 90) {
+        this.fx.popAt((e.x + ux) / 2, (e.y + uy) / 2);
+        e.setData("baseX", e.getData("baseX") + (dx >= 0 ? 30 : -30));
+      }
+    });
+
+    if (activeEnemies.length - hits.length <= 0 && this.enemies.countActive() === 0) {
+      this.onFormationCleared();
+    }
+  }
+
+  protected onFormationCleared() {
+    const formations = this.currentFormations();
+    if (this.formationIndex < formations.length - 1) {
+      this.formationIndex++;
+      this.fx.banner("More!", "#ff9f43");
+      this.time.delayedCall(700, () => this.spawnFormation());
+    } else {
+      this.onLevelCleared();
+    }
+  }
+
+  protected onLevelCleared() {
+    this.sound2.fanfare();
+    this.fx.banner("Yay! 🌈");
+    // TODO(Task17): boss
+    if (this.levelIndex >= 12) {
+      this.time.delayedCall(1500, () => this.scene.start("Rainbow"));
+      return;
+    }
+    this.levelIndex++;
+    this.formationIndex = 0;
+    this.time.delayedCall(1200, () => this.spawnFormation());
+  }
+
+  protected maybeStartBossOrFinish() {
+    // TODO(Task17): boss — wire boss spawn here before completing the level
+  }
+
   update(_t: number, dms: number) {
     const dt = dms / 1000;
     this.bg.update(dt, this.scale.width);
@@ -103,5 +214,7 @@ export class GameScene extends Phaser.Scene {
       s.y -= STAR_SPEED * dt;
       if (s.y < -40) this.stars.killAndHide(s);
     });
+
+    this.updateEnemies(dt);
   }
 }
