@@ -29,37 +29,6 @@ const RAINBOW_STAR_COLORS = [
   0xaf52de, // violet
 ];
 
-/** Safely add a glow filter to a game object using the Phaser 4 Filters API (WebGL only).
- *  Guards for Canvas / missing API so it fails silently in unsupported renderers.
- */
-function addGlowOnce(
-  obj: Phaser.GameObjects.Image,
-  color: number,
-  outerStrength: number
-) {
-  if (obj.getData("glowed")) return;
-  obj.setData("glowed", true);
-  // Phaser 4 Filters API: enableFilters() then filters.internal.addGlow(...).
-  // Cast to access the typed API (Image inherits the Filters component in WebGL).
-  const anyObj = obj as unknown as {
-    enableFilters?: () => void;
-    filters?: {
-      external?: { addGlow?: (...a: unknown[]) => unknown };
-      internal?: { addGlow?: (...a: unknown[]) => unknown };
-    };
-  };
-  if (typeof anyObj.enableFilters !== "function") return;
-  anyObj.enableFilters();
-  // Use the EXTERNAL filter list so the glow extends BEYOND the sprite and fades,
-  // rather than the internal list which clips to the sprite's box (a hard "border").
-  const list = anyObj.filters?.external ?? anyObj.filters?.internal;
-  if (list && typeof list.addGlow === "function") {
-    // addGlow(color, outerStrength, innerStrength, scale, knockout, quality, distance)
-    // Soft halo: low outer strength, no inner fill, high quality (smooth), wide distance (gentle falloff).
-    list.addGlow(color, outerStrength, 0, 1, false, 0.5, 28);
-  }
-}
-
 export class GameScene extends Phaser.Scene {
   protected bg!: Background;
   protected sound2!: Sound;
@@ -114,8 +83,6 @@ export class GameScene extends Phaser.Scene {
 
     // Unicorn = tinted body (no drawn wings — they read as stray triangles).
     const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
-    // ── Item 4: Glow on unicorn body (guarded for Canvas) ───────────────────
-    addGlowOnce(body, 0xffffff, 2);
 
     // ── Rainbow trail emitter (created BEFORE the unicorn container so it renders behind) ──
     // Use a plain WHITE dot texture so the rainbow `color` tint shows TRUE colours
@@ -335,8 +302,6 @@ export class GameScene extends Phaser.Scene {
     if (!c) {
       c = this.add.image(x, -40, ATLAS_KEY, frameFor(type)).setScale(1.0);
       this.collectibles.add(c);
-      // ── Item 4: Glow on collectible (first creation only) ───────────────
-      addGlowOnce(c, 0xffd700, 2);
     } else {
       c.setPosition(x, -40)
        .setTexture(ATLAS_KEY, frameFor(type))
