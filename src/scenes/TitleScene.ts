@@ -36,20 +36,28 @@ export class TitleScene extends Phaser.Scene {
     const uni = this.add.sprite(W / 2, 430, CATCH_UNICORN_KEY).setScale(0.8).play(CATCH_UNICORN_ANIM);
     this.tweens.add({ targets: uni, y: 400, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
 
-    this.makeButton(W / 2, 720, "🌈  Rainbow Shoot", 0x9b6bff, () => this.scene.start("Game"));
-    this.makeButton(W / 2, 880, "🌈  Rainbow Catch", 0x7ed957, () => this.scene.start("Catch"));
-    this.makeButton(W / 2, 1040, "🫧  Pop the Cuties", 0xff5fa2, () => this.scene.start("Pop"));
+    this.makeButton(W / 2, 720, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.scene.start("Game"));
+    this.makeButton(W / 2, 880, "🌈", "Rainbow Catch", 0x7ed957, () => this.scene.start("Catch"));
+    this.makeButton(W / 2, 1040, "🫧", "Pop the Cuties", 0xff5fa2, () => this.scene.start("Pop"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
 
-  private makeButton(x: number, y: number, label: string, color: number, onTap: () => void) {
+  private makeButton(x: number, y: number, emoji: string, label: string, color: number, onTap: () => void) {
     const w = 460, h = 110;
+    const ICON_W = 42; // reserved visual width for the emoji glyph (≈ fontSize)
+    const GAP = 14;    // small, comfortable gap between the emoji and the label
     const g = this.add.graphics();
     g.fillStyle(color, 1).fillRoundedRect(x - w / 2, y - h / 2, w, h, 28);
-    const t = this.add.text(x, y, label, { fontSize: "40px", color: "#ffffff", fontStyle: "bold" }).setOrigin(0.5);
+    // Render the emoji and label as separate objects (one centered string would
+    // split the emoji's wide trailing advance into a large visible gap). The
+    // emoji+label group is centered as a unit; the gap between them is fixed.
+    const t = this.add.text(0, y, label, { fontSize: "40px", color: "#ffffff", fontStyle: "bold" }).setOrigin(0, 0.5);
+    const left = x - (ICON_W + GAP + t.width) / 2;
+    t.x = left + ICON_W + GAP;
+    const icon = this.add.text(left, y, emoji, { fontSize: "40px" }).setOrigin(0, 0.5);
     const zone = this.add.zone(x, y, w, h).setInteractive({ useHandCursor: true });
     zone.on("pointerdown", onTap);
-    return { g, t, zone };
+    return { g, t, icon, zone };
   }
 }
