@@ -13,7 +13,7 @@ import type { PlacedEnemy } from "../core/types";
 import { BossController } from "../core/boss";
 
 const STAR_SPEED = 900; // px/s upward
-const KEY_SPEED = 700;
+const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/right for Zoe)
 const FIRE_INTERVAL = 0.18;
 
 export class GameScene extends Phaser.Scene {
