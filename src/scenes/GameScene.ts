@@ -118,16 +118,24 @@ export class GameScene extends Phaser.Scene {
     addGlowOnce(body, 0xffffff, 2);
 
     // ── Rainbow trail emitter (created BEFORE the unicorn container so it renders behind) ──
-    // `color` interpolates through RAINBOW_STAR_COLORS over each particle's life.
-    this.rainbowTrail = this.add.particles(this.target.x, this.target.y, ATLAS_KEY, {
-      frame: frameFor("sparkle"),
-      color: RAINBOW_STAR_COLORS,
-      colorEase: "linear",
-      lifespan: 450,
-      scale: { start: 0.55, end: 0 },
-      alpha: { start: 0.85, end: 0 },
-      speed: 20,
-      frequency: 40,
+    // Use a plain WHITE dot texture so the rainbow `color` tint shows TRUE colours
+    // (tinting the yellow sparkle emoji produced muddy/dark hues).
+    if (!this.textures.exists("trailDot")) {
+      const g = this.make.graphics({ x: 0, y: 0 });
+      g.fillStyle(0xffffff, 1);
+      g.fillCircle(20, 20, 20);
+      g.generateTexture("trailDot", 40, 40);
+      g.destroy();
+    }
+    this.rainbowTrail = this.add.particles(this.target.x, this.target.y, "trailDot", {
+      // Per-particle tint: each dot picks one of the rainbow colours -> a clearly
+      // multi-coloured trail (white texture so the tint shows true colours).
+      tint: RAINBOW_STAR_COLORS,
+      lifespan: 520,
+      scale: { start: 0.85, end: 0 },
+      alpha: { start: 0.95, end: 0 },
+      speed: 14,
+      frequency: 26,
       quantity: 1,
       blendMode: Phaser.BlendModes.NORMAL,
       emitting: false,
