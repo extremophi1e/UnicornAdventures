@@ -10,6 +10,7 @@ import { nearestEnemy, steerVelocity } from "../core/magnetism";
 import { createRng } from "../core/rng";
 import { Celebrations } from "./ui/Celebrations";
 import type { PlacedEnemy } from "../core/types";
+import { BossController } from "../core/boss";
 
 const STAR_SPEED = 900; // px/s upward
 const KEY_SPEED = 700;
@@ -32,6 +33,10 @@ export class GameScene extends Phaser.Scene {
   protected t = 0;
   protected isStory = true;
   protected transitioning = false;
+
+  protected boss?: Phaser.GameObjects.Image;
+  protected bossCtl?: BossController;
+  protected bossBar?: Phaser.GameObjects.Graphics;
 
   constructor(key = "Game") {
     super(key);
@@ -184,15 +189,15 @@ export class GameScene extends Phaser.Scene {
       this.fx.banner("More!", "#ff9f43");
       this.time.delayedCall(700, () => this.spawnFormation());
     } else {
-      this.onLevelCleared();
+      this.maybeStartBossOrFinish();
     }
   }
 
   protected onLevelCleared() {
+    this.bossCtl = undefined;
     this.sound2.fanfare();
     this.fx.banner("Yay! 🌈");
     this.formationIndex = 0;
-    // TODO(Task17): boss
     if (this.levelIndex >= 12) {
       this.time.delayedCall(1500, () => this.scene.start("Rainbow"));
       return;
@@ -203,7 +208,55 @@ export class GameScene extends Phaser.Scene {
   }
 
   protected maybeStartBossOrFinish() {
-    // TODO(Task17): boss — wire boss spawn here before completing the level
+    const lvl = getLevel(this.levelIndex);
+    if (lvl.boss && !this.bossCtl) {
+      this.startBoss();
+    } else {
+      this.onLevelCleared();
+    }
+  }
+
+  protected startBoss() {
+    const spec = getLevel(this.levelIndex).boss!;
+    this.bossCtl = new BossController(spec);
+    this.boss = this.add.image(this.scale.width / 2, 320, ATLAS_KEY, frameFor(spec.type)).setScale(4).setTint(0xfff0a0);
+    this.bossBar = this.add.graphics();
+    this.tweens.add({ targets: this.boss, x: this.scale.width / 2 + 80, yoyo: true, repeat: -1, duration: 1600, ease: "Sine.inOut" });
+  }
+
+  protected updateBoss(dt: number) {
+    if (!this.bossCtl || !this.boss) return;
+    this.bossCtl.update(dt);
+
+    // Telegraph phase transition with a color flash.
+    if (this.bossCtl.state === "phaseTransition") this.boss.setTint(0xff7777);
+    else if (this.bossCtl.state === "active") this.boss.setTint(0xfff0a0);
+
+    // Stars hit the boss only while vulnerable.
+    const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Image[]).filter((s) => s.active);
+    if (this.bossCtl.isVulnerable()) {
+      for (const s of activeStars) {
+        const dx = s.x - this.boss.x, dy = s.y - this.boss.y;
+        if (dx * dx + dy * dy < 150 * 150) {
+          this.bossCtl.hit(1);
+          this.fx.popAt(s.x, s.y);
+          this.sound2.pop();
+          this.stars.killAndHide(s);
+        }
+      }
+    }
+
+    // Happiness meter (top of screen).
+    const frac = Math.max(0, this.bossCtl.hp / getLevel(this.levelIndex).boss!.maxHp);
+    this.bossBar!.clear().fillStyle(0xffffff, 0.4).fillRoundedRect(120, 120, this.scale.width - 240, 28, 14)
+      .fillStyle(0xff5fa2, 1).fillRoundedRect(120, 120, (this.scale.width - 240) * frac, 28, 14);
+
+    if (this.bossCtl.state === "defeated") {
+      this.fx.popAt(this.boss.x, this.boss.y);
+      this.boss.destroy(); this.bossBar!.destroy();
+      this.boss = undefined; this.bossCtl = undefined;
+      this.onLevelCleared();
+    }
   }
 
   update(_t: number, dms: number) {
@@ -228,5 +281,6 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.updateEnemies(dt);
+    this.updateBoss(dt);
   }
 }
