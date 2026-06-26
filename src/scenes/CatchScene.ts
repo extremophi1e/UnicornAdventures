@@ -10,9 +10,9 @@ import { initialCatchState, recordCatch, recordMiss, speedForNotch, type CatchSt
 
 const KEY_SPEED = 4800;        // px/s for arrow-key movement (3x faster)
 const SPAWN_INTERVAL = 1.1;    // seconds, fixed (independent of fall speed)
-const MAX_CONCURRENT = 6;      // cap on-screen items
+const MAX_CONCURRENT = 10;     // cap on-screen items
 const CATCH_RADIUS = 95;       // generous; larger than the visible unicorn
-const CELEBRATION_EVERY = 25;  // catches per milestone celebration
+const CELEBRATION_EVERY = 10;  // catches per milestone celebration
 const UNICORN_DISPLAY_H = 150; // target on-screen unicorn height in px
 
 // Cosmetic variety only (no balloon, no cloud). All caught the same way.

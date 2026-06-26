@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Background } from "./ui/Background";
+import { SpaceBackground } from "./ui/SpaceBackground";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { AutoFire, resolveTarget, type AimInput, type Bounds } from "../core/input";
@@ -31,7 +31,7 @@ const RAINBOW_STAR_COLORS = [
 ];
 
 export class GameScene extends Phaser.Scene {
-  protected bg!: Background;
+  protected bg!: SpaceBackground;
   protected sound2!: Sound;
   protected unicorn!: Phaser.GameObjects.Container;
   protected target = { x: 360, y: 1120 };
@@ -74,7 +74,7 @@ export class GameScene extends Phaser.Scene {
   create() {
     const W = this.scale.width;
     const H = this.scale.height;
-    this.bg = new Background(this, W, H);
+    this.bg = new SpaceBackground(this, W, H);
     this.sound2 = new Sound(this);
     this.sound2.playMusic();
 
@@ -130,6 +130,11 @@ export class GameScene extends Phaser.Scene {
         strokeThickness: 6,
       })
       .setDepth(1000);
+
+    // Back-to-title button (top-right), like the catch game.
+    this.add.text(W - 24, 24, "⬅", { fontSize: "44px", color: "#ffffff" })
+      .setOrigin(1, 0).setDepth(1000).setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.scene.start("Title"));
 
     // ── Item 3: Collectibles pool ────────────────────────────────────────────
     this.collectibles = this.add.group();

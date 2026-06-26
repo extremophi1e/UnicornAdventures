@@ -80,8 +80,9 @@ export class CatchBackground extends Phaser.GameObjects.Container {
     this.hills.fillStyle(0x5fb94a, 1);
     this.hills.fillRect(0, horizon, width, height - horizon);
 
-    // Sun on the right, clear of the top-left score and the top-right back button.
-    this.sun.setPosition(width - 100, 150);
+    // Sun (3x size) on the right, clear of the top-left score and top-right back button.
+    this.sun.setScale(3);
+    this.sun.setPosition(width - 180, 230);
     this.clouds.forEach((c, i) => c.setPosition((width / 4) * (i + 1), 150 + (i % 2) * 70));
 
     this.buildGround(width, height);

@@ -4,8 +4,8 @@
 // always drifts toward the child's current skill and can never run away.
 // No Phaser imports: this module is unit-tested headlessly.
 
-export const SPEED_TABLE: readonly number[] = [90, 120, 150, 185, 220, 260, 300, 340]; // px/s
-export const START_NOTCH = 1;            // ~120 px/s on entry
+export const SPEED_TABLE: readonly number[] = [135, 180, 225, 278, 330, 390, 450, 510]; // px/s (base +50%)
+export const START_NOTCH = 1;            // ~180 px/s on entry
 export const CATCHES_PER_STEP_UP = 5;    // +1 notch every 5 catches
 export const MISSES_PER_STEP_DOWN = 3;   // -1 notch every 3 misses
 

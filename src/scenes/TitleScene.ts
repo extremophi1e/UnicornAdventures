@@ -14,6 +14,17 @@ export class TitleScene extends Phaser.Scene {
     const H = this.scale.height;
     this.bg = new Background(this, W, H);
 
+    // Upbeat title theme (loops). Stops when leaving the title.
+    const music = this.sound.add("title", { loop: true, volume: 0.5 });
+    const startMusic = () => { if (!music.isPlaying) music.play(); };
+    startMusic();
+    // Browsers may not be ready to play right at scene-create; retry shortly,
+    // and also on audio-unlock / first tap (autoplay gesture requirement).
+    this.time.delayedCall(200, startMusic);
+    if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
+    this.input.once("pointerdown", startMusic);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => music.stop());
+
     this.add
       .text(W / 2, 220, `✨ ${PLAYER_NAME}'s Rainbow Unicorn ✨`, {
         fontSize: "44px", color: "#7a3fa0", fontStyle: "bold", align: "center",
@@ -25,7 +36,7 @@ export class TitleScene extends Phaser.Scene {
     const uni = this.add.sprite(W / 2, 430, CATCH_UNICORN_KEY).setScale(0.8).play(CATCH_UNICORN_ANIM);
     this.tweens.add({ targets: uni, y: 400, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
 
-    this.makeButton(W / 2, 720, "▶  Play", 0xff7eb6, () => this.scene.start("Game"));
+    this.makeButton(W / 2, 720, "🌈  Rainbow Shoot", 0x9b6bff, () => this.scene.start("Game"));
     this.makeButton(W / 2, 880, "🌈  Rainbow Catch", 0x7ed957, () => this.scene.start("Catch"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));

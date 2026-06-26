@@ -12,7 +12,8 @@
     "audio": "node scripts/build-audio.mjs",
     "icons": "node scripts/build-icons.mjs",
     "catch-unicorn": "node scripts/build-catch-unicorn.mjs",
-    "catch-audio": "node scripts/build-catch-audio.mjs"
+    "catch-audio": "node scripts/build-catch-audio.mjs",
+    "title-song": "node scripts/build-title-song.mjs"
   },
   "dependencies": {
     "phaser": "^4.0.0"
