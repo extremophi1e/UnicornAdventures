@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { SpaceBackground } from "./ui/SpaceBackground";
-import { ATLAS_KEY, frameFor } from "../render/sprites";
+import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { AutoFire, resolveTarget, type AimInput, type Bounds } from "../core/input";
 import { Sound } from "../audio/sound";
@@ -48,7 +48,7 @@ export class GameScene extends Phaser.Scene {
   protected t = 0;
   protected transitioning = false;
 
-  protected boss?: Phaser.GameObjects.Image;
+  protected boss?: Phaser.GameObjects.Sprite;
   protected bossCtl?: BossController;
   protected bossBar?: Phaser.GameObjects.Graphics;
 
@@ -196,16 +196,14 @@ export class GameScene extends Phaser.Scene {
     const assigned = assignTypes(tpl, spec.typing, spec.types, rng);
     const placed: PlacedEnemy[] = layoutFormation(tpl, assigned, { width: this.scale.width, height: this.scale.height });
     for (const pe of placed) {
-      let img = this.enemies.getFirstDead(false) as Phaser.GameObjects.Image | null;
+      let img = this.enemies.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
       if (!img) {
-        img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
+        img = spawnEmoji(this, pe.pos.x, pe.pos.y, pe.type).setScale(1.1);
         this.enemies.add(img);
         // ── Item 5: Per-enemy random phase for sine pulse ─────────────────
         img.setData("phase", Math.random() * Math.PI * 2);
       } else {
-        img.setPosition(pe.pos.x, pe.pos.y)
-           .setTexture(ATLAS_KEY, frameFor(pe.type))
-           .setActive(true).setVisible(true).setScale(1.1);
+        resetEmoji(img, pe.type, pe.pos.x, pe.pos.y).setScale(1.1);
         // Re-assign phase on reuse so each wave feels fresh
         img.setData("phase", Math.random() * Math.PI * 2);
       }
@@ -217,7 +215,7 @@ export class GameScene extends Phaser.Scene {
 
   protected updateEnemies(dt: number) {
     this.t += dt;
-    (this.enemies.getChildren() as Phaser.GameObjects.Image[]).forEach((e) => {
+    (this.enemies.getChildren() as Phaser.GameObjects.Sprite[]).forEach((e) => {
       if (!e.active) return;
       const drift = e.getData("drift");
       e.x = e.getData("baseX") + Math.sin(this.t * drift.swaySpeed) * drift.swayAmplitude;
@@ -230,7 +228,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Star[]).filter((s) => s.active);
-    const activeEnemies = (this.enemies.getChildren() as Phaser.GameObjects.Image[]).filter((e) => e.active);
+    const activeEnemies = (this.enemies.getChildren() as Phaser.GameObjects.Sprite[]).filter((e) => e.active);
 
     // Bullet magnetism: steer each star toward nearest enemy.
     activeStars.forEach((s) => {
@@ -275,14 +273,12 @@ export class GameScene extends Phaser.Scene {
   private spawnCollectible() {
     const type = Math.random() < 0.5 ? "gem" : "heart";
     const x = 80 + Math.random() * (this.scale.width - 160);
-    let c = this.collectibles.getFirstDead(false) as Phaser.GameObjects.Image | null;
+    let c = this.collectibles.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
     if (!c) {
-      c = this.add.image(x, -40, ATLAS_KEY, frameFor(type)).setScale(1.0);
+      c = spawnEmoji(this, x, -40, type).setScale(1.0);
       this.collectibles.add(c);
     } else {
-      c.setPosition(x, -40)
-       .setTexture(ATLAS_KEY, frameFor(type))
-       .setActive(true).setVisible(true).setScale(1.0).setAngle(0);
+      resetEmoji(c, type, x, -40).setScale(1.0);
     }
   }
 
@@ -297,12 +293,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     const ux = this.unicorn.x, uy = this.unicorn.y;
-    (this.collectibles.getChildren() as Phaser.GameObjects.Image[]).forEach((c) => {
+    (this.collectibles.getChildren() as Phaser.GameObjects.Sprite[]).forEach((c) => {
       if (!c.active) return;
 
-      // Fall and spin
+      // Fall (the emoji animates on its own).
       c.y += COLLECTIBLE_SPEED * dt;
-      c.rotation += dt * 2.0;
 
       // Collect: unicorn overlap check (radius 70)
       if (circleOverlap({ x: c.x, y: c.y, r: 70 }, { x: ux, y: uy, r: 0 })) {
@@ -368,7 +363,7 @@ export class GameScene extends Phaser.Scene {
   protected startBoss() {
     const spec = getLevel(this.levelIndex).boss!;
     this.bossCtl = new BossController(spec);
-    this.boss = this.add.image(this.scale.width / 2, 320, ATLAS_KEY, frameFor(spec.type)).setScale(4).setTint(0xfff0a0);
+    this.boss = spawnEmoji(this, this.scale.width / 2, 320, spec.type).setScale(4);
     this.bossBar = this.add.graphics();
     this.tweens.add({ targets: this.boss, x: this.scale.width / 2 + 80, yoyo: true, repeat: -1, duration: 1600, ease: "Sine.inOut" });
   }
@@ -379,7 +374,7 @@ export class GameScene extends Phaser.Scene {
 
     // Telegraph phase transition with a color flash.
     if (this.bossCtl.state === "phaseTransition") this.boss.setTint(0xff7777);
-    else if (this.bossCtl.state === "active") this.boss.setTint(0xfff0a0);
+    else this.boss.clearTint();
 
     // Stars hit the boss only while vulnerable.
     const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Star[]).filter((s) => s.active);

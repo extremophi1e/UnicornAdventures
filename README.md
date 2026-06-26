@@ -25,4 +25,4 @@ A gentle, no-fail Galaga-style game made for Zoe.
 
 ## Notes
 - No accounts, ads, purchases, or data collection. Nothing is saved (always starts at Level 1).
-- Art uses the OpenMoji emoji set, swappable later via `src/render/sprites.ts` + the atlas.
+- Items & enemies use Google's animated [Noto emoji](https://googlefonts.github.io/noto-emoji-animation/) (Apache-2.0), decoded into sprite sheets by `scripts/build-emoji.mjs` (`npm run emoji`). The sparkle burst still uses the OpenMoji atlas (`src/render/sprites.ts`). The unicorn is a separate animated sheet.

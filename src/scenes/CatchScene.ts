@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { CatchBackground } from "./ui/CatchBackground";
-import { ATLAS_KEY, frameFor } from "../render/sprites";
+import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM, CATCH_UNICORN } from "../render/catchUnicorn";
 import { resolveTarget, type AimInput, type Bounds } from "../core/input";
 import { circleOverlap } from "../core/collision";
@@ -104,12 +104,12 @@ export class CatchScene extends Phaser.Scene {
   private spawnItem() {
     const type = CATCH_ITEM_TYPES[Math.floor(Math.random() * CATCH_ITEM_TYPES.length)];
     const x = 80 + Math.random() * (this.scale.width - 160);
-    let c = this.items.getFirstDead(false) as Phaser.GameObjects.Image | null;
+    let c = this.items.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
     if (!c) {
-      c = this.add.image(x, -40, ATLAS_KEY, frameFor(type)).setScale(1.1);
+      c = spawnEmoji(this, x, -40, type).setScale(1.1);
       this.items.add(c);
     } else {
-      c.setPosition(x, -40).setTexture(ATLAS_KEY, frameFor(type)).setActive(true).setVisible(true).setScale(1.1).setAngle(0);
+      resetEmoji(c, type, x, -40).setScale(1.1);
     }
   }
 
@@ -163,10 +163,9 @@ export class CatchScene extends Phaser.Scene {
     // Fall + catch/miss. One global speed applied to all in-flight items.
     const speed = speedForNotch(this.state.notch);
     const ux = this.unicorn.x, uy = this.unicorn.y;
-    (this.items.getChildren() as Phaser.GameObjects.Image[]).forEach((c) => {
+    (this.items.getChildren() as Phaser.GameObjects.Sprite[]).forEach((c) => {
       if (!c.active) return;
       c.y += speed * dt;
-      c.rotation += dt * 1.6;
 
       if (circleOverlap({ x: c.x, y: c.y, r: CATCH_RADIUS }, { x: ux, y: uy, r: 0 })) {
         this.items.killAndHide(c);

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { ATLAS_KEY } from "../render/sprites";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_SHEET, CATCH_UNICORN_ANIM, CATCH_UNICORN } from "../render/catchUnicorn";
+import { EMOJI_DEFS } from "../render/emoji";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -24,6 +25,9 @@ export class BootScene extends Phaser.Scene {
       frameWidth: CATCH_UNICORN.frameWidth,
       frameHeight: CATCH_UNICORN.frameHeight,
     });
+    for (const d of EMOJI_DEFS) {
+      this.load.spritesheet(d.key, d.sheet, { frameWidth: d.frameWidth, frameHeight: d.frameHeight });
+    }
     // Loading progress bar (no text — pre-readers).
     const g = this.add.graphics();
     this.load.on("progress", (p: number) => {
@@ -39,6 +43,16 @@ export class BootScene extends Phaser.Scene {
         frameRate: CATCH_UNICORN.frameRate,
         repeat: -1,
       });
+    }
+    for (const d of EMOJI_DEFS) {
+      if (!this.anims.exists(d.anim)) {
+        this.anims.create({
+          key: d.anim,
+          frames: this.anims.generateFrameNumbers(d.key, { start: 0, end: d.frameCount - 1 }),
+          frameRate: d.frameRate,
+          repeat: -1,
+        });
+      }
     }
     this.scene.start("Title");
   }
