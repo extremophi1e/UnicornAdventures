@@ -29,8 +29,8 @@ const RAINBOW_STAR_COLORS = [
   0xaf52de, // violet
 ];
 
-/** Safely add a preFX glow to a game object (WebGL only; guarded for Canvas).
- *  preFX is not in Phaser 4 type stubs yet, so we access it via a cast.
+/** Safely add a glow filter to a game object using the Phaser 4 Filters API (WebGL only).
+ *  Guards for Canvas / missing API so it fails silently in unsupported renderers.
  */
 function addGlowOnce(
   obj: Phaser.GameObjects.Image,
@@ -38,12 +38,23 @@ function addGlowOnce(
   outerStrength: number
 ) {
   if (obj.getData("glowed")) return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fx = (obj as unknown as Record<string, any>)["preFX"];
-  if (fx && typeof fx.addGlow === "function") {
-    fx.addGlow(color, outerStrength);
-  }
   obj.setData("glowed", true);
+  // Phaser 4 Filters API: enableFilters() then filters.internal.addGlow(...).
+  // Cast to access the typed API (Image inherits the Filters component in WebGL).
+  const anyObj = obj as unknown as {
+    enableFilters?: () => void;
+    filters?: {
+      external?: { addGlow?: (...a: unknown[]) => unknown };
+      internal?: { addGlow?: (...a: unknown[]) => unknown };
+    };
+  };
+  if (typeof anyObj.enableFilters !== "function") return;
+  anyObj.enableFilters();
+  const list = anyObj.filters?.internal ?? anyObj.filters?.external;
+  if (list && typeof list.addGlow === "function") {
+    // addGlow(color, outerStrength, innerStrength, scale, knockout, quality, distance)
+    list.addGlow(color, outerStrength, 0, 1, false, 0.1, 16);
+  }
 }
 
 export class GameScene extends Phaser.Scene {
@@ -96,7 +107,7 @@ export class GameScene extends Phaser.Scene {
     // Unicorn = tinted body (no drawn wings — they read as stray triangles).
     const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
     // ── Item 4: Glow on unicorn body (guarded for Canvas) ───────────────────
-    addGlowOnce(body, 0xffffff, 3);
+    addGlowOnce(body, 0xffffff, 8);
     this.unicorn = this.add.container(this.target.x, this.target.y, [body]);
 
     // ── Item 5: Alive pulse tween on unicorn container ───────────────────────
@@ -201,7 +212,7 @@ export class GameScene extends Phaser.Scene {
         img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
         this.enemies.add(img);
         // ── Item 4: Glow on enemy (first creation only) ───────────────────
-        addGlowOnce(img, 0xffeedd, 4);
+        addGlowOnce(img, 0xffeedd, 8);
         // ── Item 5: Per-enemy random phase for sine pulse ─────────────────
         img.setData("phase", Math.random() * Math.PI * 2);
       } else {
@@ -282,7 +293,7 @@ export class GameScene extends Phaser.Scene {
       c = this.add.image(x, -40, ATLAS_KEY, frameFor(type)).setScale(1.0);
       this.collectibles.add(c);
       // ── Item 4: Glow on collectible (first creation only) ───────────────
-      addGlowOnce(c, 0xffd700, 3);
+      addGlowOnce(c, 0xffd700, 8);
     } else {
       c.setPosition(x, -40)
        .setTexture(ATLAS_KEY, frameFor(type))
@@ -312,7 +323,7 @@ export class GameScene extends Phaser.Scene {
       if (circleOverlap({ x: c.x, y: c.y, r: 70 }, { x: ux, y: uy, r: 0 })) {
         this.addScore(25);
         this.fx.popAt(c.x, c.y);
-        this.sound2.pop();
+        this.sound2.collect();
         this.collectibles.killAndHide(c);
         return;
       }
@@ -342,7 +353,7 @@ export class GameScene extends Phaser.Scene {
     if (this.levelIndex >= 12) {
       // Final level: one BIG finale (boss already played bigParty+tada). No medium tier.
       this.fx.finale("Zoe"); this.sound2.tada();
-      this.time.delayedCall(1500, () => this.scene.start("Rainbow"));
+      this.time.delayedCall(5500, () => this.scene.start("Rainbow"));
       return;
     }
     if (getLevel(this.levelIndex).boss) {

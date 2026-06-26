@@ -15,10 +15,10 @@ export class Celebrations {
       });
     }
   }
-  banner(text: string, color = "#ff5fa2") {
+  banner(text: string, color = "#ff5fa2", holdMs = 600) {
     const W = this.scene.scale.width;
     const t = this.scene.add.text(W / 2, 360, text, { fontSize: "60px", color, fontStyle: "bold" }).setOrigin(0.5).setScale(0);
-    this.scene.tweens.add({ targets: t, scale: 1, yoyo: true, hold: 600, duration: 300, onComplete: () => t.destroy() });
+    this.scene.tweens.add({ targets: t, scale: 1, yoyo: true, hold: holdMs, duration: 300, onComplete: () => t.destroy() });
   }
 
   bigParty() {
@@ -34,6 +34,9 @@ export class Celebrations {
 
   finale(name = "Zoe") {
     this.bigParty();
-    this.banner(`YOU DID IT, ${name.toUpperCase()}! 🦄🌈`, "#ff3f8a");
+    this.banner(`YOU DID IT, ${name.toUpperCase()}! 🦄🌈`, "#ff3f8a", 4500);
+    // Keep the party going: two extra bigParty bursts spread across the hold window.
+    this.scene.time.delayedCall(1500, () => this.bigParty());
+    this.scene.time.delayedCall(3000, () => this.bigParty());
   }
 }
