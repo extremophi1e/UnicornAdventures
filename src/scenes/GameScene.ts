@@ -16,12 +16,24 @@ const STAR_SPEED = 900; // px/s upward
 const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/right for Zoe)
 const FIRE_INTERVAL = 0.18;
 
+// Rainbow colours the shot stars cycle through (ROYGBIV), bright and kid-friendly.
+const RAINBOW_STAR_COLORS = [
+  0xff3b30, // red
+  0xff9500, // orange
+  0xffcc00, // yellow
+  0x34c759, // green
+  0x00a3ff, // blue
+  0x5e5ce6, // indigo
+  0xaf52de, // violet
+];
+
 export class GameScene extends Phaser.Scene {
   protected bg!: Background;
   protected sound2!: Sound;
   protected unicorn!: Phaser.GameObjects.Container;
   protected target = { x: 360, y: 1120 };
   protected stars!: Phaser.GameObjects.Group;
+  protected starColor = 0;
   protected autofire = new AutoFire(FIRE_INTERVAL);
   protected cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   protected pointerActive = false;
@@ -95,13 +107,16 @@ export class GameScene extends Phaser.Scene {
   protected fireStar() {
     const x = this.unicorn.x;
     const y = this.unicorn.y - 60;
-    let s = this.stars.getFirstDead(false) as Phaser.GameObjects.Image | null;
+    const color = RAINBOW_STAR_COLORS[this.starColor];
+    this.starColor = (this.starColor + 1) % RAINBOW_STAR_COLORS.length;
+    let s = this.stars.getFirstDead(false) as Phaser.GameObjects.Star | null;
     if (!s) {
-      s = this.add.image(x, y, ATLAS_KEY, frameFor("star")).setScale(0.8);
+      s = this.add.star(x, y, 5, 10, 24, color);
       this.stars.add(s);
     } else {
-      s.setPosition(x, y).setActive(true).setVisible(true);
+      s.setPosition(x, y).setFillStyle(color).setActive(true).setVisible(true);
     }
+    s.setData("vx", 0);
   }
 
   protected currentFormations() {
@@ -138,7 +153,7 @@ export class GameScene extends Phaser.Scene {
       e.x = e.getData("baseX") + Math.sin(this.t * drift.swaySpeed) * drift.swayAmplitude;
     });
 
-    const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Image[]).filter((s) => s.active);
+    const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Star[]).filter((s) => s.active);
     const activeEnemies = (this.enemies.getChildren() as Phaser.GameObjects.Image[]).filter((e) => e.active);
 
     // Bullet magnetism: steer each star toward nearest enemy.
@@ -241,7 +256,7 @@ export class GameScene extends Phaser.Scene {
     else if (this.bossCtl.state === "active") this.boss.setTint(0xfff0a0);
 
     // Stars hit the boss only while vulnerable.
-    const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Image[]).filter((s) => s.active);
+    const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Star[]).filter((s) => s.active);
     if (this.bossCtl.isVulnerable()) {
       for (const s of activeStars) {
         const dx = s.x - this.boss.x, dy = s.y - this.boss.y;
@@ -282,7 +297,7 @@ export class GameScene extends Phaser.Scene {
 
     for (const shot of Array(this.autofire.update(dt)).fill(0)) void shot, this.fireStar();
 
-    (this.stars.getChildren() as Phaser.GameObjects.Image[]).forEach((s) => {
+    (this.stars.getChildren() as Phaser.GameObjects.Star[]).forEach((s) => {
       if (!s.active) return;
       s.y -= STAR_SPEED * dt;
       if (s.y < -40) this.stars.killAndHide(s);
