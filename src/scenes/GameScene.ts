@@ -113,10 +113,17 @@ export class GameScene extends Phaser.Scene {
     const assigned = assignTypes(tpl, spec.typing, spec.types, rng);
     const placed: PlacedEnemy[] = layoutFormation(tpl, assigned, { width: this.scale.width, height: this.scale.height });
     for (const pe of placed) {
-      const img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
+      let img = this.enemies.getFirstDead(false) as Phaser.GameObjects.Image | null;
+      if (!img) {
+        img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
+        this.enemies.add(img);
+      } else {
+        img.setPosition(pe.pos.x, pe.pos.y)
+           .setTexture(ATLAS_KEY, frameFor(pe.type))
+           .setActive(true).setVisible(true).setScale(1.1);
+      }
       img.setData("baseX", pe.pos.x);
       img.setData("drift", spec.drift);
-      this.enemies.add(img);
     }
     this.transitioning = false;
   }
@@ -156,6 +163,7 @@ export class GameScene extends Phaser.Scene {
     // harmless bounce: enemy touching unicorn just sparkles and drifts back, no penalty
     const ux = this.unicorn.x, uy = this.unicorn.y;
     activeEnemies.forEach((e) => {
+      if (!e.active) return;
       const dx = e.x - ux, dy = e.y - uy;
       if (dx * dx + dy * dy < 90 * 90) {
         this.fx.popAt((e.x + ux) / 2, (e.y + uy) / 2);
@@ -183,6 +191,7 @@ export class GameScene extends Phaser.Scene {
   protected onLevelCleared() {
     this.sound2.fanfare();
     this.fx.banner("Yay! 🌈");
+    this.formationIndex = 0;
     // TODO(Task17): boss
     if (this.levelIndex >= 12) {
       this.time.delayedCall(1500, () => this.scene.start("Rainbow"));
