@@ -1,4 +1,4 @@
-import type { CuteType, FormationTemplate, Rng, TypingRule } from "./types";
+import type { CuteType, FormationTemplate, PlacedEnemy, Rng, TypingRule } from "./types";
 
 function grid(id: string, cols: number, rows: number, mask: string[]): FormationTemplate {
   const cells: { gx: number; gy: number }[] = [];
@@ -41,4 +41,22 @@ export function assignTypes(
       }
     }
   });
+}
+
+export type Playfield = { width: number; height: number };
+
+export function layoutFormation(
+  template: FormationTemplate,
+  assigned: CuteType[],
+  field: Playfield,
+  opts: { topMargin?: number; cellSize?: number } = {},
+): PlacedEnemy[] {
+  const cellSize = opts.cellSize ?? 110;
+  const topMargin = opts.topMargin ?? 180;
+  const totalWidth = (template.cols - 1) * cellSize;
+  const originX = (field.width - totalWidth) / 2;
+  return template.cells.map((c, i) => ({
+    pos: { x: originX + c.gx * cellSize, y: topMargin + c.gy * cellSize },
+    type: assigned[i],
+  }));
 }

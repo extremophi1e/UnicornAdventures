@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { TEMPLATES, assignTypes } from "../../src/core/formations";
+import { TEMPLATES, assignTypes, layoutFormation } from "../../src/core/formations";
 import { createRng } from "../../src/core/rng";
 
 describe("TEMPLATES", () => {
@@ -45,5 +45,39 @@ describe("assignTypes", () => {
   it("only emits types from the provided list", () => {
     const out = assignTypes(t, "cluster", ["heart", "flower", "donut"], createRng(3));
     for (const ty of out) expect(["heart", "flower", "donut"]).toContain(ty);
+  });
+});
+
+describe("layoutFormation", () => {
+  const field = { width: 720, height: 1280 };
+
+  it("returns one placed enemy per assigned type, preserving order", () => {
+    const t = TEMPLATES.block3x3;
+    const assigned = assignTypes(t, "uniform", ["star"], createRng(1));
+    const placed = layoutFormation(t, assigned, field);
+    expect(placed.length).toBe(t.cells.length);
+    expect(placed[0].type).toBe("star");
+  });
+
+  it("keeps all enemies inside the playfield", () => {
+    const t = TEMPLATES.vRows4;
+    const assigned = assignTypes(t, "byRow", ["cloud", "heart"], createRng(1));
+    const placed = layoutFormation(t, assigned, field);
+    for (const p of placed) {
+      expect(p.pos.x).toBeGreaterThanOrEqual(0);
+      expect(p.pos.x).toBeLessThanOrEqual(field.width);
+      expect(p.pos.y).toBeGreaterThanOrEqual(0);
+      expect(p.pos.y).toBeLessThanOrEqual(field.height);
+    }
+  });
+
+  it("centers horizontally — leftmost and rightmost margins are equal", () => {
+    const t = TEMPLATES.twoRows;
+    const assigned = assignTypes(t, "uniform", ["donut"], createRng(1));
+    const placed = layoutFormation(t, assigned, field);
+    const xs = placed.map((p) => p.pos.x);
+    const left = Math.min(...xs);
+    const right = Math.max(...xs);
+    expect(Math.abs(left - (field.width - right))).toBeLessThan(1);
   });
 });
