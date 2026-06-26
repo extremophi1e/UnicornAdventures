@@ -57,8 +57,8 @@ describe("assignTypes", () => {
   });
 
   it("only emits types from the provided list", () => {
-    const out = assignTypes(t, "cluster", ["heart", "flower", "donut"], createRng(3));
-    for (const ty of out) expect(["heart", "flower", "donut"]).toContain(ty);
+    const out = assignTypes(t, "cluster", ["cupcake", "flower", "donut"], createRng(3));
+    for (const ty of out) expect(["cupcake", "flower", "donut"]).toContain(ty);
   });
 });
 
@@ -75,7 +75,7 @@ describe("layoutFormation", () => {
 
   it("keeps all enemies inside the playfield", () => {
     const t = TEMPLATES.vRows4;
-    const assigned = assignTypes(t, "byRow", ["cloud", "heart"], createRng(1));
+    const assigned = assignTypes(t, "byRow", ["cloud", "flower"], createRng(1));
     const placed = layoutFormation(t, assigned, field);
     for (const p of placed) {
       expect(p.pos.x).toBeGreaterThanOrEqual(0);

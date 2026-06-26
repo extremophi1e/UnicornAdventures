@@ -1,7 +1,6 @@
 import Phaser from "phaser";
 import { Background } from "./ui/Background";
-import { ATLAS_KEY, frameFor } from "../render/sprites";
-import { settings } from "../state/settings";
+import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 
 const PLAYER_NAME = "Zoe";
 
@@ -22,16 +21,12 @@ export class TitleScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const uni = this.add.image(W / 2, 430, ATLAS_KEY, frameFor("unicorn")).setScale(2.2);
-    uni.setTint(0xff8fcf);
+    // The one unified animated unicorn, used on the title and in both games.
+    const uni = this.add.sprite(W / 2, 430, CATCH_UNICORN_KEY).setScale(0.8).play(CATCH_UNICORN_ANIM);
     this.tweens.add({ targets: uni, y: 400, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
 
     this.makeButton(W / 2, 720, "▶  Play", 0xff7eb6, () => this.scene.start("Game"));
-    this.makeButton(W / 2, 880, "🌈  Rainbow Mode", 0x7ec8ff, () => this.scene.start("Rainbow"));
-    this.makeButton(W / 2, 1040, "🌈  Rainbow Catch", 0x7ed957, () => this.scene.start("Catch"));
-
-    // Calm toggle — TOP corner (off the bottom edge per spec).
-    this.makeCalmToggle(W - 90, 80);
+    this.makeButton(W / 2, 880, "🌈  Rainbow Catch", 0x7ed957, () => this.scene.start("Catch"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
@@ -44,15 +39,5 @@ export class TitleScene extends Phaser.Scene {
     const zone = this.add.zone(x, y, w, h).setInteractive({ useHandCursor: true });
     zone.on("pointerdown", onTap);
     return { g, t, zone };
-  }
-
-  private makeCalmToggle(x: number, y: number) {
-    const label = () => (settings.calm ? "🌙" : "✨");
-    const t = this.add.text(x, y, label(), { fontSize: "48px" }).setOrigin(0.5);
-    const zone = this.add.zone(x, y, 90, 90).setInteractive({ useHandCursor: true });
-    zone.on("pointerdown", () => {
-      settings.toggleCalm();
-      t.setText(label());
-    });
   }
 }

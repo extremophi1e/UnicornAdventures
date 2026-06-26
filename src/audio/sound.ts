@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import { settings } from "../state/settings";
 
 const MUSIC_KEYS = ["music1", "music2", "music3", "music4"] as const;
 export const CATCH_MUSIC_KEYS: readonly string[] = ["catch1", "catch2", "catch3"];
@@ -18,10 +17,9 @@ export class Sound {
   }
 
   private _playTrack(key: string): void {
-    const vol = settings.calm ? 0.25 : 0.5;
     this._lastMusicKey = key;
     const prev = this._current;
-    const m = this.scene.sound.add(key, { loop: false, volume: vol });
+    const m = this.scene.sound.add(key, { loop: false, volume: 0.5 });
     this._current = m;
     m.once("complete", () => {
       this._playTrack(this._pickNextTrack());
@@ -38,15 +36,15 @@ export class Sound {
   }
 
   collect(): void {
-    this.scene.sound.play("collect", { volume: settings.calm ? 0.35 : 0.7 });
+    this.scene.sound.play("collect", { volume: 0.7 });
   }
   pop(): void {
-    this.scene.sound.play("pop", { volume: settings.calm ? 0.3 : 0.6 });
+    this.scene.sound.play("pop", { volume: 0.6 });
   }
   fanfare(): void {
-    this.scene.sound.play("fanfare", { volume: settings.calm ? 0.35 : 0.7 });
+    this.scene.sound.play("fanfare", { volume: 0.7 });
   }
   tada(): void {
-    this.scene.sound.play("tada", { volume: settings.calm ? 0.4 : 0.8 });
+    this.scene.sound.play("tada", { volume: 0.8 });
   }
 }

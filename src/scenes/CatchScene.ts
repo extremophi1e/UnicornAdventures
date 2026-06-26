@@ -8,15 +8,18 @@ import { Sound, CATCH_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, speedForNotch, type CatchState } from "../core/catch";
 
-const KEY_SPEED = 1600;        // px/s for arrow-key movement
+const KEY_SPEED = 4800;        // px/s for arrow-key movement (3x faster)
 const SPAWN_INTERVAL = 1.1;    // seconds, fixed (independent of fall speed)
-const MAX_CONCURRENT = 4;      // cap on-screen items (UX: keep it uncluttered)
+const MAX_CONCURRENT = 6;      // cap on-screen items
 const CATCH_RADIUS = 95;       // generous; larger than the visible unicorn
 const CELEBRATION_EVERY = 25;  // catches per milestone celebration
 const UNICORN_DISPLAY_H = 150; // target on-screen unicorn height in px
 
 // Cosmetic variety only (no balloon, no cloud). All caught the same way.
 const CATCH_ITEM_TYPES = ["gem", "heart", "cupcake", "star", "lollipop", "icecream", "donut", "flower", "butterfly"];
+
+// Rainbow trail colours dropped behind the unicorn while it moves (ROYGBIV).
+const RAINBOW_TRAIL_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
 
 export class CatchScene extends Phaser.Scene {
   private bg!: CatchBackground;
@@ -33,6 +36,12 @@ export class CatchScene extends Phaser.Scene {
   private state: CatchState = initialCatchState();
   private score = 0;
   private scoreText!: Phaser.GameObjects.Text;
+
+  // Rainbow trail bookkeeping.
+  private _prevX = 0;
+  private _prevY = 0;
+  private _trailColor = 0;
+  private _trailAccum = 0;
 
   constructor() {
     super("Catch");
@@ -56,6 +65,8 @@ export class CatchScene extends Phaser.Scene {
     this.unicorn = this.add.sprite(this.target.x, this.target.y, CATCH_UNICORN_KEY).setDepth(10);
     this.unicorn.setScale(UNICORN_DISPLAY_H / CATCH_UNICORN.frameHeight);
     this.unicorn.play(CATCH_UNICORN_ANIM);
+    this._prevX = this.target.x;
+    this._prevY = this.target.y;
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.input.on("pointermove", (p: Phaser.Input.Pointer) => { this.pointerActive = true; this.target = { x: p.worldX, y: p.worldY }; });
@@ -120,6 +131,27 @@ export class CatchScene extends Phaser.Scene {
     const next = resolveTarget(cur, this.aimInput(), KEY_SPEED, dt, this.bounds());
     this.unicorn.x = Phaser.Math.Linear(this.unicorn.x, next.x, Math.min(1, 12 * dt));
     this.unicorn.y = Phaser.Math.Linear(this.unicorn.y, next.y, Math.min(1, 12 * dt));
+
+    // Rainbow trail: drop fading rainbow circles behind the unicorn while moving.
+    const tdx = this.unicorn.x - this._prevX;
+    const tdy = this.unicorn.y - this._prevY;
+    this._trailAccum += dt;
+    if (Math.sqrt(tdx * tdx + tdy * tdy) > 2 && this._trailAccum >= 0.025) {
+      this._trailAccum = 0;
+      const color = RAINBOW_TRAIL_COLORS[this._trailColor];
+      this._trailColor = (this._trailColor + 1) % RAINBOW_TRAIL_COLORS.length;
+      const dot = this.add.circle(this.unicorn.x, this.unicorn.y + 12, 16, color).setDepth(5);
+      this.tweens.add({
+        targets: dot,
+        alpha: { from: 0.9, to: 0 },
+        scale: { from: 1, to: 0.2 },
+        duration: 520,
+        ease: "Sine.easeOut",
+        onComplete: () => dot.destroy(),
+      });
+    }
+    this._prevX = this.unicorn.x;
+    this._prevY = this.unicorn.y;
 
     // Spawn at a fixed interval, capped.
     this.spawnTimer += dt;

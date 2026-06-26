@@ -21,8 +21,7 @@ A gentle, no-fail Galaga-style game made for Zoe.
 
 ## Controls
 - Move the unicorn: drag (touch), move the mouse, or arrow keys. It shoots by itself.
-- Two buttons: **Play** (story, 12 levels + bosses) and **Rainbow Mode** (endless).
-- The ✨/🌙 button (top corner) turns calm mode on/off (fewer sparkles + quieter).
+- Two games: **Play** (the shooter — 12 levels + friendly bosses; the unicorn shoots by itself) and **Rainbow Catch** (catch the falling treats — it speeds up the more you catch and slows when you miss; endless, no-fail).
 
 ## Notes
 - No accounts, ads, purchases, or data collection. Nothing is saved (always starts at Level 1).

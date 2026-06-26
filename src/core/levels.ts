@@ -28,7 +28,7 @@ export const LEVELS: Level[] = [
     boss: { type: "cupcake", maxHp: 18, phases: 2 },
   },
   // 6: heart + ring (hollow frame)
-  { index: 6, formations: [f("heart", "uniform", ["heart"]), f("ring", "byCol", ["heart", "flower"])] },
+  { index: 6, formations: [f("heart", "uniform", ["flower"]), f("ring", "byCol", ["donut", "flower"])] },
   // 7: pillars + xshape + twoRows
   {
     index: 7,
@@ -51,8 +51,8 @@ export const LEVELS: Level[] = [
   {
     index: 9,
     formations: [
-      f("xshape", "byRow", ["heart", "star"]),
-      f("vee", "byCol", ["star", "heart"]),
+      f("xshape", "byRow", ["flower", "star"]),
+      f("vee", "byCol", ["star", "flower"]),
       f("pillars", "uniform", ["cupcake"], livelier),
     ],
   },
@@ -67,14 +67,14 @@ export const LEVELS: Level[] = [
     index: 11,
     formations: [
       f("pyramid", "uniform", ["icecream"], livelier),
-      f("ring", "cluster", ["icecream", "donut", "heart"], livelier),
-      f("vee", "byRow", ["heart", "donut"], livelier),
+      f("ring", "cluster", ["icecream", "donut", "flower"], livelier),
+      f("vee", "byRow", ["flower", "donut"], livelier),
     ],
   },
   // 12: FINAL BOSS — giant star
   {
     index: 12,
-    formations: [f("vRows4", "cluster", ["star", "balloon", "heart"], livelier)],
+    formations: [f("vRows4", "cluster", ["star", "balloon", "flower"], livelier)],
     boss: { type: "star", maxHp: 36, phases: 2 },
   },
 ];

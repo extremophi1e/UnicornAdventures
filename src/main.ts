@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import { BootScene } from "./scenes/BootScene";
 import { TitleScene } from "./scenes/TitleScene";
 import { GameScene } from "./scenes/GameScene";
-import { RainbowScene } from "./scenes/RainbowScene";
 import { CatchScene } from "./scenes/CatchScene";
 import { computeLogicalWidth, LOGICAL_HEIGHT } from "./core/viewport";
 import { maybeShowIosInstallHint, requestFullscreenOnce } from "./pwa/installHint";
@@ -18,7 +17,7 @@ const game = new Phaser.Game({
     width: computeLogicalWidth(window.innerWidth, window.innerHeight),
     height: LOGICAL_HEIGHT,
   },
-  scene: [BootScene, TitleScene, GameScene, RainbowScene, CatchScene],
+  scene: [BootScene, TitleScene, GameScene, CatchScene],
 });
 
 (window as unknown as { __game?: Phaser.Game }).__game = game;

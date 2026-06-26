@@ -1,11 +1,10 @@
 import Phaser from "phaser";
 import { ATLAS_KEY, frameFor } from "../../render/sprites";
-import { settings } from "../../state/settings";
 
 export class Celebrations {
   constructor(private scene: Phaser.Scene) {}
   popAt(x: number, y: number) {
-    const n = settings.calm ? 3 : 8;
+    const n = 8;
     for (let i = 0; i < n; i++) {
       const s = this.scene.add.image(x, y, ATLAS_KEY, frameFor("sparkle")).setScale(0.6);
       const ang = (Math.PI * 2 * i) / n;
@@ -23,13 +22,13 @@ export class Celebrations {
 
   bigParty() {
     const W = this.scene.scale.width, H = this.scene.scale.height;
-    const n = settings.calm ? 20 : 70;
+    const n = 70;
     for (let i = 0; i < n; i++) {
       const x = Math.random() * W;
       const s = this.scene.add.image(x, -20, ATLAS_KEY, frameFor("sparkle")).setScale(0.5 + Math.random());
       this.scene.tweens.add({ targets: s, y: H + 40, alpha: 0, duration: 1200 + Math.random() * 1200, onComplete: () => s.destroy() });
     }
-    if (!settings.calm) this.scene.cameras.main.shake(250, 0.004); // screen-shake only when not calm, only here
+    this.scene.cameras.main.shake(250, 0.004);
   }
 
   finale(name = "Zoe") {

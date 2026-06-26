@@ -2,11 +2,11 @@ export type Vec2 = { x: number; y: number };
 
 export type CuteType =
   | "cloud" | "cupcake" | "star" | "lollipop" | "icecream"
-  | "balloon" | "heart" | "flower" | "donut" | "butterfly";
+  | "balloon" | "flower" | "donut" | "butterfly";
 
 export const CUTE_TYPES: CuteType[] = [
   "cloud", "cupcake", "star", "lollipop", "icecream",
-  "balloon", "heart", "flower", "donut", "butterfly",
+  "balloon", "flower", "donut", "butterfly",
 ];
 
 export type DriftParams = { swayAmplitude: number; swaySpeed: number; descendSpeed: number };

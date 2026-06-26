@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Background } from "./ui/Background";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
+import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { AutoFire, resolveTarget, type AimInput, type Bounds } from "../core/input";
 import { Sound } from "../audio/sound";
 import { getLevel } from "../core/levels";
@@ -82,8 +83,8 @@ export class GameScene extends Phaser.Scene {
       this.sound.stopAll();
     });
 
-    // Unicorn = tinted body (no drawn wings — they read as stray triangles).
-    const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
+    // Unicorn = the unified animated sprite (same one used on the title and in Catch).
+    const body = this.add.sprite(0, 0, CATCH_UNICORN_KEY).setScale(0.55).play(CATCH_UNICORN_ANIM);
 
     this.unicorn = this.add.container(this.target.x, this.target.y, [body]);
     this.unicorn.setDepth(10); // render above the rainbow trail dots (spawned at depth 5)
@@ -332,7 +333,7 @@ export class GameScene extends Phaser.Scene {
     if (this.levelIndex >= 12) {
       // Final level: one BIG finale (boss already played bigParty+tada). No medium tier.
       this.fx.finale("Zoe"); this.sound2.tada();
-      this.time.delayedCall(5500, () => this.scene.start("Rainbow"));
+      this.time.delayedCall(5500, () => this.scene.start("Title"));
       return;
     }
     if (getLevel(this.levelIndex).boss) {

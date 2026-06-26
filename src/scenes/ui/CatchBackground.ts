@@ -1,9 +1,8 @@
 import Phaser from "phaser";
-import { settings } from "../../state/settings";
 
 // Shape-based animated "parallax meadow" for Rainbow Catch. Distinct in style
 // from the shooter's gradient sky. Motion sits low/peripheral so it doesn't
-// compete with the falling items. Calm mode freezes the motion.
+// compete with the falling items.
 export class CatchBackground extends Phaser.GameObjects.Container {
   private sky: Phaser.GameObjects.Graphics;
   private hills: Phaser.GameObjects.Graphics;
@@ -81,14 +80,14 @@ export class CatchBackground extends Phaser.GameObjects.Container {
     this.hills.fillStyle(0x5fb94a, 1);
     this.hills.fillRect(0, horizon, width, height - horizon);
 
-    this.sun.setPosition(90, 110);
+    // Sun on the right, clear of the top-left score and the top-right back button.
+    this.sun.setPosition(width - 100, 150);
     this.clouds.forEach((c, i) => c.setPosition((width / 4) * (i + 1), 150 + (i % 2) * 70));
 
     this.buildGround(width, height);
   }
 
   update(dt: number): void {
-    if (settings.calm) return; // calm mode: motion frozen
     this.sun.rotation += dt * 0.25;
     for (const c of this.clouds) {
       c.x += 14 * dt;
