@@ -2,8 +2,9 @@
 
 ## Background Music
 
-All four music tracks are by **Kevin MacLeod** ([incompetech.com](https://incompetech.com)),
+All background and title music tracks are by **Kevin MacLeod** ([incompetech.com](https://incompetech.com)),
 licensed under [Creative Commons Attribution 4.0 (CC-BY)](https://creativecommons.org/licenses/by/4.0/).
+The title-screen theme is "Bit Quest" — an upbeat 8-bit/chiptune track.
 
 Attribution: "Music by Kevin MacLeod — incompetech.com"
 
@@ -16,6 +17,7 @@ Attribution: "Music by Kevin MacLeod — incompetech.com"
 | catch1.mp3 | Sneaky Adventure  | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Sneaky%20Adventure.mp3  | CC-BY 4.0 |
 | catch2.mp3 | Cheery Monday     | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cheery%20Monday.mp3     | CC-BY 4.0 |
 | catch3.mp3 | Pleasant Porridge | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Pleasant%20Porridge.mp3 | CC-BY 4.0 |
+| title.mp3  | Bit Quest         | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bit%20Quest.mp3         | CC-BY 4.0 |
 
 ## Sound Effects
 
