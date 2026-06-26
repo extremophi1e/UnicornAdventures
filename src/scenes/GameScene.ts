@@ -31,7 +31,6 @@ export class GameScene extends Phaser.Scene {
   protected levelIndex = 1;
   protected formationIndex = 0;
   protected t = 0;
-  protected isStory = true;
   protected transitioning = false;
 
   protected boss?: Phaser.GameObjects.Image;
@@ -195,14 +194,24 @@ export class GameScene extends Phaser.Scene {
 
   protected onLevelCleared() {
     this.bossCtl = undefined;
-    this.sound2.fanfare();
-    this.fx.banner("Yay! 🌈");
+    this.bossBar = undefined;
     this.formationIndex = 0;
     if (this.levelIndex >= 12) {
+      // Final level: one BIG finale (boss already played bigParty+tada). No medium tier.
       this.fx.finale("Zoe"); this.sound2.tada();
       this.time.delayedCall(1500, () => this.scene.start("Rainbow"));
       return;
     }
+    if (getLevel(this.levelIndex).boss) {
+      // Boss level: boss already played bigParty+tada in updateBoss. No medium tier here.
+      this.levelIndex++;
+      this.formationIndex = 0;
+      this.time.delayedCall(1200, () => this.spawnFormation());
+      return;
+    }
+    // Normal level: play MEDIUM tier.
+    this.sound2.fanfare();
+    this.fx.banner("Yay! 🌈");
     this.levelIndex++;
     this.formationIndex = 0;
     this.time.delayedCall(1200, () => this.spawnFormation());
