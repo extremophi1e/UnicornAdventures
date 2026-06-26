@@ -1,7 +1,11 @@
 /**
  * build-audio.mjs
- * Synthesises placeholder audio files for Zoe's Rainbow Unicorn game.
+ * Synthesises SFX audio files for Zoe's Rainbow Unicorn game.
  * Outputs MP3s to public/audio/ via @breezystack/lamejs.
+ *
+ * Generates: pop.mp3, collect.mp3, fanfare.mp3, tada.mp3
+ * Does NOT generate music1-4.mp3 — those are real royalty-free tracks
+ * downloaded from Incompetech (Kevin MacLeod, CC-BY). See public/audio/CREDITS.md.
  *
  * Run: node scripts/build-audio.mjs
  */
@@ -123,38 +127,48 @@ function note(midiNote) {
 }
 
 // ----- COLLECT -----------------------------------------------------------
-// ~300 ms bright "coin sparkle" chime: two quick ascending notes (C6 → E6)
-// with crisp pluck envelope + shimmer overtone — clearly different from the
-// soft single-blip pop.
+// ~420 ms magical harp/chime sparkle: ascending pentatonic gliss of 5 soft
+// bell-like notes (C6-D6-E6-G6-A6) with soft pluck attack + shimmer overtone
+// tail.  Fairy-tale/unicorn magic feel — bright but gentle, kid-safe amplitude.
 {
-  const dur1 = 0.13; // first note (C6 = 1047 Hz)
-  const dur2 = 0.17; // second note (E6 = 1319 Hz), slightly longer
-  const amp = 0.45;
+  // Pentatonic run: C6, D6, E6, G6, A6 (MIDI 84, 86, 88, 91, 93)
+  const pentatonicFreqs = [
+    1046.50, // C6
+    1174.66, // D6
+    1318.51, // E6
+    1567.98, // G6
+    1760.00, // A6
+  ];
+  const noteDur = 0.085;  // each note ~85 ms, slight overlap feel
+  const gap = 0.005;      // 5 ms gap between notes
+  const amp = 0.40;       // gentle, kid-safe amplitude ≤ 0.5
 
-  // First note: C6 with a crisp pluck (very short attack, quick decay)
-  const n1 = sine(1047, dur1, amp);
-  applyADEnvelope(n1, 0.004, dur1 - 0.004);
+  /** Bell-like tone: fundamental + 2nd + 3rd partial with inharmonic shimmer */
+  function bellNote(freq, duration, amplitude) {
+    const n = Math.ceil(SAMPLE_RATE * duration);
+    const out = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const t = i / SAMPLE_RATE;
+      // Fundamental
+      out[i] += amplitude * Math.sin(2 * Math.PI * freq * t);
+      // 2nd partial (octave up) — shimmer
+      out[i] += amplitude * 0.30 * Math.sin(2 * Math.PI * freq * 2 * t);
+      // Inharmonic shimmer at 2.76x (bell-like overtone)
+      out[i] += amplitude * 0.15 * Math.sin(2 * Math.PI * freq * 2.76 * t);
+    }
+    // Very short attack (4 ms), then exponential decay tail — harp/bell pluck
+    applyADEnvelope(out, 0.004, duration - 0.004);
+    return out;
+  }
 
-  // Add a shimmer overtone at 2x frequency (an octave up) at lower amplitude
-  const shimmer1 = sine(2094, dur1, amp * 0.25);
-  applyADEnvelope(shimmer1, 0.004, dur1 - 0.004);
-  for (let i = 0; i < n1.length; i++) n1[i] += shimmer1[i];
-
-  // Second note: E6 — slightly brighter, slightly longer pluck
-  const n2 = sine(1319, dur2, amp);
-  applyADEnvelope(n2, 0.003, dur2 - 0.003);
-
-  // Add shimmer on second note too
-  const shimmer2 = sine(2638, dur2, amp * 0.2);
-  applyADEnvelope(shimmer2, 0.003, dur2 - 0.003);
-  for (let i = 0; i < n2.length; i++) n2[i] += shimmer2[i];
-
-  // Concatenate with a tiny gap between the two notes
-  const samples = concat([n1, n2], 0.02);
+  const noteSegments = pentatonicFreqs.map((freq) =>
+    bellNote(freq, noteDur, amp)
+  );
+  const samples = concat(noteSegments, gap);
   const mp3 = encodeToMp3(samples);
   const outPath = path.join(OUT_DIR, "collect.mp3");
   fs.writeFileSync(outPath, mp3);
-  console.log(`collect.mp3  → ${mp3.length} bytes`);
+  console.log(`collect.mp3  → ${mp3.length} bytes  (magical harp/chime sparkle – 5-note pentatonic gliss)`);
 }
 
 // ----- FANFARE -----------------------------------------------------------
@@ -198,189 +212,8 @@ function note(midiNote) {
   console.log(`tada.mp3  → ${mp3.length} bytes`);
 }
 
-// ----- MUSIC TRACKS -------------------------------------------------------
-// Four distinct peppy loopable tracks — upbeat, plucky, kid-friendly.
-// CHARACTER: staccato chord stabs (NOT sustained pads) + bouncy 8th-note arpeggio
-// + soft bass pulse on the beat.  Notes bounce rather than blur.
+// NOTE: music1-4.mp3 are real royalty-free tracks (Kevin MacLeod / Incompetech, CC-BY).
+// They are NOT synthesised here. See public/audio/CREDITS.md for details.
+// To re-download them: curl from the URLs in CREDITS.md directly.
 
-/**
- * addNote(out, startSample, freq, amp, durationSec, attackSec)
- * Write a single plucked sine note into the output buffer.
- * Attack is very short (crisp pluck), decay to ~0 by durationSec.
- */
-function addNote(out, startSample, freq, amp, durationSec, attackSec = 0.006) {
-  const nSamples = Math.floor(SAMPLE_RATE * durationSec);
-  for (let s = 0; s < nSamples; s++) {
-    const globalIdx = startSample + s;
-    if (globalIdx >= out.length) break;
-    const t = s / SAMPLE_RATE;
-    const attack = Math.min(1, t / attackSec);
-    const decay = Math.exp(-5 * (t / durationSec)); // fast decay = staccato
-    out[globalIdx] += amp * attack * decay * Math.sin(2 * Math.PI * freq * t);
-  }
-}
-
-/**
- * makeMusic(progression, opts) — synthesise one peppy background music track.
- *
- * Character: plucky chord stabs (very short, staccato) on beat 1 of each chord,
- * bouncy 8th-note arpeggio on melody, and a soft bass kick-blip on every beat.
- *
- * @param {number[][]} progression  Array of chord tone MIDI arrays, one per chord.
- * @param {{
- *   totalSec?: number,   total track duration (default 14)
- *   bpm?: number,        tempo in BPM (default 170)
- *   ampStab?: number,    chord stab amplitude (default 0.09)
- *   ampArp?: number,     arpeggio layer amplitude (default 0.13)
- *   ampBass?: number,    bass pulse amplitude (default 0.10)
- *   octaveShift?: number arp octave offset in semitones (default 12)
- * }} opts
- * @returns {Float32Array}
- */
-function makeMusic(progression, opts = {}) {
-  const {
-    totalSec = 14,
-    bpm = 170,
-    ampStab = 0.09,
-    ampArp = 0.13,
-    ampBass = 0.10,
-    octaveShift = 12,
-  } = opts;
-
-  const totalSamples = Math.ceil(SAMPLE_RATE * totalSec);
-  const out = new Float32Array(totalSamples);
-
-  const chordCount = progression.length;
-  const chordDur = totalSec / chordCount;
-
-  const beatDur = 60 / bpm;             // quarter note duration
-  const eighthDur = beatDur / 2;        // 8th note — arp step
-  const stabDur = beatDur * 0.35;       // chord stab: very short, ~35% of beat
-  const bassDur = beatDur * 0.40;       // bass blip: short, punchy
-
-  // Arp pattern: root → third → fifth → octave → fifth → third (lively bounce)
-  const arpPattern = [0, 1, 2, 3, 2, 1];
-  // Extended chord tones — add octave of root as index 3
-  function extendedTones(chord) {
-    return [chord[0], chord[1], chord[2], chord[0] + 12];
-  }
-
-  for (let ci = 0; ci < chordCount; ci++) {
-    const chordTones = progression[ci];
-    const chordStart = ci * chordDur;
-    const chordStartSample = Math.floor(chordStart * SAMPLE_RATE);
-    const ext = extendedTones(chordTones);
-
-    // --- Chord stab: all three chord tones played together, very short ---
-    // Placed on beat 1 of each chord, and beat 3 (adds rhythmic punch)
-    const stabBeats = [0, 2]; // within-chord beat offsets
-    for (const b of stabBeats) {
-      const stabTime = chordStart + b * beatDur;
-      if (stabTime >= totalSec) continue;
-      const stabSample = Math.floor(stabTime * SAMPLE_RATE);
-      for (const midiN of chordTones) {
-        // Stab at mid-octave (not shifted — keeps it warm but staccato)
-        addNote(out, stabSample, note(midiN), ampStab / chordTones.length, stabDur, 0.005);
-      }
-    }
-
-    // --- Bass pulse: root note (two octaves down) on every beat ---
-    const beatsInChord = Math.floor(chordDur / beatDur);
-    for (let b = 0; b < beatsInChord; b++) {
-      const bassTime = chordStart + b * beatDur;
-      if (bassTime >= totalSec) continue;
-      const bassSample = Math.floor(bassTime * SAMPLE_RATE);
-      const rootFreq = note(chordTones[0] - 12); // one octave below chord root
-      addNote(out, bassSample, rootFreq, ampBass, bassDur, 0.008);
-    }
-
-    // --- Bouncy 8th-note arpeggio on the melody layer ---
-    const arpStepsInChord = Math.max(1, Math.floor(chordDur / eighthDur));
-    for (let ai = 0; ai < arpStepsInChord; ai++) {
-      const midiN = ext[arpPattern[ai % arpPattern.length]];
-      const freq = note(midiN + octaveShift);
-      const arpTime = chordStart + ai * eighthDur;
-      if (arpTime >= totalSec) continue;
-      const arpSample = Math.floor(arpTime * SAMPLE_RATE);
-      // Each arp note: ~45% duty cycle, crisp pluck
-      addNote(out, arpSample, freq, ampArp, eighthDur * 0.45, 0.004);
-    }
-  }
-
-  // End fade: smooth the last 100 ms to avoid loop click
-  const fadeLen = Math.floor(SAMPLE_RATE * 0.10);
-  for (let i = 0; i < fadeLen; i++) {
-    out[out.length - 1 - i] *= i / fadeLen;
-  }
-
-  return out;
-}
-
-// Track 1 — C major, happy & bouncy (C–G–Am–F)
-{
-  const progression = [
-    [60, 64, 67], // C major
-    [55, 59, 62], // G major
-    [57, 60, 64], // A minor
-    [53, 57, 60], // F major
-  ];
-  const samples = makeMusic(progression, { totalSec: 14, bpm: 172, ampStab: 0.09, ampArp: 0.13, ampBass: 0.10 });
-  const mp3 = encodeToMp3(samples);
-  const outPath = path.join(OUT_DIR, "music1.mp3");
-  fs.writeFileSync(outPath, mp3);
-  console.log(`music1.mp3  → ${mp3.length} bytes  (C major – bouncy/happy)`);
-}
-
-// Track 2 — G major, bright & lively (G–D–Em–C), slightly faster
-{
-  const progression = [
-    [55, 59, 62], // G major
-    [50, 54, 57], // D major
-    [52, 55, 59], // E minor
-    [48, 52, 55], // C major
-  ];
-  const samples = makeMusic(progression, { totalSec: 14, bpm: 180, ampStab: 0.08, ampArp: 0.14, ampBass: 0.09, octaveShift: 12 });
-  const mp3 = encodeToMp3(samples);
-  const outPath = path.join(OUT_DIR, "music2.mp3");
-  fs.writeFileSync(outPath, mp3);
-  console.log(`music2.mp3  → ${mp3.length} bytes  (G major – bright/lively)`);
-}
-
-// Track 3 — F major, warm & skipping (F–C–Dm–Bb)
-{
-  const progression = [
-    [53, 57, 60], // F major
-    [60, 64, 67], // C major
-    [50, 53, 57], // D minor
-    [46, 50, 53], // Bb major
-  ];
-  const samples = makeMusic(progression, { totalSec: 16, bpm: 165, ampStab: 0.09, ampArp: 0.12, ampBass: 0.10, octaveShift: 12 });
-  const mp3 = encodeToMp3(samples);
-  const outPath = path.join(OUT_DIR, "music3.mp3");
-  fs.writeFileSync(outPath, mp3);
-  console.log(`music3.mp3  → ${mp3.length} bytes  (F major – warm/skipping)`);
-}
-
-// Track 4 — A minor, playful (Am–F–C–G) — still minor but energetic, not dreamy
-{
-  const progression = [
-    [57, 60, 64], // A minor
-    [53, 57, 60], // F major
-    [60, 64, 67], // C major
-    [55, 59, 62], // G major
-  ];
-  const samples = makeMusic(progression, { totalSec: 15, bpm: 168, ampStab: 0.08, ampArp: 0.12, ampBass: 0.09, octaveShift: 24 });
-  const mp3 = encodeToMp3(samples);
-  const outPath = path.join(OUT_DIR, "music4.mp3");
-  fs.writeFileSync(outPath, mp3);
-  console.log(`music4.mp3  → ${mp3.length} bytes  (A minor – playful/energetic)`);
-}
-
-// Remove old single music.mp3 if it still exists
-const oldMusic = path.join(OUT_DIR, "music.mp3");
-if (fs.existsSync(oldMusic)) {
-  fs.unlinkSync(oldMusic);
-  console.log("music.mp3  → removed (replaced by music1–4)");
-}
-
-console.log("\nAll audio files written to public/audio/");
+console.log("\nSFX audio files written to public/audio/ (pop, collect, fanfare, tada)");
