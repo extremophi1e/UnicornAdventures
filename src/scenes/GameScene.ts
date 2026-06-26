@@ -15,6 +15,8 @@ import { BossController } from "../core/boss";
 const STAR_SPEED = 900; // px/s upward
 const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/right for Zoe)
 const FIRE_INTERVAL = 0.18;
+const COLLECTIBLE_SPEED = 240; // px/s downward
+const COLLECTIBLE_SPAWN_INTERVAL = 2.5; // seconds (base)
 
 // Rainbow colours the shot stars cycle through (ROYGBIV), bright and kid-friendly.
 const RAINBOW_STAR_COLORS = [
@@ -26,6 +28,23 @@ const RAINBOW_STAR_COLORS = [
   0x5e5ce6, // indigo
   0xaf52de, // violet
 ];
+
+/** Safely add a preFX glow to a game object (WebGL only; guarded for Canvas).
+ *  preFX is not in Phaser 4 type stubs yet, so we access it via a cast.
+ */
+function addGlowOnce(
+  obj: Phaser.GameObjects.Image,
+  color: number,
+  outerStrength: number
+) {
+  if (obj.getData("glowed")) return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fx = (obj as unknown as Record<string, any>)["preFX"];
+  if (fx && typeof fx.addGlow === "function") {
+    fx.addGlow(color, outerStrength);
+  }
+  obj.setData("glowed", true);
+}
 
 export class GameScene extends Phaser.Scene {
   protected bg!: Background;
@@ -49,6 +68,15 @@ export class GameScene extends Phaser.Scene {
   protected bossCtl?: BossController;
   protected bossBar?: Phaser.GameObjects.Graphics;
 
+  // ── Item 2: Score ───────────────────────────────────────────────────────────
+  protected score = 0;
+  private scoreText!: Phaser.GameObjects.Text;
+
+  // ── Item 3: Collectibles ────────────────────────────────────────────────────
+  protected collectibles!: Phaser.GameObjects.Group;
+  private collectibleTimer = 0;
+  private nextCollectibleIn = COLLECTIBLE_SPAWN_INTERVAL;
+
   constructor(key = "Game") {
     super(key);
   }
@@ -67,7 +95,21 @@ export class GameScene extends Phaser.Scene {
 
     // Unicorn = tinted body (no drawn wings — they read as stray triangles).
     const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
+    // ── Item 4: Glow on unicorn body (guarded for Canvas) ───────────────────
+    addGlowOnce(body, 0xffffff, 3);
     this.unicorn = this.add.container(this.target.x, this.target.y, [body]);
+
+    // ── Item 5: Alive pulse tween on unicorn container ───────────────────────
+    this.tweens.add({
+      targets: this.unicorn,
+      scaleX: 1.06,
+      scaleY: 1.06,
+      angle: { from: -4, to: 4 },
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+      duration: 900,
+    });
 
     this.stars = this.add.group();
     this.cursors = this.input.keyboard!.createCursorKeys();
@@ -85,7 +127,31 @@ export class GameScene extends Phaser.Scene {
 
     this.enemies = this.add.group();
     this.fx = new Celebrations(this);
+
+    // ── Item 2: Score display ────────────────────────────────────────────────
+    this.score = 0;
+    this.scoreText = this.add
+      .text(24, 24, "⭐ 0", {
+        fontSize: "44px",
+        color: "#ffffff",
+        fontStyle: "bold",
+        stroke: "#7a3fa0",
+        strokeThickness: 6,
+      })
+      .setDepth(1000);
+
+    // ── Item 3: Collectibles pool ────────────────────────────────────────────
+    this.collectibles = this.add.group();
+    this.collectibleTimer = 0;
+    this.nextCollectibleIn = COLLECTIBLE_SPAWN_INTERVAL + (Math.random() - 0.5) * 0.8;
+
     this.spawnFormation();
+  }
+
+  // ── Item 2: addScore helper ─────────────────────────────────────────────────
+  protected addScore(n: number) {
+    this.score += n;
+    this.scoreText.setText(`⭐ ${this.score}`);
   }
 
   protected bounds(): Bounds {
@@ -134,10 +200,16 @@ export class GameScene extends Phaser.Scene {
       if (!img) {
         img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
         this.enemies.add(img);
+        // ── Item 4: Glow on enemy (first creation only) ───────────────────
+        addGlowOnce(img, 0xffeedd, 4);
+        // ── Item 5: Per-enemy random phase for sine pulse ─────────────────
+        img.setData("phase", Math.random() * Math.PI * 2);
       } else {
         img.setPosition(pe.pos.x, pe.pos.y)
            .setTexture(ATLAS_KEY, frameFor(pe.type))
            .setActive(true).setVisible(true).setScale(1.1);
+        // Re-assign phase on reuse so each wave feels fresh
+        img.setData("phase", Math.random() * Math.PI * 2);
       }
       img.setData("baseX", pe.pos.x);
       img.setData("drift", spec.drift);
@@ -151,6 +223,12 @@ export class GameScene extends Phaser.Scene {
       if (!e.active) return;
       const drift = e.getData("drift");
       e.x = e.getData("baseX") + Math.sin(this.t * drift.swaySpeed) * drift.swayAmplitude;
+
+      // ── Item 5: Sine-based breathe (scale + rotation) ───────────────────
+      const phase = (e.getData("phase") as number) ?? 0;
+      const breathe = Math.sin(this.t * 1.8 + phase);
+      e.setScale(1.1 + breathe * 0.055);      // ±5% around base 1.1
+      e.setAngle(breathe * 5);                 // ±5°
     });
 
     const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Star[]).filter((s) => s.active);
@@ -175,6 +253,8 @@ export class GameScene extends Phaser.Scene {
       this.sound2.pop();
       this.enemies.killAndHide(e);
       this.stars.killAndHide(activeStars[h.starIndex]);
+      // ── Item 2: Score +10 per enemy popped ──────────────────────────────
+      this.addScore(10);
     }
 
     // harmless bounce: enemy touching unicorn just sparkles and drifts back, no penalty
@@ -192,6 +272,61 @@ export class GameScene extends Phaser.Scene {
       this.transitioning = true;
       this.onFormationCleared();
     }
+  }
+
+  // ── Item 3: Spawn one collectible ───────────────────────────────────────────
+  private spawnCollectible() {
+    const type = Math.random() < 0.5 ? "gem" : "heart";
+    const x = 80 + Math.random() * (this.scale.width - 160);
+    let c = this.collectibles.getFirstDead(false) as Phaser.GameObjects.Image | null;
+    if (!c) {
+      c = this.add.image(x, -40, ATLAS_KEY, frameFor(type)).setScale(1.0);
+      this.collectibles.add(c);
+      // ── Item 4: Glow on collectible (first creation only) ───────────────
+      addGlowOnce(c, 0xffd700, 3);
+    } else {
+      c.setPosition(x, -40)
+       .setTexture(ATLAS_KEY, frameFor(type))
+       .setActive(true).setVisible(true).setScale(1.0);
+    }
+    c.setData("rot", 0);
+  }
+
+  // ── Item 3: Update falling collectibles ─────────────────────────────────────
+  private updateCollectibles(dt: number) {
+    // Spawn timer with jitter
+    this.collectibleTimer += dt;
+    if (this.collectibleTimer >= this.nextCollectibleIn) {
+      this.collectibleTimer = 0;
+      this.nextCollectibleIn = COLLECTIBLE_SPAWN_INTERVAL + (Math.random() - 0.5) * 0.8;
+      this.spawnCollectible();
+    }
+
+    const ux = this.unicorn.x, uy = this.unicorn.y;
+    (this.collectibles.getChildren() as Phaser.GameObjects.Image[]).forEach((c) => {
+      if (!c.active) return;
+
+      // Fall and spin
+      c.y += COLLECTIBLE_SPEED * dt;
+      const rot = (c.getData("rot") as number) + dt * 2.0;
+      c.setData("rot", rot);
+      c.setAngle(rot * (180 / Math.PI));
+
+      // Collect: unicorn overlap check (radius 70)
+      const dx = c.x - ux, dy = c.y - uy;
+      if (dx * dx + dy * dy < 70 * 70) {
+        this.addScore(25);
+        this.fx.popAt(c.x, c.y);
+        this.sound2.pop();
+        this.collectibles.killAndHide(c);
+        return;
+      }
+
+      // Miss: fell off bottom
+      if (c.y > this.scale.height + 50) {
+        this.collectibles.killAndHide(c);
+      }
+    });
   }
 
   protected onFormationCleared() {
@@ -265,6 +400,8 @@ export class GameScene extends Phaser.Scene {
           this.fx.popAt(s.x, s.y);
           this.sound2.pop();
           this.stars.killAndHide(s);
+          // ── Item 2: Score +5 per boss hit ───────────────────────────────
+          this.addScore(5);
         }
       }
     }
@@ -305,5 +442,7 @@ export class GameScene extends Phaser.Scene {
 
     this.updateEnemies(dt);
     this.updateBoss(dt);
+    // ── Item 3: Drive collectibles from the shared update loop ──────────────
+    this.updateCollectibles(dt);
   }
 }

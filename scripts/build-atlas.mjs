@@ -33,6 +33,7 @@ const FRAMES = [
   { name: "flower",    code: "1F338" },
   { name: "donut",     code: "1F369" },
   { name: "butterfly", code: "1F98B" },
+  { name: "gem",       code: "1F48E" },
 ];
 
 const CELL = 72;
@@ -72,6 +73,7 @@ const PLACEHOLDER_COLORS = [
   [255, 182, 193], [255, 218, 185], [144, 238, 144], [135, 206, 250],
   [221, 160, 221], [255, 255, 153], [255, 160, 122], [173, 216, 230],
   [250, 128, 114], [152, 251, 152], [255, 228, 181], [176, 196, 222],
+  [180, 220, 255],
 ];
 
 /** Build a placeholder 72x72 PNG buffer for a frame. */

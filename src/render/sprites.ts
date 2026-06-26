@@ -7,6 +7,8 @@ export const SPRITE_FRAME: Record<string, string> = {
   unicorn: "unicorn",
   star: "star",
   sparkle: "sparkle",
+  heart: "heart",
+  gem: "gem",
   ...Object.fromEntries(CUTE_TYPES.map((t) => [t, t])),
 };
 

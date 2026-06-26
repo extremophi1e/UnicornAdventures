@@ -239,13 +239,33 @@
         "w": 72,
         "h": 72
       }
+    },
+    "gem": {
+      "frame": {
+        "x": 0,
+        "y": 144,
+        "w": 72,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 72
+      }
     }
   },
   "meta": {
     "image": "openmoji.png",
     "size": {
       "w": 432,
-      "h": 144
+      "h": 216
     },
     "scale": "1"
   }
