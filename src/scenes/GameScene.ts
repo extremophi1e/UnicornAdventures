@@ -53,11 +53,9 @@ export class GameScene extends Phaser.Scene {
       this.sound.stopAll();
     });
 
-    // Unicorn = tinted body + simple drawn wings + sparkle trail anchor.
+    // Unicorn = tinted body (no drawn wings — they read as stray triangles).
     const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
-    const wingL = this.add.triangle(-44, 6, 0, 0, 40, -18, 36, 26, 0xffffff, 0.9);
-    const wingR = this.add.triangle(44, 6, 0, 0, -40, -18, -36, 26, 0xffffff, 0.9);
-    this.unicorn = this.add.container(this.target.x, this.target.y, [wingL, body, wingR]);
+    this.unicorn = this.add.container(this.target.x, this.target.y, [body]);
 
     this.stars = this.add.group();
     this.cursors = this.input.keyboard!.createCursorKeys();
