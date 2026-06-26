@@ -109,6 +109,7 @@ export class PopScene extends Phaser.Scene {
       c = spawnEmoji(this, x, H + 40, type);
       this.cuties.add(c);
     } else {
+      this.clearRainbow(c);
       this.tweens.killTweensOf(c);
       resetEmoji(c, type, x, H + 40);
     }
@@ -123,10 +124,11 @@ export class PopScene extends Phaser.Scene {
     if (isBonus) {
       this.spawnsSinceBonus = 0;
       // Rainbow colour-cycle + gentle pulse so it reads as special.
-      this.tweens.addCounter({
+      const rainbowTw = this.tweens.addCounter({
         from: 0, to: RAINBOW_COLORS.length, duration: 1400, repeat: -1,
         onUpdate: (tw) => { if (c!.active) c!.setTint(RAINBOW_COLORS[Math.floor(tw.getValue() ?? 0) % RAINBOW_COLORS.length]); },
       });
+      c.setData("rainbowTween", rainbowTw);
       this.tweens.add({ targets: c, scale: BONUS_SCALE * 1.12, yoyo: true, repeat: -1, duration: 520, ease: "Sine.inOut" });
     } else {
       this.spawnsSinceBonus += 1;
@@ -137,8 +139,14 @@ export class PopScene extends Phaser.Scene {
     this.burst.explode(this.reduceMotion ? BURST_PARTICLES_REDUCED : BURST_PARTICLES, x, y);
   }
 
+  private clearRainbow(c: Phaser.GameObjects.Sprite) {
+    const rt = c.getData("rainbowTween") as Phaser.Tweens.Tween | undefined;
+    if (rt) { rt.remove(); c.setData("rainbowTween", undefined); }
+  }
+
   // Pop a single cutie: count it, burst + sound, squash, recycle.
   private popOne(c: Phaser.GameObjects.Sprite) {
+    this.clearRainbow(c);
     c.setActive(false);
     this.tweens.killTweensOf(c);
     this.popCount += 1;
@@ -191,6 +199,7 @@ export class PopScene extends Phaser.Scene {
 
   // A cutie reached the top un-popped: gentle float-away wave, counts as a miss.
   private escape(c: Phaser.GameObjects.Sprite) {
+    this.clearRainbow(c);
     c.setActive(false);
     this.tweens.killTweensOf(c);
     this.state = recordMiss(this.state);
