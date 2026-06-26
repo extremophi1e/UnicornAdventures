@@ -82,6 +82,11 @@ export class GameScene extends Phaser.Scene {
   protected bossCtl?: BossController;
   protected bossBar?: Phaser.GameObjects.Graphics;
 
+  // ── Rainbow trail ────────────────────────────────────────────────────────────
+  protected rainbowTrail?: Phaser.GameObjects.Particles.ParticleEmitter;
+  private _prevUnicornX = 0;
+  private _prevUnicornY = 0;
+
   // ── Item 2: Score ───────────────────────────────────────────────────────────
   protected score!: number;
   protected scoreText!: Phaser.GameObjects.Text;
@@ -111,7 +116,32 @@ export class GameScene extends Phaser.Scene {
     const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
     // ── Item 4: Glow on unicorn body (guarded for Canvas) ───────────────────
     addGlowOnce(body, 0xffffff, 2);
+
+    // ── Rainbow trail emitter (created BEFORE the unicorn container so it renders behind) ──
+    // `color` interpolates through RAINBOW_STAR_COLORS over each particle's life.
+    this.rainbowTrail = this.add.particles(this.target.x, this.target.y, ATLAS_KEY, {
+      frame: frameFor("sparkle"),
+      color: RAINBOW_STAR_COLORS,
+      colorEase: "linear",
+      lifespan: 450,
+      scale: { start: 0.55, end: 0 },
+      alpha: { start: 0.85, end: 0 },
+      speed: 20,
+      frequency: 40,
+      quantity: 1,
+      blendMode: Phaser.BlendModes.NORMAL,
+      emitting: false,
+    });
     this.unicorn = this.add.container(this.target.x, this.target.y, [body]);
+
+    // Trail renders behind unicorn because it was added to the display list first (before container).
+    // Follow the unicorn container; small downward offset so trail comes from below/behind the horn.
+    this.rainbowTrail.startFollow(
+      this.unicorn as unknown as Phaser.Types.Math.Vector2Like,
+      0,
+      20,
+      false
+    );
 
     // ── Item 5: Alive pulse tween on unicorn container ───────────────────────
     this.tweens.add({
@@ -158,6 +188,10 @@ export class GameScene extends Phaser.Scene {
     this.collectibles = this.add.group();
     this.collectibleTimer = 0;
     this.nextCollectibleIn = COLLECTIBLE_SPAWN_INTERVAL + (Math.random() - 0.5) * 0.8;
+
+    // Initialise previous position for movement-gate
+    this._prevUnicornX = this.target.x;
+    this._prevUnicornY = this.target.y;
 
     this.spawnFormation();
   }
@@ -214,8 +248,6 @@ export class GameScene extends Phaser.Scene {
       if (!img) {
         img = this.add.image(pe.pos.x, pe.pos.y, ATLAS_KEY, frameFor(pe.type)).setScale(1.1);
         this.enemies.add(img);
-        // ── Item 4: Glow on enemy (first creation only) ───────────────────
-        addGlowOnce(img, 0xffeedd, 2);
         // ── Item 5: Per-enemy random phase for sine pulse ─────────────────
         img.setData("phase", Math.random() * Math.PI * 2);
       } else {
@@ -440,6 +472,16 @@ export class GameScene extends Phaser.Scene {
     // Smooth follow.
     this.unicorn.x = Phaser.Math.Linear(this.unicorn.x, next.x, Math.min(1, 12 * dt));
     this.unicorn.y = Phaser.Math.Linear(this.unicorn.y, next.y, Math.min(1, 12 * dt));
+
+    // ── Rainbow trail: emit only while unicorn is moving ────────────────────
+    if (this.rainbowTrail) {
+      const dx = this.unicorn.x - this._prevUnicornX;
+      const dy = this.unicorn.y - this._prevUnicornY;
+      const moved = Math.sqrt(dx * dx + dy * dy) > 2;
+      this.rainbowTrail.emitting = moved;
+    }
+    this._prevUnicornX = this.unicorn.x;
+    this._prevUnicornY = this.unicorn.y;
 
     for (const shot of Array(this.autofire.update(dt)).fill(0)) void shot, this.fireStar();
 

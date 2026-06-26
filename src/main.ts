@@ -20,6 +20,8 @@ const game = new Phaser.Game({
   scene: [BootScene, TitleScene, GameScene, RainbowScene],
 });
 
+(window as unknown as { __game?: Phaser.Game }).__game = game;
+
 maybeShowIosInstallHint();
 requestFullscreenOnce();
 
