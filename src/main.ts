@@ -1,15 +1,25 @@
 import Phaser from "phaser";
 import { BootScene } from "./scenes/BootScene";
+import { computeLogicalWidth, LOGICAL_HEIGHT } from "./core/viewport";
+export { computeLogicalWidth, LOGICAL_HEIGHT } from "./core/viewport";
 
-new Phaser.Game({
+const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: "game",
   backgroundColor: "#8ec5ff",
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 720,
-    height: 1280,
+    width: computeLogicalWidth(window.innerWidth, window.innerHeight),
+    height: LOGICAL_HEIGHT,
   },
   scene: [BootScene],
 });
+
+function applySize() {
+  const w = computeLogicalWidth(window.innerWidth, window.innerHeight);
+  game.scale.setGameSize(w, LOGICAL_HEIGHT);
+  game.events.emit("logicalresize", w, LOGICAL_HEIGHT);
+}
+window.addEventListener("resize", applySize);
+window.addEventListener("orientationchange", applySize);
