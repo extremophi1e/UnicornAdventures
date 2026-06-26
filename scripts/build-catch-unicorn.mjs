@@ -1,7 +1,8 @@
 /**
  * build-catch-unicorn.mjs
- * Decodes the animated unicorn GIF into a horizontal sprite sheet for Phaser,
- * and writes a TS constants module so the loader needs no magic numbers.
+ * Decodes the animated unicorn GIF into a tiled grid sprite sheet for Phaser
+ * (rows kept <= 2048px wide for mobile-GPU texture-size safety), and writes a
+ * TS constants module so the loader needs no magic numbers.
  *
  * Input:  assets/source/catch-unicorn.gif
  * Output: public/catch-unicorn/sheet.png

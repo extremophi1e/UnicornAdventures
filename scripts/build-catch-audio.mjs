@@ -20,7 +20,7 @@ const TRACKS = [
 
 function download(url, dest, redirects = 0) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
+    const req = https.get(url, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects < 5) {
         res.resume();
         download(res.headers.location, dest, redirects + 1).then(resolve, reject);
@@ -31,7 +31,10 @@ function download(url, dest, redirects = 0) {
       res.pipe(out);
       out.on("finish", () => out.close(() => resolve()));
       out.on("error", (e) => { try { unlinkSync(dest); } catch {} reject(e); });
-    }).on("error", reject);
+    });
+    req.on("error", reject);
+    // Guard against a stalled connection hanging the build forever.
+    req.setTimeout(30000, () => req.destroy(new Error("request timed out")));
   });
 }
 
