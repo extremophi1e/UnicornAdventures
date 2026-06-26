@@ -5,7 +5,7 @@ import { AutoFire, resolveTarget, type AimInput, type Bounds } from "../core/inp
 import { Sound } from "../audio/sound";
 import { getLevel } from "../core/levels";
 import { TEMPLATES, assignTypes, layoutFormation } from "../core/formations";
-import { findStarEnemyHits, type Circle } from "../core/collision";
+import { findStarEnemyHits, circleOverlap, type Circle } from "../core/collision";
 import { nearestEnemy, steerVelocity } from "../core/magnetism";
 import { createRng } from "../core/rng";
 import { Celebrations } from "./ui/Celebrations";
@@ -69,13 +69,13 @@ export class GameScene extends Phaser.Scene {
   protected bossBar?: Phaser.GameObjects.Graphics;
 
   // ── Item 2: Score ───────────────────────────────────────────────────────────
-  protected score = 0;
-  private scoreText!: Phaser.GameObjects.Text;
+  protected score!: number;
+  protected scoreText!: Phaser.GameObjects.Text;
 
   // ── Item 3: Collectibles ────────────────────────────────────────────────────
   protected collectibles!: Phaser.GameObjects.Group;
   private collectibleTimer = 0;
-  private nextCollectibleIn = COLLECTIBLE_SPAWN_INTERVAL;
+  private nextCollectibleIn = 0;
 
   constructor(key = "Game") {
     super(key);
@@ -151,7 +151,7 @@ export class GameScene extends Phaser.Scene {
   // ── Item 2: addScore helper ─────────────────────────────────────────────────
   protected addScore(n: number) {
     this.score += n;
-    this.scoreText.setText(`⭐ ${this.score}`);
+    this.scoreText?.setText(`⭐ ${this.score}`);
   }
 
   protected bounds(): Bounds {
@@ -225,7 +225,7 @@ export class GameScene extends Phaser.Scene {
       e.x = e.getData("baseX") + Math.sin(this.t * drift.swaySpeed) * drift.swayAmplitude;
 
       // ── Item 5: Sine-based breathe (scale + rotation) ───────────────────
-      const phase = (e.getData("phase") as number) ?? 0;
+      const phase = e.getData("phase") as number;
       const breathe = Math.sin(this.t * 1.8 + phase);
       e.setScale(1.1 + breathe * 0.055);      // ±5% around base 1.1
       e.setAngle(breathe * 5);                 // ±5°
@@ -261,10 +261,9 @@ export class GameScene extends Phaser.Scene {
     const ux = this.unicorn.x, uy = this.unicorn.y;
     activeEnemies.forEach((e) => {
       if (!e.active) return;
-      const dx = e.x - ux, dy = e.y - uy;
-      if (dx * dx + dy * dy < 90 * 90) {
+      if (circleOverlap({ x: e.x, y: e.y, r: 90 }, { x: ux, y: uy, r: 0 })) {
         this.fx.popAt((e.x + ux) / 2, (e.y + uy) / 2);
-        e.setData("baseX", e.getData("baseX") + (dx >= 0 ? 30 : -30));
+        e.setData("baseX", e.getData("baseX") + (e.x >= ux ? 30 : -30));
       }
     });
 
@@ -287,9 +286,8 @@ export class GameScene extends Phaser.Scene {
     } else {
       c.setPosition(x, -40)
        .setTexture(ATLAS_KEY, frameFor(type))
-       .setActive(true).setVisible(true).setScale(1.0);
+       .setActive(true).setVisible(true).setScale(1.0).setAngle(0);
     }
-    c.setData("rot", 0);
   }
 
   // ── Item 3: Update falling collectibles ─────────────────────────────────────
@@ -308,13 +306,10 @@ export class GameScene extends Phaser.Scene {
 
       // Fall and spin
       c.y += COLLECTIBLE_SPEED * dt;
-      const rot = (c.getData("rot") as number) + dt * 2.0;
-      c.setData("rot", rot);
-      c.setAngle(rot * (180 / Math.PI));
+      c.rotation += dt * 2.0;
 
       // Collect: unicorn overlap check (radius 70)
-      const dx = c.x - ux, dy = c.y - uy;
-      if (dx * dx + dy * dy < 70 * 70) {
+      if (circleOverlap({ x: c.x, y: c.y, r: 70 }, { x: ux, y: uy, r: 0 })) {
         this.addScore(25);
         this.fx.popAt(c.x, c.y);
         this.sound2.pop();
@@ -394,12 +389,12 @@ export class GameScene extends Phaser.Scene {
     const activeStars = (this.stars.getChildren() as Phaser.GameObjects.Star[]).filter((s) => s.active);
     if (this.bossCtl.isVulnerable()) {
       for (const s of activeStars) {
-        const dx = s.x - this.boss.x, dy = s.y - this.boss.y;
-        if (dx * dx + dy * dy < 150 * 150) {
+        if (circleOverlap({ x: s.x, y: s.y, r: 0 }, { x: this.boss.x, y: this.boss.y, r: 150 })) {
           this.bossCtl.hit(1);
           this.fx.popAt(s.x, s.y);
           this.sound2.pop();
           this.stars.killAndHide(s);
+          if (this.bossCtl.state === "defeated") { break; }
           // ── Item 2: Score +5 per boss hit ───────────────────────────────
           this.addScore(5);
         }

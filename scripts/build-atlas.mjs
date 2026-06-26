@@ -38,7 +38,7 @@ const FRAMES = [
 
 const CELL = 72;
 const COLS = 6;
-const ROWS = Math.ceil(FRAMES.length / COLS);  // 2
+const ROWS = Math.ceil(FRAMES.length / COLS);  // 3
 const ATLAS_W = COLS * CELL;
 const ATLAS_H = ROWS * CELL;
 
