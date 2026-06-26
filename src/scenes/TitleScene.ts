@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { Background } from "./ui/Background";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 
-const PLAYER_NAME = "Zoe";
+const PLAYER_NAME = "Zoe and Desi";
 
 export class TitleScene extends Phaser.Scene {
   private bg!: Background;
@@ -26,8 +26,8 @@ export class TitleScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => music.stop());
 
     this.add
-      .text(W / 2, 220, `✨ ${PLAYER_NAME}'s Rainbow Unicorn ✨`, {
-        fontSize: "44px", color: "#7a3fa0", fontStyle: "bold", align: "center",
+      .text(W / 2, 220, `✨ ${PLAYER_NAME}'s Rainbow Unicorn Adventures ✨`, {
+        fontSize: "40px", color: "#7a3fa0", fontStyle: "bold", align: "center",
         wordWrap: { width: W - 80 },
       })
       .setOrigin(0.5);

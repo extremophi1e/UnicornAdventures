@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["atlas/**", "audio/**"],
       manifest: {
-        name: "Zoe's Rainbow Unicorn",
-        short_name: "Zoe Unicorn",
-        description: "A rainbow unicorn game for Zoe",
+        name: "Zoe and Desi's Rainbow Unicorn Adventures",
+        short_name: "Rainbow Fun",
+        description: "A rainbow unicorn adventure game for Zoe and Desi",
         theme_color: "#ff8fcf",
         background_color: "#8ec5ff",
         display: "standalone",
