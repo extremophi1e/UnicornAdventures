@@ -51,10 +51,11 @@ export class GameScene extends Phaser.Scene {
   protected bossCtl?: BossController;
   protected bossBar?: Phaser.GameObjects.Graphics;
 
-  // ── Rainbow trail ────────────────────────────────────────────────────────────
-  protected rainbowTrail?: Phaser.GameObjects.Particles.ParticleEmitter;
+  // ── Rainbow trail (fading rainbow circles dropped behind the unicorn) ─────────
   private _prevUnicornX = 0;
   private _prevUnicornY = 0;
+  private _trailColor = 0;
+  private _trailAccum = 0;
 
   // ── Item 2: Score ───────────────────────────────────────────────────────────
   protected score!: number;
@@ -84,39 +85,8 @@ export class GameScene extends Phaser.Scene {
     // Unicorn = tinted body (no drawn wings — they read as stray triangles).
     const body = this.add.image(0, 0, ATLAS_KEY, frameFor("unicorn")).setScale(1.6).setTint(0xff8fcf);
 
-    // ── Rainbow trail emitter (created BEFORE the unicorn container so it renders behind) ──
-    // Use a plain WHITE dot texture so the rainbow `color` tint shows TRUE colours
-    // (tinting the yellow sparkle emoji produced muddy/dark hues).
-    if (!this.textures.exists("trailDot")) {
-      const g = this.make.graphics({ x: 0, y: 0 });
-      g.fillStyle(0xffffff, 1);
-      g.fillCircle(20, 20, 20);
-      g.generateTexture("trailDot", 40, 40);
-      g.destroy();
-    }
-    this.rainbowTrail = this.add.particles(this.target.x, this.target.y, "trailDot", {
-      // Per-particle tint: each dot picks one of the rainbow colours -> a clearly
-      // multi-coloured trail (white texture so the tint shows true colours).
-      tint: RAINBOW_STAR_COLORS,
-      lifespan: 600,
-      scale: { start: 1.4, end: 0.25 }, // big & visible, fades but never vanishes to nothing mid-trail
-      alpha: { start: 1, end: 0 },
-      speed: 10,
-      frequency: 22, // denser trail
-      quantity: 1,
-      blendMode: Phaser.BlendModes.NORMAL,
-      emitting: false,
-    });
     this.unicorn = this.add.container(this.target.x, this.target.y, [body]);
-
-    // Trail renders behind unicorn because it was added to the display list first (before container).
-    // Follow the unicorn container; small downward offset so trail comes from below/behind the horn.
-    this.rainbowTrail.startFollow(
-      this.unicorn as unknown as Phaser.Types.Math.Vector2Like,
-      0,
-      20,
-      false
-    );
+    this.unicorn.setDepth(10); // render above the rainbow trail dots (spawned at depth 5)
 
     // ── Item 5: Alive pulse tween on unicorn container ───────────────────────
     this.tweens.add({
@@ -446,12 +416,25 @@ export class GameScene extends Phaser.Scene {
     this.unicorn.x = Phaser.Math.Linear(this.unicorn.x, next.x, Math.min(1, 12 * dt));
     this.unicorn.y = Phaser.Math.Linear(this.unicorn.y, next.y, Math.min(1, 12 * dt));
 
-    // ── Rainbow trail: emit only while unicorn is moving ────────────────────
-    if (this.rainbowTrail) {
-      const dx = this.unicorn.x - this._prevUnicornX;
-      const dy = this.unicorn.y - this._prevUnicornY;
-      const moved = Math.sqrt(dx * dx + dy * dy) > 2;
-      this.rainbowTrail.emitting = moved;
+    // ── Rainbow trail: drop fading rainbow circles behind the unicorn while moving ──
+    const tdx = this.unicorn.x - this._prevUnicornX;
+    const tdy = this.unicorn.y - this._prevUnicornY;
+    const moved = Math.sqrt(tdx * tdx + tdy * tdy) > 2;
+    this._trailAccum += dt;
+    if (moved && this._trailAccum >= 0.025) {
+      this._trailAccum = 0;
+      const color = RAINBOW_STAR_COLORS[this._trailColor];
+      this._trailColor = (this._trailColor + 1) % RAINBOW_STAR_COLORS.length;
+      const dot = this.add.circle(this.unicorn.x, this.unicorn.y + 12, 16, color);
+      dot.setDepth(5); // behind the unicorn (depth 10), above the background
+      this.tweens.add({
+        targets: dot,
+        alpha: { from: 0.9, to: 0 },
+        scale: { from: 1, to: 0.2 },
+        duration: 520,
+        ease: "Sine.easeOut",
+        onComplete: () => dot.destroy(),
+      });
     }
     this._prevUnicornX = this.unicorn.x;
     this._prevUnicornY = this.unicorn.y;
