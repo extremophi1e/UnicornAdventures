@@ -34,6 +34,9 @@ export class Sound {
     this._playTrack(this._pickNextTrack());
   }
 
+  collect(): void {
+    this.scene.sound.play("collect", { volume: settings.calm ? 0.35 : 0.7 });
+  }
   pop(): void {
     this.scene.sound.play("pop", { volume: settings.calm ? 0.3 : 0.6 });
   }
