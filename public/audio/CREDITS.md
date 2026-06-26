@@ -13,6 +13,9 @@ Attribution: "Music by Kevin MacLeod — incompetech.com"
 | music2.mp3 | Carefree                 | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3                 | CC-BY 4.0 |
 | music3.mp3 | Monkeys Spinning Monkeys | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Monkeys%20Spinning%20Monkeys.mp3 | CC-BY 4.0 |
 | music4.mp3 | Fluffing a Duck          | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Fluffing%20a%20Duck.mp3      | CC-BY 4.0 |
+| catch1.mp3 | Sneaky Adventure  | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Sneaky%20Adventure.mp3  | CC-BY 4.0 |
+| catch2.mp3 | Cheery Monday     | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Cheery%20Monday.mp3     | CC-BY 4.0 |
+| catch3.mp3 | Pleasant Porridge | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Pleasant%20Porridge.mp3 | CC-BY 4.0 |
 
 ## Sound Effects
 

@@ -2,20 +2,22 @@ import Phaser from "phaser";
 import { settings } from "../state/settings";
 
 const MUSIC_KEYS = ["music1", "music2", "music3", "music4"] as const;
-type MusicKey = (typeof MUSIC_KEYS)[number];
+export const CATCH_MUSIC_KEYS: readonly string[] = ["catch1", "catch2", "catch3"];
 
 export class Sound {
-  private _lastMusicKey: MusicKey | null = null;
+  private _lastMusicKey: string | null = null;
   private _current?: Phaser.Sound.BaseSound;
+  private _playlist: readonly string[] = MUSIC_KEYS;
 
   constructor(private scene: Phaser.Scene) {}
 
-  private _pickNextTrack(): MusicKey {
-    const candidates = MUSIC_KEYS.filter((k) => k !== this._lastMusicKey);
-    return candidates[Math.floor(Math.random() * candidates.length)];
+  private _pickNextTrack(): string {
+    const candidates = this._playlist.filter((k) => k !== this._lastMusicKey);
+    const pool = candidates.length ? candidates : this._playlist;
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  private _playTrack(key: MusicKey): void {
+  private _playTrack(key: string): void {
     const vol = settings.calm ? 0.25 : 0.5;
     this._lastMusicKey = key;
     const prev = this._current;
@@ -25,12 +27,13 @@ export class Sound {
       this._playTrack(this._pickNextTrack());
     });
     m.play();
-    // Free the just-finished previous track (its 'complete' already fired) so
-    // finished tracks don't accumulate in the sound manager over a long session.
+    // Free the just-finished previous track so finished tracks don't accumulate.
     if (prev) prev.destroy();
   }
 
-  playMusic(): void {
+  playMusic(playlist: readonly string[] = MUSIC_KEYS): void {
+    this._playlist = playlist;
+    this._lastMusicKey = null;
     this._playTrack(this._pickNextTrack());
   }
 
