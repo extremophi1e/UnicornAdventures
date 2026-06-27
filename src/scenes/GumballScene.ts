@@ -7,6 +7,7 @@ import { Sound, GUMBALL_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { createBag, JACKPOT, type Bag } from "../core/gumballs";
 import { EMOJI } from "../render/emoji";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, ALL_EMOJI_KEYS } from "../render/assets";
 
 const ANTICIPATION_MS = 1100;        // rattle + flash before the reveal
 const FLASH_INTERVAL_MS = 260;       // toggle every 260ms -> ~1.9 flashes/sec (seizure-safe)
@@ -46,7 +47,15 @@ export class GumballScene extends Phaser.Scene {
 
   constructor() { super("Gumball"); }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, ALL_EMOJI_KEYS);
+    loadAudio(this, ["pop", "tada", "fanfare"]);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, ALL_EMOJI_KEYS);
     const W = this.scale.width, H = this.scale.height;
     this.reduceMotion = (typeof window !== "undefined" && window.matchMedia)
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
@@ -118,7 +127,8 @@ export class GumballScene extends Phaser.Scene {
     const g = this.add.graphics();
     g.fillStyle(0xff5fa2, 1).fillCircle(0, 0, r);
     g.fillStyle(0xffffff, 0.25).fillCircle(0, -r * 0.32, r * 0.55);
-    const label = this.add.text(0, 0, "👆", { fontSize: "84px" }).setOrigin(0.5);
+    // padding gives the tall 👆 emoji glyph room so Phaser's text texture doesn't clip its base.
+    const label = this.add.text(0, 0, "👆", { fontSize: "84px", padding: { x: 8, y: 18 } }).setOrigin(0.5);
     this.button = this.add.container(bx, by, [g, label]).setDepth(40);
     // Generous rectangular hit area via a separate zone (reliable for containers).
     const zone = this.add.zone(bx, by, (r + 30) * 2, (r + 30) * 2).setDepth(40).setInteractive({ useHandCursor: true });
