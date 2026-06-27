@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { PeekabooBackground } from "./ui/PeekabooBackground";
 import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { EMOJI } from "../render/emoji";
-import { Sound, CATCH_MUSIC_KEYS } from "../audio/sound";
+import { Sound, PEEKABOO_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, type CatchState } from "../core/catch";
 import { computeSpots, windowForNotch, concurrentForNotch, shouldSurprise, chooseSpot, type Spot } from "../core/peekaboo";
@@ -38,7 +38,7 @@ export class PeekabooScene extends Phaser.Scene {
     const W = this.scale.width, H = this.scale.height;
     this.bg = new PeekabooBackground(this, W, H);
     this.sound2 = new Sound(this);
-    this.sound2.playMusic(CATCH_MUSIC_KEYS);
+    this.sound2.playMusic(PEEKABOO_MUSIC_KEYS);
     this.fx = new Celebrations(this);
 
     this.state = initialCatchState();
