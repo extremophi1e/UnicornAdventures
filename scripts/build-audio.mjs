@@ -4,7 +4,7 @@
  * Outputs MP3s to public/audio/ via @breezystack/lamejs.
  *
  * Generates: pop.mp3, collect.mp3, fanfare.mp3, tada.mp3
- * Does NOT generate music1-4.mp3 — those are real royalty-free tracks
+ * Does NOT generate music1-3.mp3 — those are real royalty-free tracks
  * downloaded from Incompetech (Kevin MacLeod, CC-BY). See public/audio/CREDITS.md.
  *
  * Run: node scripts/build-audio.mjs
@@ -212,7 +212,7 @@ function note(midiNote) {
   console.log(`tada.mp3  → ${mp3.length} bytes`);
 }
 
-// NOTE: music1-4.mp3 are real royalty-free tracks (Kevin MacLeod / Incompetech, CC-BY).
+// NOTE: music1-3.mp3 are real royalty-free tracks (Kevin MacLeod / Incompetech, CC-BY).
 // They are NOT synthesised here. See public/audio/CREDITS.md for details.
 // To re-download them: curl from the URLs in CREDITS.md directly.
 
