@@ -133,6 +133,18 @@ export class GameScene extends Phaser.Scene {
     this._prevUnicornX = this.target.x;
     this._prevUnicornY = this.target.y;
 
+    // Reset run progression on every entry. Phaser reuses the scene instance, so
+    // the class-field initializers don't re-run — without this, returning to the
+    // title after the finale and re-entering would resume on the last level.
+    this.levelIndex = 1;
+    this.formationIndex = 0;
+    this.t = 0;
+    this.transitioning = false;
+    this.boss = undefined;
+    this.bossCtl = undefined;
+    this.bossBar = undefined;
+    this.autofire.reset();
+
     this.spawnFormation();
   }
 
