@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { PlayroomBackground } from "./ui/PlayroomBackground";
-import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
+import { resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { Sound } from "../audio/sound";
@@ -13,7 +13,6 @@ const BURST_PARTICLES = 16;
 const BURST_PARTICLES_REDUCED = 5;
 const ITEM_REVEAL_SCALE = 2.2;       // emoji frame is 72px
 const JACKPOT_REVEAL_SCALE = 0.85;   // catchUnicorn frame is 256px
-const RAINBOW_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
 // Flashing bulbs avoid saturated red (photosensitivity); soft coral replaces it.
 const BULB_COLORS = [0xff7f7f, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
 const BULB_DIM = 0xcfd8e0;
@@ -26,13 +25,11 @@ export class GumballScene extends Phaser.Scene {
   private bag!: Bag;
   private reduceMotion = false;
   private busy = false;
-  private _t = 0;
 
   private machine!: Phaser.GameObjects.Container;
   private machineBaseX = 0;
   private bulbs: Phaser.GameObjects.Arc[] = [];
   private bulbsLit = false;
-  private globeCuties: Phaser.GameObjects.Sprite[] = [];
   private button!: Phaser.GameObjects.Container;
   private wiggle?: Phaser.Tweens.Tween;
   private rattle?: Phaser.Tweens.Tween;
@@ -57,7 +54,6 @@ export class GumballScene extends Phaser.Scene {
     this.fx = new Celebrations(this);
     this.bag = createBag(Math.random);
     this.busy = false;
-    this._t = 0;
 
     this.burst = this.add.particles(0, 0, ATLAS_KEY, {
       frame: frameFor("sparkle"), speed: { min: 140, max: 320 }, angle: { min: 0, max: 360 },
@@ -98,16 +94,11 @@ export class GumballScene extends Phaser.Scene {
     g.fillStyle(0xb9c4d0, 1).fillRoundedRect(-140, 230, 280, 26, 12);
     // Chute opening.
     g.fillStyle(0x3a3f47, 1).fillRoundedRect(-44, 150, 88, 44, 10);
-    // Glass globe.
-    g.fillStyle(0xffffff, 0.18).fillCircle(0, -30, 150);
-    g.lineStyle(8, 0xffffff, 0.55).strokeCircle(0, -30, 150);
-    // Rainbow dome: nested top-half semicircles, largest first.
-    for (let i = 0; i < RAINBOW_COLORS.length; i++) {
-      const r = 116 - i * 15;
-      g.fillStyle(RAINBOW_COLORS[i], 1);
-      g.slice(0, -150, r, Math.PI, 0, true);
-      g.fillPath();
-    }
+    // Solid red globe — opaque (nothing visible inside), a darker rim, and a soft
+    // glossy highlight so it reads as a candy-red glass dome.
+    g.fillStyle(0xe23b3b, 1).fillCircle(0, -30, 150);
+    g.lineStyle(8, 0xb52d2d, 1).strokeCircle(0, -30, 150);
+    g.fillStyle(0xffffff, 0.22).fillCircle(-52, -88, 52);
     c.add(g);
 
     // Bulbs around the globe.
@@ -116,18 +107,6 @@ export class GumballScene extends Phaser.Scene {
       const b = this.add.circle(Math.cos(ang) * 168, -30 + Math.sin(ang) * 168, 13, BULB_DIM, 1);
       this.bulbs.push(b);
       c.add(b);
-    }
-
-    // A few cuties jumbling inside the globe.
-    const insideTypes = ["star", "heart", "gem", "flower", "balloon"];
-    for (let i = 0; i < insideTypes.length; i++) {
-      const bx = (Math.random() - 0.5) * 160;
-      const by = -30 + (Math.random() - 0.5) * 150;
-      const s = spawnEmoji(this, 0, 0, insideTypes[i]).setScale(0.5);
-      s.setData("baseX", bx).setData("baseY", by);
-      s.setPosition(bx, by);
-      this.globeCuties.push(s);
-      c.add(s);
     }
 
     this.machine = c;
@@ -221,8 +200,8 @@ export class GumballScene extends Phaser.Scene {
       this.fx.popAt(x, y);
       this.sound2.fanfare();
     }
-    // Rest, then fade the item out and unlock for the next pull.
-    this.time.delayedCall(jackpot ? 1300 : 800, () => {
+    // Show the revealed item for 3s, then fade it out and unlock for the next pull.
+    this.time.delayedCall(3000, () => {
       this.tweens.add({
         targets: spr, alpha: 0, duration: 250,
         onComplete: () => { spr.setVisible(false); spr.setAlpha(1); },
@@ -234,14 +213,6 @@ export class GumballScene extends Phaser.Scene {
   }
 
   update(_t: number, dms: number) {
-    const dt = dms / 1000;
-    this._t += dt;
-    this.bg.update(dt, this.scale.width);
-    // Cuties jumble gently inside the globe.
-    for (let i = 0; i < this.globeCuties.length; i++) {
-      const s = this.globeCuties[i];
-      s.x = (s.getData("baseX") as number) + Math.cos(this._t * 1.6 + i) * 6;
-      s.y = (s.getData("baseY") as number) + Math.sin(this._t * 2.0 + i) * 8;
-    }
+    this.bg.update(dms / 1000, this.scale.width);
   }
 }
