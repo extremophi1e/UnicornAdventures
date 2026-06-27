@@ -71,7 +71,7 @@ export class GardenBackground extends Phaser.GameObjects.Container {
     const c = Math.max(0, Math.min(1, t));
     if (Math.abs(c - this.warmth) < 0.001) return;
     this.warmth = c;
-    this.redraw(this.w, this.scene.scale.height);
+    this.redraw(this._w, this.scene.scale.height);
   }
 
   update(dt: number): void {
