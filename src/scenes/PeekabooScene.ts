@@ -16,7 +16,13 @@ const SPOT_COOLDOWN_MS = 500;   // min idle time after a spot frees before it ca
 const MILESTONE_EVERY = 15;     // catches per celebration
 const CRITTER_SCALE = 1.4 / 2;  // /2: 144px emoji frames
 const EMERGE_MS = 250, DUCK_MS = 150;
-const NON_CREATURES = ["cloud", "star", "icecream", "balloon", "heart", "flower", "gem", "cupcake", "lollipop"];
+// Only living creatures peek: exclude objects/plants AND the non-animal "silly" set
+// (robot, alien, ghost, poop). Kept: all animals, dinos (trex/sauropod), bugs
+// (butterfly/snail/ant/donut=ladybug), and the microbe (a living germ).
+const NON_CREATURES = [
+  "cloud", "star", "icecream", "balloon", "heart", "flower", "gem", "cupcake", "lollipop",
+  "robot", "alien", "ghost", "poop",
+];
 const CRITTER_KEYS = Object.keys(EMOJI).filter((k) => !NON_CREATURES.includes(k));
 
 export class PeekabooScene extends Phaser.Scene {

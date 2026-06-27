@@ -1,15 +1,22 @@
 import Phaser from "phaser";
 import { ensureAudioLoaded, takeFirstTrack } from "../render/assets";
 
-export const MUSIC_KEYS = ["music1", "music2", "music3", "music4", "music5", "music6"] as const;
-export const CATCH_MUSIC_KEYS: readonly string[] = ["catch1", "catch2", "catch3", "catch4", "catch5"];
-export const POP_MUSIC_KEYS: readonly string[] = ["popmusic", "popmusic2"];
-export const GUMBALL_MUSIC_KEYS: readonly string[] = ["gumball", "gumball2"];
-export const PEEKABOO_MUSIC_KEYS: readonly string[] = ["peekaboo1", "peekaboo2", "peekaboo3"];
-// Garden reuses the calm meadow tracks as a quiet ambient bed (the tap-notes are the foreground).
-export const GARDEN_MUSIC_KEYS: readonly string[] = PEEKABOO_MUSIC_KEYS;
+import { MUSIC_KEYS } from "./musicKeys";
+
+// Per-game playlists live in the Phaser-free musicKeys module; re-export them so
+// scenes can keep importing the names from here.
+export {
+  MUSIC_KEYS,
+  CATCH_MUSIC_KEYS,
+  POP_MUSIC_KEYS,
+  GUMBALL_MUSIC_KEYS,
+  PEEKABOO_MUSIC_KEYS,
+  GARDEN_MUSIC_KEYS,
+  EGGS_MUSIC_KEYS,
+  AQUARIUM_MUSIC_KEYS,
+} from "./musicKeys";
+
 export const GARDEN_NOTE_COUNT = 11;
-export const EGGS_MUSIC_KEYS: readonly string[] = ["eggsmusic", "eggsmusic2", "eggsmusic3"];
 const GIGGLE_KEYS = ["giggle1", "giggle2", "giggle3"] as const;
 
 export class Sound {
