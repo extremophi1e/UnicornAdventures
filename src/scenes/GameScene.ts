@@ -16,6 +16,7 @@ import { BossController } from "../core/boss";
 const STAR_SPEED = 900; // px/s upward
 const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/right for Zoe)
 const FIRE_INTERVAL = 0.18;
+const FINGER_LIFT = 120; // on touch, aim the unicorn this far above the finger so it isn't hidden
 
 // Rainbow colours the shot stars cycle through (ROYGBIV), bright and kid-friendly.
 const RAINBOW_STAR_COLORS = [
@@ -100,14 +101,13 @@ export class GameScene extends Phaser.Scene {
     // Plain pointer movement moves the unicorn — no click/drag needed.
     // (On touch devices pointermove only fires while a finger is down, so this
     //  still behaves as drag-to-move there.)
-    this.input.on("pointermove", (p: Phaser.Input.Pointer) => {
+    // Touch lifts the unicorn above the finger so it isn't hidden; mouse aims exactly.
+    const setTarget = (p: Phaser.Input.Pointer) => {
       this.pointerActive = true;
-      this.target = { x: p.worldX, y: p.worldY };
-    });
-    this.input.on("pointerdown", (p: Phaser.Input.Pointer) => {
-      this.pointerActive = true;
-      this.target = { x: p.worldX, y: p.worldY };
-    });
+      this.target = { x: p.worldX, y: p.worldY - (p.wasTouch ? FINGER_LIFT : 0) };
+    };
+    this.input.on("pointermove", setTarget);
+    this.input.on("pointerdown", setTarget);
 
     this.enemies = this.add.group();
     this.fx = new Celebrations(this);
