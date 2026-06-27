@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { AquariumBackground } from "./ui/AquariumBackground";
 import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
+import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { Sound } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { pickNearestWithinRadius } from "../core/pop";
@@ -122,14 +123,38 @@ export class AquariumScene extends Phaser.Scene {
     const n = this.reduceMotion ? Math.ceil(count / 2) : count;
     for (let i = 0; i < n; i++) {
       const bx = x + (Math.random() * 2 - 1) * spread;
-      const r = 4 + Math.random() * 8;
-      const b = this.add.circle(bx, y, r, 0xffffff, 0.5).setDepth(55);
-      b.setStrokeStyle(2, 0xffffff, 0.8);
+      const r = 7 + Math.random() * 13;
+      const b = this.add.circle(bx, y, r, 0xffffff, 0.6).setDepth(55);
+      b.setStrokeStyle(3, 0xffffff, 0.9);
       this.tweens.add({
-        targets: b, y: y - (70 + Math.random() * 80), alpha: 0,
+        targets: b, y: y - (90 + Math.random() * 100), alpha: 0,
         duration: 700 + Math.random() * 500, ease: "Sine.out", onComplete: () => b.destroy(),
       });
     }
+  }
+
+  // Guaranteed, unmistakable feedback on EVERY tap: a punchy sparkle ring at the
+  // touch point, so even the gentlest reaction obviously "does something."
+  private tapBurst(x: number, y: number) {
+    const n = this.reduceMotion ? 6 : 12;
+    for (let i = 0; i < n; i++) {
+      const ang = (Math.PI * 2 * i) / n + Math.random() * 0.4;
+      const dist = 75 + Math.random() * 55;
+      const s = this.add.image(x, y, ATLAS_KEY, frameFor("sparkle")).setScale(1).setDepth(58);
+      this.tweens.add({
+        targets: s, x: x + Math.cos(ang) * dist, y: y + Math.sin(ang) * dist,
+        scale: 0, alpha: 0, duration: 400, ease: "Cubic.out", onComplete: () => s.destroy(),
+      });
+    }
+  }
+
+  // A quick scale "pop" used for the shockwave's per-fish wave (bigger + sound-free
+  // so a tankful reacting at once doesn't turn into an audio pile-up).
+  private quickPop(fish: Fish) {
+    this.tweens.add({
+      targets: fish, scale: ITEM_SCALE * 1.5, yoyo: true, duration: 160,
+      ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE),
+    });
   }
 
   private tryTap(px: number, py: number) {
@@ -166,6 +191,9 @@ export class AquariumScene extends Phaser.Scene {
     // resized, or tinted. (update() controls x/y drift separately — not tweened.)
     this.tweens.killTweensOf(fish);
     fish.setAngle(0).setScale(ITEM_SCALE).clearTint();
+    // Universal feedback: every tap throws a sparkle ring, regardless of which
+    // reaction rolled — so the child always sees an unmistakable response.
+    this.tapBurst(fish.x, fish.y);
     switch (reaction.id) {
       case "spin": this.rSpin(fish); break;
       case "wiggle": this.rWiggle(fish); break;
@@ -186,95 +214,111 @@ export class AquariumScene extends Phaser.Scene {
     }
   }
 
-  // --- Common reaction handlers ---
+  // --- Common reaction handlers (amplified: big motion + sound on every one) ---
   private rSpin(fish: Fish) {
-    this.tweens.add({ targets: fish, angle: fish.angle + 360, duration: 500, ease: "Cubic.out", onComplete: () => fish.setAngle(0) });
-    this.sound.play("blub", { volume: 0.4, detune: Phaser.Math.Between(-100, 100) });
+    this.tweens.add({ targets: fish, angle: fish.angle + 360, duration: 450, ease: "Cubic.out", onComplete: () => fish.setAngle(0) });
+    this.tweens.add({ targets: fish, scale: ITEM_SCALE * 1.5, yoyo: true, duration: 225, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE) });
+    this.sound.play("blub", { volume: 0.5, detune: Phaser.Math.Between(-100, 100) });
   }
   private rWiggle(fish: Fish) {
     const a = fish.angle;
-    this.tweens.add({ targets: fish, angle: a + 14, yoyo: true, repeat: 3, duration: 70, onComplete: () => fish.setAngle(0) });
+    this.tweens.add({ targets: fish, angle: a + 32, yoyo: true, repeat: 5, duration: 60, onComplete: () => fish.setAngle(0) });
+    this.tweens.add({ targets: fish, scale: ITEM_SCALE * 1.3, yoyo: true, duration: 190, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE) });
+    this.sound.play("blub", { volume: 0.4, detune: Phaser.Math.Between(-80, 80) });
   }
   private rBubble(fish: Fish) {
-    this.emitBubbles(fish.x, fish.y - 10, 6, 26);
-    this.sound.play("blub", { volume: 0.5, detune: Phaser.Math.Between(-150, 150) });
+    this.emitBubbles(fish.x, fish.y - 10, 16, 40);
+    this.sound.play("blub", { volume: 0.55, detune: Phaser.Math.Between(-150, 150) });
   }
   private rSquash(fish: Fish) {
     this.tweens.add({
-      targets: fish, scaleX: ITEM_SCALE * 1.3, scaleY: ITEM_SCALE * 0.7, yoyo: true,
-      duration: 140, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE),
+      targets: fish, scaleX: ITEM_SCALE * 1.8, scaleY: ITEM_SCALE * 0.45, yoyo: true, repeat: 1,
+      duration: 130, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE),
     });
+    this.sound.play("sproing", { volume: 0.45 });
   }
   private rColorFlash(fish: Fish) {
     const cols = RAINBOW_COLORS;
     this.tweens.addCounter({
-      from: 0, to: cols.length, duration: 600,
+      from: 0, to: cols.length * 2, duration: 720,
       onUpdate: (tw) => { if (fish.active) fish.setTint(cols[Math.floor(tw.getValue() ?? 0) % cols.length]); },
       onComplete: () => { if (fish.active) fish.clearTint(); },
     });
+    this.tweens.add({ targets: fish, scale: ITEM_SCALE * 1.45, yoyo: true, duration: 360, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE) });
+    this.sound.play("blub", { volume: 0.45, detune: 120 });
   }
   private rHeart(fish: Fish) {
-    const h = spawnEmoji(this, fish.x, fish.y, "heart").setScale(0.4).setDepth(60);
-    this.tweens.add({ targets: h, y: h.y - 90, alpha: 0, duration: 700, ease: "Sine.out", onComplete: () => h.destroy() });
+    const n = this.reduceMotion ? 1 : 3;
+    for (let i = 0; i < n; i++) {
+      const ox = (Math.random() * 2 - 1) * 40;
+      const h = spawnEmoji(this, fish.x + ox, fish.y, "heart").setScale(0.15).setDepth(60);
+      this.tweens.add({ targets: h, scale: 0.75, duration: 220, ease: "Back.out" });
+      this.tweens.add({ targets: h, y: h.y - (130 + Math.random() * 70), alpha: 0, delay: 90, duration: 900, ease: "Sine.out", onComplete: () => h.destroy() });
+    }
+    this.sound.play("chime", { volume: 0.4 });
   }
 
   // --- Uncommon reaction handlers ---
   // Split: the parent squashes and a same-species child pops out swimming the
   // other way. Cap-safe via netAdds (and pickReaction already filters split at cap).
   private rSplit(fish: Fish, reaction: Reaction) {
-    this.rSquash(fish);
+    // Big parent "punch" pop, then the child rockets out further.
+    this.tweens.add({ targets: fish, scale: ITEM_SCALE * 1.5, yoyo: true, duration: 150, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE) });
     const remaining = HARD_CAP - this.fish.countActive(true);
     if (netAdds(reaction, remaining) > 0) {
       const dir = -(fish.getData("dir") as number) || 1;
       const child = this.spawnFishAt(fish.x, fish.y, dir, fish.getData("type") as string);
-      child.setScale(ITEM_SCALE * 0.6);
-      this.tweens.add({ targets: child, scale: ITEM_SCALE, duration: 300, ease: "Back.out" });
-      this.tweens.add({ targets: child, x: child.x + dir * 40, duration: 220, ease: "Sine.out" });
+      child.setScale(ITEM_SCALE * 0.3);
+      this.tweens.add({ targets: child, scale: ITEM_SCALE, duration: 360, ease: "Back.out" });
+      this.tweens.add({ targets: child, x: child.x + dir * 75, duration: 300, ease: "Cubic.out" });
     }
-    this.sound.play("sproing", { volume: 0.5 });
+    this.sound.play("sproing", { volume: 0.6 });
   }
   private rBubbleStream(fish: Fish) {
     this.time.addEvent({
-      delay: 90, repeat: 7,
-      callback: () => { if (fish.active) this.emitBubbles(fish.x, fish.y - 10, 2, 14); },
+      delay: 70, repeat: 11,
+      callback: () => { if (fish.active) this.emitBubbles(fish.x, fish.y - 10, 4, 24); },
     });
-    this.sound.play("blub", { volume: 0.45 });
+    this.sound.play("blub", { volume: 0.5 });
   }
   private rZoom(fish: Fish) {
     const W = this.scale.width;
     const nx = 80 + Math.random() * (W - 160);
-    this.emitBubbles(fish.x, fish.y, 5, 10);
-    this.tweens.add({ targets: fish, x: nx, duration: 340, ease: "Cubic.inOut" });
-    this.sound.play("blub", { volume: 0.4, detune: 200 });
+    this.emitBubbles(fish.x, fish.y, 12, 16);
+    this.tweens.add({ targets: fish, x: nx, duration: 300, ease: "Cubic.inOut" });
+    this.tweens.add({ targets: fish, scaleX: ITEM_SCALE * 1.6, scaleY: ITEM_SCALE * 0.8, yoyo: true, duration: 150, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE) });
+    this.sound.play("blub", { volume: 0.5, detune: 250 });
   }
   private rMorph(fish: Fish) {
     const cur = fish.getData("type") as string;
     const others = AQUARIUM_TYPES.filter((t) => t !== cur);
     const nt = others[Math.floor(Math.random() * others.length)];
-    this.emitBubbles(fish.x, fish.y, 8, 30);
+    this.emitBubbles(fish.x, fish.y, 16, 42);
+    this.tapBurst(fish.x, fish.y);
     this.tweens.add({
-      targets: fish, scale: ITEM_SCALE * 0.2, duration: 140, ease: "Sine.in",
+      targets: fish, scale: ITEM_SCALE * 0.1, angle: fish.angle + 180, duration: 170, ease: "Sine.in",
       onComplete: () => {
         if (!fish.active) return;
         resetEmoji(fish, nt, fish.x, fish.y);
         fish.setData("type", nt);
-        fish.setScale(ITEM_SCALE * 0.2);
-        this.tweens.add({ targets: fish, scale: ITEM_SCALE, duration: 220, ease: "Back.out" });
+        fish.setScale(ITEM_SCALE * 0.1).setAngle(0);
+        this.tweens.add({ targets: fish, scale: ITEM_SCALE * 1.35, yoyo: true, duration: 280, ease: "Back.out", onComplete: () => fish.setScale(ITEM_SCALE) });
       },
     });
-    this.sound.play("blub", { volume: 0.4 });
+    this.sound.play("sproing", { volume: 0.5 });
   }
   private rBackflip(fish: Fish) {
     const a = fish.angle;
-    this.tweens.add({ targets: fish, angle: a - 360, duration: 650, ease: "Back.inOut", onComplete: () => fish.setAngle(0) });
-    this.tweens.add({ targets: fish, scaleX: ITEM_SCALE * 1.15, scaleY: ITEM_SCALE * 1.15, yoyo: true, duration: 325, onComplete: () => fish.setScale(ITEM_SCALE) });
+    this.tweens.add({ targets: fish, angle: a - 720, duration: 700, ease: "Cubic.inOut", onComplete: () => fish.setAngle(0) });
+    this.tweens.add({ targets: fish, scale: ITEM_SCALE * 1.6, yoyo: true, duration: 350, ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE) });
+    this.sound.play("sproing", { volume: 0.45, detune: -150 });
   }
   private rGiant(fish: Fish) {
     this.tweens.add({
-      targets: fish, scale: ITEM_SCALE * 2.4, yoyo: true, hold: 200, duration: 260,
-      ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE),
+      targets: fish, scale: ITEM_SCALE * 3.4, yoyo: true, hold: 350, duration: 320,
+      ease: "Back.inOut", onComplete: () => fish.setScale(ITEM_SCALE),
     });
-    this.sound.play("blub", { volume: 0.5, detune: -300 });
+    this.sound.play("blub", { volume: 0.6, detune: -350 });
   }
 
   // --- Rare jackpot handlers ---
@@ -290,10 +334,11 @@ export class AquariumScene extends Phaser.Scene {
       const y = 150 + Math.random() * (H - 320);
       const t = AQUARIUM_TYPES[Math.floor(Math.random() * AQUARIUM_TYPES.length)];
       const f = this.spawnFishAt(x, y, dir, t);
-      f.setScale(ITEM_SCALE * 0.4);
-      this.tweens.add({ targets: f, scale: ITEM_SCALE, duration: 300, ease: "Back.out" });
+      f.setScale(ITEM_SCALE * 0.2);
+      this.tweens.add({ targets: f, scale: ITEM_SCALE, duration: 360, ease: "Back.out" });
+      this.tapBurst(f.x, f.y);
     }
-    this.fx.banner("🐟", "#0077b6");
+    this.fx.banner("🐟🐟🐟", "#0077b6", 800);
     this.sound2.fanfare();
   }
   // Rainbow shockwave: a slow low-contrast rainbow overlay (NOT a strobe) +
@@ -308,14 +353,16 @@ export class AquariumScene extends Phaser.Scene {
       onUpdate: (tw) => { overlay.fillColor = cols[Math.floor(tw.getValue() ?? 0) % cols.length]; },
     });
     this.tweens.add({
-      targets: overlay, alpha: this.reduceMotion ? 0.12 : 0.22, yoyo: true, hold: 200,
+      targets: overlay, alpha: this.reduceMotion ? 0.14 : 0.28, yoyo: true, hold: 250,
       duration: this.reduceMotion ? 300 : 550, ease: "Sine.inOut", onComplete: () => overlay.destroy(),
     });
+    // Every fish does a big scale-pop in a staggered wave (sound-free so a full
+    // tank doesn't pile up audio). Photosensitivity-safe: single slow sweep.
     const actives = (this.fish.getChildren() as Fish[]).filter((f) => f.active && (f.getData("napUntil") as number) <= this._t);
     actives.forEach((f, i) => {
-      this.time.delayedCall(this.reduceMotion ? 0 : i * 70, () => { if (f.active) this.rWiggle(f); });
+      this.time.delayedCall(this.reduceMotion ? 0 : i * 60, () => { if (f.active) this.quickPop(f); });
     });
-    this.fx.banner("🌈");
+    this.fx.banner("🌈", "#ff5fa2", 800);
     this.sound2.tada();
   }
   // Treasure chest: a shape-based chest rises from the floor, pops open into a
@@ -326,7 +373,7 @@ export class AquariumScene extends Phaser.Scene {
     const floorY = H - 70;
     const cx = fish.x;
 
-    const chest = this.add.container(cx, floorY + 90).setDepth(45);
+    const chest = this.add.container(cx, floorY + 110).setDepth(45).setScale(1.35);
     const body = this.add.graphics();
     body.fillStyle(0x8a5a2b, 1).fillRoundedRect(-50, -28, 100, 52, 8);
     body.fillStyle(0xffd54a, 1).fillRect(-50, -4, 100, 8);
@@ -337,21 +384,23 @@ export class AquariumScene extends Phaser.Scene {
     this.tweens.add({
       targets: chest, y: floorY, duration: 360, ease: "Back.out",
       onComplete: () => {
-        this.tweens.add({ targets: lid, y: -64, angle: -12, duration: 240, ease: "Sine.out" });
-        this.emitBubbles(cx, floorY - 20, 16, 40);
+        this.tweens.add({ targets: lid, y: -72, angle: -16, duration: 240, ease: "Sine.out" });
+        this.emitBubbles(cx, floorY - 20, 30, 64);
         this.fx.popAt(cx, floorY - 20);
-        for (let i = 0; i < 5; i++) {
-          const gem = spawnEmoji(this, cx + (Math.random() * 2 - 1) * 40, floorY - 20, "gem").setScale(0.35).setDepth(46);
+        this.tapBurst(cx, floorY - 30);
+        for (let i = 0; i < 9; i++) {
+          const gem = spawnEmoji(this, cx + (Math.random() * 2 - 1) * 55, floorY - 20, "gem").setScale(0.15).setDepth(46);
+          this.tweens.add({ targets: gem, scale: 0.55, duration: 220, ease: "Back.out" });
           this.tweens.add({
-            targets: gem, y: gem.y - (120 + Math.random() * 100), x: gem.x + (Math.random() * 2 - 1) * 50,
-            alpha: 0, duration: 1000 + Math.random() * 400, ease: "Sine.out", onComplete: () => gem.destroy(),
+            targets: gem, y: gem.y - (150 + Math.random() * 130), x: gem.x + (Math.random() * 2 - 1) * 70,
+            alpha: 0, delay: 80, duration: 1100 + Math.random() * 400, ease: "Sine.out", onComplete: () => gem.destroy(),
           });
         }
-        this.fx.banner("💎", "#ffd54a");
+        this.fx.banner("💎", "#ffd54a", 800);
         this.sound2.fanfare();
-        this.sound.play("chime", { volume: 0.6 });
-        this.time.delayedCall(1600, () => {
-          this.tweens.add({ targets: chest, y: floorY + 90, alpha: 0, duration: 400, onComplete: () => chest.destroy() });
+        this.sound.play("chime", { volume: 0.7 });
+        this.time.delayedCall(1800, () => {
+          this.tweens.add({ targets: chest, y: floorY + 110, alpha: 0, duration: 400, onComplete: () => chest.destroy() });
         });
       },
     });
