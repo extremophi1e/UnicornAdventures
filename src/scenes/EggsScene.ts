@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { EggsBackground, NEST_CX, NEST_CY } from "./ui/EggsBackground";
+import { EggsBackground, nestSlots } from "./ui/EggsBackground";
 import { resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
@@ -78,14 +78,8 @@ export class EggsScene extends Phaser.Scene {
     this.glow = this.add.rectangle(W / 2, H / 2, W, H, 0xff7fbf, 0).setDepth(55);
     this.reveals = this.add.group();
 
-    // Four eggs clustered as a clutch in the bowl: a higher back pair tucked
-    // behind a slightly wider, lower front pair (small offsets read as natural).
-    const cx = NEST_CX(W), nestY = NEST_CY(H);
-    const dxBack = Math.min(0.062 * W, 58), dxFront = Math.min(0.088 * W, 82);
-    const anchors = [
-      { x: cx - dxBack, y: nestY - 30 }, { x: cx + dxBack, y: nestY - 34 },
-      { x: cx - dxFront, y: nestY + 30 }, { x: cx + dxFront, y: nestY + 26 },
-    ];
+    // One egg per nest, spread across the grass (each egg sits up in its bowl).
+    const anchors = nestSlots(W, H).map((s) => ({ x: s.x, y: s.y - 22 }));
     anchors.forEach((a) => this.eggs.push(this.makeEgg(a.x, a.y)));
     this.eggs.forEach((e, i) => this.time.delayedCall(120 * i, () => this.fillEgg(e))); // staggered drop-in
 
