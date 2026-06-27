@@ -16,14 +16,26 @@ export class TitleScene extends Phaser.Scene {
 
     // Upbeat title theme (loops). Stops when leaving the title.
     const music = this.sound.add("title", { loop: true, volume: 0.5 });
-    const startMusic = () => { if (!music.isPlaying) music.play(); };
+    // `left` guards every deferred retry below: if the player leaves the title
+    // before the track starts — e.g. taps a game on their very first gesture,
+    // which is also what unlocks audio — none of the retries may resurrect it.
+    let left = false;
+    const startMusic = () => { if (!left && !music.isPlaying) music.play(); };
     startMusic();
     // Browsers may not be ready to play right at scene-create; retry shortly,
     // and also on audio-unlock / first tap (autoplay gesture requirement).
     this.time.delayedCall(200, startMusic);
     if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
     this.input.once("pointerdown", startMusic);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => music.stop());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      left = true;
+      // The UNLOCKED listener lives on the global sound manager, which outlives
+      // this scene — remove it so a late async unlock can't replay the theme
+      // after we've already left the title.
+      this.sound.off(Phaser.Sound.Events.UNLOCKED, startMusic);
+      music.stop();
+      music.destroy();
+    });
 
     this.add
       .text(W / 2, 220, `✨ ${PLAYER_NAME}'s Rainbow Unicorn Adventures ✨`, {
