@@ -6,6 +6,7 @@ import { Sound } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, speedForNotch, type CatchState } from "../core/catch";
 import { pickNearestWithinRadius, shouldSpawnBonus } from "../core/pop";
+import { EMOJI } from "../render/emoji";
 
 const SPAWN_INTERVAL = 0.9;          // seconds, fixed (independent of float speed)
 const MAX_CONCURRENT = 12;           // cap on-screen cuties
@@ -17,9 +18,9 @@ const BONUS_SCALE = 1.8 / 3;
 const BURST_PARTICLES = 12;
 const BURST_PARTICLES_REDUCED = 4;
 
-// Cute, non-disappearing types (keys from src/render/emoji.ts; note icecream/
-// donut/cupcake/lollipop now render tulip/ladybug/clover/cat). No cloud.
-const POP_ITEM_TYPES = ["star", "heart", "flower", "butterfly", "gem", "balloon", "icecream", "donut", "cupcake", "lollipop"];
+// Every emoji in the set (the original cuties + the 25 gumball creatures + poop) —
+// all are loop-safe (verified non-disappearing). Auto-updates if more are added.
+const POP_ITEM_TYPES = Object.keys(EMOJI);
 
 // Rainbow tint cycle for the bonus cutie (ROYGBIV).
 const RAINBOW_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
