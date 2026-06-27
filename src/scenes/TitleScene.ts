@@ -48,11 +48,21 @@ export class TitleScene extends Phaser.Scene {
     const uni = this.add.sprite(W / 2, 430, CATCH_UNICORN_KEY).setScale(0.8).play(CATCH_UNICORN_ANIM);
     this.tweens.add({ targets: uni, y: 400, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
 
-    this.makeButton(W / 2, 720, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.scene.start("Game"));
-    this.makeButton(W / 2, 880, "🌈", "Rainbow Catch", 0x7ed957, () => this.scene.start("Catch"));
-    this.makeButton(W / 2, 1040, "🫧", "Pop the Cuties", 0xff5fa2, () => this.scene.start("Pop"));
+    this.makeButton(W / 2, 720, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
+    this.makeButton(W / 2, 880, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
+    this.makeButton(W / 2, 1040, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
+  }
+
+  // Audio can't autoplay before a user gesture, so on a fresh load the title
+  // theme is silent until the first tap. If that first tap is a game button it
+  // would leave before the music is ever heard — so the audio-unlocking tap
+  // only starts the music (via the pointerdown/UNLOCKED retries) and stays on
+  // the title; once audio is unlocked, taps enter the game normally.
+  private go(key: string) {
+    if (this.sound.locked) return;
+    this.scene.start(key);
   }
 
   private makeButton(x: number, y: number, emoji: string, label: string, color: number, onTap: () => void) {
