@@ -14,6 +14,7 @@ const MAX_CONCURRENT = 10;     // cap on-screen items
 const CATCH_RADIUS = 95;       // generous; larger than the visible unicorn
 const CELEBRATION_EVERY = 10;  // catches per milestone celebration
 const UNICORN_DISPLAY_H = 150; // target on-screen unicorn height in px
+const FINGER_LIFT = 120;       // on touch, float the unicorn this far above the finger so it isn't hidden
 
 // Cosmetic variety only (no balloon, no cloud). All caught the same way.
 const CATCH_ITEM_TYPES = ["gem", "heart", "cupcake", "star", "lollipop", "icecream", "donut", "flower", "butterfly"];
@@ -69,8 +70,13 @@ export class CatchScene extends Phaser.Scene {
     this._prevY = this.target.y;
 
     this.cursors = this.input.keyboard!.createCursorKeys();
-    this.input.on("pointermove", (p: Phaser.Input.Pointer) => { this.pointerActive = true; this.target = { x: p.worldX, y: p.worldY }; });
-    this.input.on("pointerdown", (p: Phaser.Input.Pointer) => { this.pointerActive = true; this.target = { x: p.worldX, y: p.worldY }; });
+    // Touch lifts the unicorn above the finger so it isn't hidden; mouse aims exactly.
+    const setTarget = (p: Phaser.Input.Pointer) => {
+      this.pointerActive = true;
+      this.target = { x: p.worldX, y: p.worldY - (p.wasTouch ? FINGER_LIFT : 0) };
+    };
+    this.input.on("pointermove", setTarget);
+    this.input.on("pointerdown", setTarget);
 
     this.items = this.add.group();
     this.spawnTimer = 0;
