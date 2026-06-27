@@ -13,12 +13,12 @@
 - **No new runtime dependencies** — Phaser 4 + existing helpers only.
 - **Reuse, don't duplicate:** multi-touch reuses `pickNearestWithinRadius` from `src/core/pop.ts`; sprites use `spawnEmoji`/`resetEmoji`; juice uses `Celebrations` (`popAt`/`banner`/`bigParty`) + `Sound` (`fanfare`/`tada`); music wiring copies `PopScene`'s robust-autoplay pattern verbatim.
 - **Pure logic is Vitest-tested** (`src/core/aquarium.ts`); scenes/backgrounds/scripts are not unit-tested (verified by running the game in Claude Preview).
-- **Existing modes must be untouched behaviorally.** New emoji are added to the global set (Pop the Cuties will also gain them — acceptable). The only `TitleScene` change is the button list (a 6th button + two display-label renames).
+- **Existing modes must be untouched behaviorally.** New emoji are added to the global set (Pop the Cuties will also gain them — acceptable). The only `TitleScene` change is the button list (a 7th button on a new 4th grid row + two display-label renames; Peekaboo's grid + button stay).
 - **Surprise, not Skinner box:** NO score, count, currency, collection meter, persistence, or "tap to unlock." Each tap is guaranteed a pleasant reaction; rarity only varies which one.
 - **Unbreakable & calm:** no fail state; population can never overflow (hard cap + cap-filter) or empty (ambient recycle); reactions are fire-and-forget and overlap-safe; photosensitivity-safe (no strobe — slow low-contrast rainbow); honor `prefers-reduced-motion`.
 - **Phaser 4 gotchas:** no `setTintFill()` (use `setTint`/`clearTint`); no Tween `Timeline` and do NOT use `this.add.timeline` for duration-driven sequences — sequence with `this.time.delayedCall` + chained/concurrent tweens; avoid runtime `generateTexture` (blank-texture gotcha) — backgrounds/bubbles are shape GameObjects.
 - **Exact names/values:** scene key `"Aquarium"`; title button glyph `🐠`, label `"Tap the Aquarium"`, color `0x0077b6`; renames (labels only, scene keys unchanged): `"Rainbow Shoot"`→`"Star Blaster"` (key `"Game"`), `"Rainbow Catch"`→`"Catch the Cuties"` (key `"Catch"`); baseline ~`7`, hard cap `16`, tap radius `90`, nap after `5` taps for `2.5 s`, rare min-gap `6`, pity ceiling `22`, tier weights Common `65` / Uncommon `30` / Rare `5`.
-- **TypeScript must compile** (`npx tsc --noEmit`) and **`npm run build`** must pass at every task; **`npm test`** (currently 72 on this branch) must stay green and grow with Task 2.
+- **TypeScript must compile** (`npx tsc --noEmit`) and **`npm run build`** must pass at every task; **`npm test`** must stay green (record the baseline count via `npm test` at the start of Task 2) and grow by the Task 2 aquarium tests.
 - **Reference spec:** `docs/superpowers/specs/2026-06-27-tap-the-aquarium-design.md`. **Reference brief:** `docs/superpowers/research/2026-06-27-tap-the-aquarium-brief.md`.
 
 ---
@@ -1040,7 +1040,7 @@ export class AquariumScene extends Phaser.Scene {
 
 - [ ] **Step 2: Register the scene**
 
-In `src/main.ts`: add the import after the `SoundboardScene` import —
+In `src/main.ts`: add the import after the `PeekabooScene` import —
 
 ```ts
 import { AquariumScene } from "./scenes/AquariumScene";
@@ -1049,21 +1049,30 @@ import { AquariumScene } from "./scenes/AquariumScene";
 — and add `AquariumScene` to the end of the `scene` array:
 
 ```ts
-  scene: [BootScene, TitleScene, GameScene, CatchScene, PopScene, GumballScene, SoundboardScene, AquariumScene],
+  scene: [BootScene, TitleScene, GameScene, CatchScene, PopScene, GumballScene, SoundboardScene, PeekabooScene, AquariumScene],
 ```
 
-- [ ] **Step 3: Add the 6th title button + rename two, and re-space all six**
+- [ ] **Step 3: Rename two modes + add the 7th title button (Tap the Aquarium)**
 
-In `src/scenes/TitleScene.ts` `create()`, replace the five existing `this.makeButton(...)` lines (the block currently at `y` 630/748/866/984/1102) with these six (re-spaced to 112px starting at `y=600`, fits the fixed `LOGICAL_HEIGHT` 1280):
+The current title uses a 2-column grid (`makeGridButton(x, y, w, h, emoji, label, color, onTap)`, `rowY = [590, 770, 950]`, 6 buttons incl. Peekaboo). In `src/scenes/TitleScene.ts` `create()`, first extend `rowY` with a 4th row:
 
 ```ts
-    this.makeButton(W / 2, 600, "⭐", "Star Blaster", 0x9b6bff, () => this.go("Game"));
-    this.makeButton(W / 2, 712, "🌈", "Catch the Cuties", 0x7ed957, () => this.go("Catch"));
-    this.makeButton(W / 2, 824, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
-    this.makeButton(W / 2, 936, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
-    this.makeButton(W / 2, 1048, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
-    this.makeButton(W / 2, 1160, "🐠", "Tap the Aquarium", 0x0077b6, () => this.go("Aquarium"));
+    const rowY = [590, 770, 950, 1130];
 ```
+
+Then replace the six `this.makeGridButton(...)` lines with these seven — renaming **Rainbow Shoot→Star Blaster** and **Rainbow Catch→Catch the Cuties** (scene keys `"Game"`/`"Catch"` unchanged), keeping Peekaboo, and adding **Tap the Aquarium** centered on the new 4th row:
+
+```ts
+    this.makeGridButton(colL, rowY[0], BW, BH, "⭐", "Star Blaster", 0x9b6bff, () => this.go("Game"));
+    this.makeGridButton(colR, rowY[0], BW, BH, "🌈", "Catch the Cuties", 0x7ed957, () => this.go("Catch"));
+    this.makeGridButton(colL, rowY[1], BW, BH, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
+    this.makeGridButton(colR, rowY[1], BW, BH, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
+    this.makeGridButton(colL, rowY[2], BW, BH, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
+    this.makeGridButton(colR, rowY[2], BW, BH, "🐹", "Peekaboo", 0xffd23f, () => this.go("Peekaboo"));
+    this.makeGridButton(W / 2, rowY[3], BW, BH, "🐠", "Tap the Aquarium", 0x0077b6, () => this.go("Aquarium"));
+```
+
+(The single new button is centered on row 4; with `BH = 150` its bottom edge is `1130 + 75 = 1205 < LOGICAL_HEIGHT` 1280, so it fits.)
 
 - [ ] **Step 4: Typecheck**
 
@@ -1078,7 +1087,7 @@ Expected: build succeeds; tests unchanged from Task 2 (no scene tests).
 - [ ] **Step 6: Runtime verification (Claude Preview)**
 
 Start the dev server and open the game. Verify via `window.__game` evals and/or screenshots:
-- The title now shows **six** buttons; the first two read **"⭐ Star Blaster"** and **"🌈 Catch the Cuties"**; the sixth is **"🐠 Tap the Aquarium"** (ocean-blue); all six fit on screen without overlap.
+- The title now shows **seven** buttons (the 2-column grid plus a centered 7th on a new 4th row); the first two read **"⭐ Star Blaster"** and **"🌈 Catch the Cuties"**; Peekaboo is still present; the 7th is **"🐠 Tap the Aquarium"** (ocean-blue); all seven fit on screen without overlap.
 - Tapping **Tap the Aquarium** starts the `Aquarium` scene over the new fish-tank background (blue water, sandy floor, swaying kelp, coral); music loops.
 - ~7 sea-creatures drift sideways with a gentle bob and **keep animating**; fish that drift off an edge are replaced (the tank never empties).
 - Tapping a fish triggers a visible reaction (spin / wiggle / bubble puff / squash / rainbow flash / floating heart). Uncommon/rare taps currently just wiggle (expected until Tasks 6–7).
@@ -1354,4 +1363,4 @@ No gaps found.
 
 Plan complete and saved to `docs/superpowers/plans/2026-06-27-tap-the-aquarium.md`.
 
-> **Branch / concurrency note:** This plan targets the **`aquarium`** branch (off `master`, 5 existing modes). A separate **`peekaboo`** branch is concurrently adding its own 6th mode; both modes edit `TitleScene` (button list) and `main.ts` (scene array), so a merge reconciliation will be needed when both land — keep both buttons and both scene registrations.
+> **Branch / concurrency note:** This plan targets the **`aquarium`** branch, **rebased onto the latest `master`** which already includes the merged **Peekaboo** mode (6 modes, 2-column grid title). Tap the Aquarium is the **7th** mode. Implementation runs in an isolated worktree (`C:/Code/unicorn-galaga-2-aquarium`). A separate **Surprise Eggs** mode is still in progress in its own worktree; it may also touch `TitleScene`/`main.ts`, so whichever lands second will need a small reconciliation (keep all buttons + scene registrations).
