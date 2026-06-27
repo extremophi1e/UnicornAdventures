@@ -51,13 +51,14 @@ export class TitleScene extends Phaser.Scene {
     const MARGIN = 24, GAP = 24, BH = 150;
     const BW = (W - 2 * MARGIN - GAP) / 2;
     const colL = W / 2 - (BW / 2 + GAP / 2), colR = W / 2 + (BW / 2 + GAP / 2);
-    const rowY = [590, 770, 950];
+    const rowY = [560, 730, 900, 1070];
     this.makeGridButton(colL, rowY[0], BW, BH, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
     this.makeGridButton(colR, rowY[0], BW, BH, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
     this.makeGridButton(colL, rowY[1], BW, BH, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
     this.makeGridButton(colR, rowY[1], BW, BH, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
     this.makeGridButton(colL, rowY[2], BW, BH, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
     this.makeGridButton(colR, rowY[2], BW, BH, "🐹", "Peekaboo", 0xffd23f, () => this.go("Peekaboo"));
+    this.makeGridButton(colL, rowY[3], BW, BH, "🌱", "Grow a Garden", 0x35c46a, () => this.go("Garden"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
