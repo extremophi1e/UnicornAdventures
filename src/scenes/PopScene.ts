@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { UnderwaterBackground } from "./ui/UnderwaterBackground";
 import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
-import { Sound } from "../audio/sound";
+import { Sound, POP_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, speedForNotch, type CatchState } from "../core/catch";
 import { pickNearestWithinRadius, shouldSpawnBonus } from "../core/pop";
@@ -77,15 +77,9 @@ export class PopScene extends Phaser.Scene {
 
     this.cuties = this.add.group();
 
-    // Dedicated looping music (quieter so the pop SFX stay crisp). Robust autoplay
-    // (immediate + delayed retry + unlock/first-tap), stopped on shutdown.
-    const music = this.sound.add("popmusic", { loop: true, volume: 0.38 });
-    const startMusic = () => { if (!music.isPlaying) music.play(); };
-    startMusic();
-    this.time.delayedCall(200, startMusic);
-    if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
-    this.input.once("pointerdown", startMusic);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { music.stop(); this.sound.stopAll(); });
+    // Shuffled background music (quieter so the pop SFX stay crisp), stopped on shutdown.
+    this.sound2.playMusic(POP_MUSIC_KEYS, 0.38);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.sound.stopAll());
 
     // Multi-touch: up to 4 simultaneous fingers; each pops the nearest cutie.
     this.input.addPointer(3);
