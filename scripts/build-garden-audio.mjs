@@ -10,6 +10,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import lamejs from "@breezystack/lamejs";
+import https from "https";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { Mp3Encoder } = lamejs;
@@ -78,4 +79,36 @@ function main() {
     JSON.stringify({ resources: ["gardennotes.mp3"], spritemap }, null, 2));
   console.log(`gardennotes.mp3 → ${Math.round(mp3.length / 1024)}KB, ${Object.keys(spritemap).length} markers`);
 }
+// ---- Garden's own 3-track playlist (CC-BY, Kevin MacLeod). Respaced from the
+// shooter's surplus; kept downloadable here so the set reproduces. -----------
+const TRACKS = [
+  { file: "garden1.mp3", title: "Fluffing a Duck", url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Fluffing%20a%20Duck.mp3" },
+  { file: "garden2.mp3", title: "Happy Bee",       url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Happy%20Bee.mp3" },
+  { file: "garden3.mp3", title: "Wholesome",       url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wholesome.mp3" },
+];
+function download(url, dest, redirects = 0) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects < 5) {
+        res.resume(); download(res.headers.location, dest, redirects + 1).then(resolve, reject); return;
+      }
+      if (res.statusCode !== 200) { res.resume(); reject(new Error(`HTTP ${res.statusCode}`)); return; }
+      const out = fs.createWriteStream(dest);
+      res.pipe(out);
+      out.on("finish", () => out.close(() => resolve()));
+      out.on("error", (e) => { try { fs.unlinkSync(dest); } catch {} reject(e); });
+    });
+    req.on("error", reject);
+    req.setTimeout(30000, () => req.destroy(new Error("request timed out")));
+  });
+}
+async function downloadMusic() {
+  for (const t of TRACKS) {
+    process.stdout.write(`Downloading ${t.title} -> ${t.file} ... `);
+    await download(t.url, path.join(OUT_DIR, t.file))
+      .then(() => console.log("ok"))
+      .catch((e) => console.error(`FAILED: ${e.message} — pick another gentle CC-BY track, update the URL + CREDITS.md`));
+  }
+}
 main();
+await downloadMusic();
