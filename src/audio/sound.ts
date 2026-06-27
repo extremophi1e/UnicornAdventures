@@ -5,6 +5,7 @@ export const CATCH_MUSIC_KEYS: readonly string[] = ["catch1", "catch2", "catch3"
 export const POP_MUSIC_KEYS: readonly string[] = ["popmusic", "popmusic2"];
 export const GUMBALL_MUSIC_KEYS: readonly string[] = ["gumball", "gumball2"];
 export const PEEKABOO_MUSIC_KEYS: readonly string[] = ["peekaboo1", "peekaboo2", "peekaboo3"];
+export const EGGS_MUSIC_KEYS: readonly string[] = ["eggsmusic", "eggsmusic2", "eggsmusic3"];
 const GIGGLE_KEYS = ["giggle1", "giggle2", "giggle3"] as const;
 
 export class Sound {

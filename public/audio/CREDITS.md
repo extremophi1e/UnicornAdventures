@@ -30,6 +30,9 @@ Attribution: "Music by Kevin MacLeod — incompetech.com"
 | peekaboo2.mp3 | Hyperfun             | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Hyperfun.mp3                 | CC-BY 4.0 |
 | peekaboo3.mp3 | Quirky Dog           | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Quirky%20Dog.mp3             | CC-BY 4.0 |
 | aquarium.mp3 | Carefree                | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3                 | CC-BY 4.0 |
+| eggsmusic.mp3  | Run Amok          | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Run%20Amok.mp3          | CC-BY 4.0 |
+| eggsmusic2.mp3 | The Curtain Rises | https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Curtain%20Rises.mp3 | CC-BY 4.0 |
+| eggsmusic3.mp3 | Spazzmatica Polka | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Spazzmatica%20Polka.mp3 | CC-BY 4.0 |
 
 ## Sound Effects
 

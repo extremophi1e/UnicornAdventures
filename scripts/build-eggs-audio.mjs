@@ -78,12 +78,14 @@ write("crack3.mp3", tok(720));
 // Shatter: a longer noise burst + a little low body.
 write("shatter.mp3", mix(decay(noise(0.18, 0.7), 12), decay(sine(300, 0.18, 0.3), 10)));
 
-// ---- music download (user-swappable) -----------------------------------
-const TRACK = {
-  file: "eggsmusic.mp3",
-  title: "Fluffing a Duck",
-  url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Fluffing%20a%20Duck.mp3",
-};
+// ---- music playlist download (user-swappable) --------------------------
+// Surprise Eggs has its own 3-track playlist (cheerful, barnyard-friendly CC-BY
+// by Kevin MacLeod, incompetech.com). Swap any file for your own (keep the name).
+const TRACKS = [
+  { file: "eggsmusic.mp3",  title: "Run Amok",          url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Run%20Amok.mp3" },
+  { file: "eggsmusic2.mp3", title: "The Curtain Rises", url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Curtain%20Rises.mp3" },
+  { file: "eggsmusic3.mp3", title: "Spazzmatica Polka", url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Spazzmatica%20Polka.mp3" },
+];
 function download(url, dest, redirects = 0) {
   return new Promise((resolve, reject) => {
     const req = https.get(url, (res) => {
@@ -100,7 +102,9 @@ function download(url, dest, redirects = 0) {
     req.setTimeout(30000, () => req.destroy(new Error("request timed out")));
   });
 }
-process.stdout.write(`Downloading ${TRACK.title} -> ${TRACK.file} ... `);
-download(TRACK.url, path.join(OUT_DIR, TRACK.file))
-  .then(() => console.log("ok"))
-  .catch((e) => console.error(`FAILED: ${e.message} — pick another gentle CC-BY track, update the URL + CREDITS.md`));
+for (const t of TRACKS) {
+  process.stdout.write(`Downloading ${t.title} -> ${t.file} ... `);
+  await download(t.url, path.join(OUT_DIR, t.file))
+    .then(() => console.log("ok"))
+    .catch((e) => console.error(`FAILED: ${e.message} — pick another cheerful CC-BY track, update the URL + CREDITS.md`));
+}

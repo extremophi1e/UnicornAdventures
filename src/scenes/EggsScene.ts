@@ -3,7 +3,7 @@ import { EggsBackground, nestSlots } from "./ui/EggsBackground";
 import { resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
-import { Sound } from "../audio/sound";
+import { Sound, EGGS_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { createBag, JACKPOT, type Bag } from "../core/gumballs";
 import { pickNearestWithinRadius } from "../core/pop";
@@ -87,14 +87,9 @@ export class EggsScene extends Phaser.Scene {
     this.input.addPointer(3);
     this.input.on("pointerdown", (p: Phaser.Input.Pointer) => this.onTap(p.worldX, p.worldY));
 
-    // Dedicated looping music, robust autoplay, stopped on shutdown.
-    const music = this.sound.add("eggsmusic", { loop: true, volume: 0.38 });
-    const startMusic = () => { if (!music.isPlaying) music.play(); };
-    startMusic();
-    this.time.delayedCall(200, startMusic);
-    if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
-    this.input.once("pointerdown", startMusic);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { music.stop(); this.sound.stopAll(); });
+    // Dedicated 3-track music playlist (shuffled, low volume), stopped on shutdown.
+    this.sound2.playMusic(EGGS_MUSIC_KEYS, 0.38);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.sound.stopAll());
 
     const back = this.add.text(W - 24, 24, "⬅", { fontSize: "44px", color: "#5a3b8c" })
       .setOrigin(1, 0).setDepth(1000).setInteractive({ useHandCursor: true });
