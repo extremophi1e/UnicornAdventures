@@ -4,10 +4,11 @@ import Phaser from "phaser";
 // Shared with EggsScene so each egg sits in its own nest. Responsive to W/H.
 export function nestSlots(W: number, H: number): { x: number; y: number }[] {
   const colL = W * 0.26, colR = W * 0.74;
-  const rowT = H * 0.68, rowB = H * 0.88;
+  const rowT = H * 0.66, rowB = H * 0.90;
   return [
     { x: colL, y: rowT }, { x: colR, y: rowT },
     { x: colL, y: rowB }, { x: colR, y: rowB },
+    { x: W / 2, y: H * 0.78 }, // 5th egg, nestled in the middle of the other four
   ];
 }
 

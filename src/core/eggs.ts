@@ -6,7 +6,7 @@
 export type Stage = "intact" | "crack1" | "crack2" | "burst";
 
 export const TAPS_TO_HATCH = 3; // taps from intact to burst
-export const CLUTCH_SIZE = 4;   // eggs visible at once (one per nest slot)
+export const CLUTCH_SIZE = 5;   // eggs visible at once (one per nest slot)
 
 const ORDER: readonly Stage[] = ["intact", "crack1", "crack2", "burst"];
 

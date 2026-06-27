@@ -31,6 +31,6 @@ describe("eggs core — crack FSM", () => {
 
   it("constants are the values the scene + copy rely on", () => {
     expect(TAPS_TO_HATCH).toBe(3);
-    expect(CLUTCH_SIZE).toBe(4);
+    expect(CLUTCH_SIZE).toBe(5);
   });
 });
