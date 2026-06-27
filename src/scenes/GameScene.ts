@@ -16,8 +16,6 @@ import { BossController } from "../core/boss";
 const STAR_SPEED = 900; // px/s upward
 const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/right for Zoe)
 const FIRE_INTERVAL = 0.18;
-const COLLECTIBLE_SPEED = 240; // px/s downward
-const COLLECTIBLE_SPAWN_INTERVAL = 2.5; // seconds (base)
 
 // Rainbow colours the shot stars cycle through (ROYGBIV), bright and kid-friendly.
 const RAINBOW_STAR_COLORS = [
@@ -61,11 +59,6 @@ export class GameScene extends Phaser.Scene {
   // ── Item 2: Score ───────────────────────────────────────────────────────────
   protected score!: number;
   protected scoreText!: Phaser.GameObjects.Text;
-
-  // ── Item 3: Collectibles ────────────────────────────────────────────────────
-  protected collectibles!: Phaser.GameObjects.Group;
-  private collectibleTimer = 0;
-  private nextCollectibleIn = 0;
 
   constructor(key = "Game") {
     super(key);
@@ -135,11 +128,6 @@ export class GameScene extends Phaser.Scene {
     this.add.text(W - 24, 24, "⬅", { fontSize: "44px", color: "#ffffff" })
       .setOrigin(1, 0).setDepth(1000).setInteractive({ useHandCursor: true })
       .on("pointerdown", () => this.scene.start("Title"));
-
-    // ── Item 3: Collectibles pool ────────────────────────────────────────────
-    this.collectibles = this.add.group();
-    this.collectibleTimer = 0;
-    this.nextCollectibleIn = COLLECTIBLE_SPAWN_INTERVAL + (Math.random() - 0.5) * 0.8;
 
     // Initialise previous position for movement-gate
     this._prevUnicornX = this.target.x;
@@ -267,52 +255,6 @@ export class GameScene extends Phaser.Scene {
       this.transitioning = true;
       this.onFormationCleared();
     }
-  }
-
-  // ── Item 3: Spawn one collectible ───────────────────────────────────────────
-  private spawnCollectible() {
-    const type = Math.random() < 0.5 ? "gem" : "heart";
-    const x = 80 + Math.random() * (this.scale.width - 160);
-    let c = this.collectibles.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
-    if (!c) {
-      c = spawnEmoji(this, x, -40, type).setScale(1.0);
-      this.collectibles.add(c);
-    } else {
-      resetEmoji(c, type, x, -40).setScale(1.0);
-    }
-  }
-
-  // ── Item 3: Update falling collectibles ─────────────────────────────────────
-  private updateCollectibles(dt: number) {
-    // Spawn timer with jitter
-    this.collectibleTimer += dt;
-    if (this.collectibleTimer >= this.nextCollectibleIn) {
-      this.collectibleTimer = 0;
-      this.nextCollectibleIn = COLLECTIBLE_SPAWN_INTERVAL + (Math.random() - 0.5) * 0.8;
-      this.spawnCollectible();
-    }
-
-    const ux = this.unicorn.x, uy = this.unicorn.y;
-    (this.collectibles.getChildren() as Phaser.GameObjects.Sprite[]).forEach((c) => {
-      if (!c.active) return;
-
-      // Fall (the emoji animates on its own).
-      c.y += COLLECTIBLE_SPEED * dt;
-
-      // Collect: unicorn overlap check (radius 70)
-      if (circleOverlap({ x: c.x, y: c.y, r: 70 }, { x: ux, y: uy, r: 0 })) {
-        this.addScore(25);
-        this.fx.popAt(c.x, c.y);
-        this.sound2.collect();
-        this.collectibles.killAndHide(c);
-        return;
-      }
-
-      // Miss: fell off bottom
-      if (c.y > this.scale.height + 50) {
-        this.collectibles.killAndHide(c);
-      }
-    });
   }
 
   protected onFormationCleared() {
@@ -451,7 +393,5 @@ export class GameScene extends Phaser.Scene {
 
     this.updateEnemies(dt);
     this.updateBoss(dt);
-    // ── Item 3: Drive collectibles from the shared update loop ──────────────
-    this.updateCollectibles(dt);
   }
 }
