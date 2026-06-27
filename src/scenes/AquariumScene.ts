@@ -2,11 +2,11 @@ import Phaser from "phaser";
 import { AquariumBackground } from "./ui/AquariumBackground";
 import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
-import { Sound } from "../audio/sound";
+import { Sound, AQUARIUM_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { pickNearestWithinRadius } from "../core/pop";
 import { pickReaction, netAdds, initialAquariumState, pickTreasureReaction, type AquariumState, type Reaction, type TreasureReactionId } from "../core/aquarium";
-import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, ensureAudioLoaded } from "../render/assets";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, preloadFirstTrack } from "../render/assets";
 
 const BASELINE = 7;            // target ambient fish count
 const HARD_CAP = 16;          // max concurrent fish
@@ -31,6 +31,11 @@ const AQUARIUM_TYPES = [
 const TREASURE_TYPES = ["ringbuoy", "sailboat", "bottle", "ring"];
 const TREASURE_CHANCE = 0.2;   // ~1 in 5 ambient spawns is a treasure
 
+// Emoji the REACTIONS spawn (heart-pop, treasure reveal + jackpot) — NOT part of
+// the drifting cast, but they must still be loaded or they float up as a broken
+// missing-texture box.
+const REACTION_EMOJI = ["heart", "gem"];
+
 // Rainbow tint cycle (ROYGBIV) for color-flash + the shockwave overlay.
 const RAINBOW_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
 // Warm gold tints for the treasure "gleam" reaction.
@@ -54,13 +59,14 @@ export class AquariumScene extends Phaser.Scene {
 
   preload() {
     loadAtlas(this);
-    loadEmoji(this, [...AQUARIUM_TYPES, ...TREASURE_TYPES]);
-    loadAudio(this, ["aquarium", "blub", "sproing", "chime", "fanfare", "tada"]);
+    loadEmoji(this, [...AQUARIUM_TYPES, ...TREASURE_TYPES, ...REACTION_EMOJI]);
+    loadAudio(this, ["blub", "sproing", "chime", "fanfare", "tada"]);
+    preloadFirstTrack(this, AQUARIUM_MUSIC_KEYS);
     showLoadingBar(this);
   }
 
   create() {
-    registerEmojiAnims(this, [...AQUARIUM_TYPES, ...TREASURE_TYPES]);
+    registerEmojiAnims(this, [...AQUARIUM_TYPES, ...TREASURE_TYPES, ...REACTION_EMOJI]);
     const W = this.scale.width;
     const H = this.scale.height;
 
@@ -77,27 +83,14 @@ export class AquariumScene extends Phaser.Scene {
     this.aqState = initialAquariumState();
     this.lastTreasure = null;
 
-    // Dedicated looping music (quieter so SFX stay crisp), streamed on first
-    // entry so it isn't part of the initial download. Robust autoplay (immediate
-    // + delayed retry + unlock/first-tap); `left` guards every deferred path so a
-    // late track-load or retry can't resurrect music after we've left the scene.
-    let music: Phaser.Sound.BaseSound | undefined;
-    let left = false;
-    const startMusic = () => { if (!left && music && !music.isPlaying) music.play(); };
-    ensureAudioLoaded(this, "aquarium", () => {
-      if (left) return;
-      music = this.sound.add("aquarium", { loop: true, volume: 0.38 });
-      startMusic();
-      this.time.delayedCall(200, startMusic);
-      if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
-      this.input.once("pointerdown", startMusic);
-    });
+    // 3-track ambient playlist (quieter so SFX stay crisp). The first track is
+    // preloaded (preloadFirstTrack) so it starts the instant the scene shows; the
+    // rest stream on demand. Sound guards its own SHUTDOWN, so a late track-load
+    // can't resurrect music after we leave.
+    this.sound2.playMusic(AQUARIUM_MUSIC_KEYS, 0.38);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      left = true;
       this.tweens.killAll();
       this.time.removeAllEvents();
-      this.sound.off(Phaser.Sound.Events.UNLOCKED, startMusic);
-      music?.stop();
       this.sound.stopAll();
       // NOTE: do NOT iterate `this.fish` here. The Group registers its own
       // SHUTDOWN listener when created (earlier in create()), so it destroys

@@ -28,6 +28,8 @@ export const AUDIO_FILES: Record<string, string[]> = {
   gumball: ["audio/gumball.mp3"],
   gumball2: ["audio/gumball2.mp3"],
   aquarium: ["audio/aquarium.mp3"],
+  aquarium2: ["audio/aquarium2.mp3"],
+  aquarium3: ["audio/aquarium3.mp3"],
   catch1: ["audio/catch1.mp3"],
   catch2: ["audio/catch2.mp3"],
   catch3: ["audio/catch3.mp3"],
