@@ -20,12 +20,9 @@ const CREATURE_CAP = 5;
 // 🐝 bee only if it baked loop-safe in Task 1; else 🍩 donut is the 2nd flyer.
 const CREATURE_KEYS = ["butterfly", EMOJI["bee"] ? "bee" : "donut"];
 const CREATURE_SCALE = 0.5;   // 144px frames
-const SKY_KEYS = ["dove", "eagle", "flamingo", "owl"]; // existing flying birds for the sky
-const SKY_CAP = 2;            // max birds drifting across at once
-// Every emoji this mode can spawn: the 🌱 sprout, all maturity-ladder plants, the
-// pollinators, and the sky birds. Lazy-loaded on first entry.
-const GARDEN_EMOJI_KEYS = ["sprout", ...TIER_PLANTS.flat(), ...CREATURE_KEYS, ...SKY_KEYS];
-const SKY_DEPTH = 5;          // above the background, behind the meadow plants
+// Every emoji this mode can spawn: the 🌱 sprout, all maturity-ladder plants, and the
+// pollinators. Lazy-loaded on first entry.
+const GARDEN_EMOJI_KEYS = ["sprout", ...TIER_PLANTS.flat(), ...CREATURE_KEYS];
 
 export class GardenScene extends Phaser.Scene {
   private bg!: GardenBackground;
@@ -33,7 +30,6 @@ export class GardenScene extends Phaser.Scene {
   private fx!: Celebrations;
   private plants!: Phaser.GameObjects.Group;
   private creatures!: Phaser.GameObjects.Group;
-  private skyFliers!: Phaser.GameObjects.Group;
   private placed = 0;
   private lastTier = 0;
   private phase: "building" | "celebrating" | "clearing" = "building";
@@ -63,7 +59,6 @@ export class GardenScene extends Phaser.Scene {
     this.placed = 0; this.lastTier = 0; this.phase = "building"; this.noteIndex = 0;
     this.plants = this.add.group();
     this.creatures = this.add.group();
-    this.skyFliers = this.add.group();
 
     this.add.text(W - 24, 24, "⬅", { fontSize: "44px" }).setOrigin(1, 0).setDepth(FX_DEPTH)
       .setInteractive({ useHandCursor: true })
@@ -71,9 +66,6 @@ export class GardenScene extends Phaser.Scene {
 
     this.input.addPointer(3); // a couple of kids can tap at once
     this.input.on("pointerdown", (p: Phaser.Input.Pointer) => this.onTap(p.x, p.y));
-
-    this.spawnFlier();    // a bird in the sky right away
-    this.scheduleFlier(); // ...then more drift through over time
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.teardownAll());
   }
@@ -232,36 +224,6 @@ export class GardenScene extends Phaser.Scene {
     const W = this.scale.width, H = this.scale.height;
     const g = this.add.image(W / 2, H * 0.78, ATLAS_KEY, frameFor("sparkle")).setScale(1.2).setDepth(FX_DEPTH).setAlpha(0.9);
     this.tweens.add({ targets: g, scale: 1.8, alpha: 0, duration: 900, onComplete: () => g.destroy() });
-  }
-
-  // Schedule the next ambient bird to drift across the sky (recurring).
-  private scheduleFlier() {
-    const delay = (this.reduce ? 6000 : 2600) + Math.random() * 3500;
-    this.time.delayedCall(delay, () => {
-      if (this.skyFliers.countActive(true) < (this.reduce ? 2 : SKY_CAP)) this.spawnFlier();
-      this.scheduleFlier();
-    });
-  }
-
-  // A bird drifts in from one edge, across the sky with a gentle bob, recycled at the far edge.
-  private spawnFlier() {
-    const W = this.scale.width;
-    const startX = -70;   // always enter from the left...
-    const endX = W + 70;  // ...and drift off the right
-    const baseY = 130 + Math.random() * Math.max(80, this.bg.horizon - 200);
-    const key = SKY_KEYS[Math.floor(Math.random() * SKY_KEYS.length)];
-    let f = this.skyFliers.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
-    if (!f) { f = spawnEmoji(this, startX, baseY, key); this.skyFliers.add(f); }
-    else { this.tweens.killTweensOf(f); resetEmoji(f, key, startX, baseY); }
-    f.setOrigin(0.5, 0.5).setAlpha(1).setDepth(SKY_DEPTH).setFlipX(false)
-      .setScale(0.42 + Math.random() * 0.16);
-    const dur = (this.reduce ? 16000 : 8000) + Math.random() * 5000;
-    const amp = this.reduce ? 0 : 14;
-    this.tweens.add({
-      targets: f, x: endX, duration: dur, ease: "Linear",
-      onUpdate: (tw) => { f!.y = baseY + Math.sin(tw.progress * Math.PI * 6) * amp; },
-      onComplete: () => this.skyFliers.killAndHide(f!),
-    });
   }
 
   private teardownAll() {
