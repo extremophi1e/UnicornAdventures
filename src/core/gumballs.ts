@@ -30,14 +30,16 @@ function shuffle(items: readonly string[], rng: () => number): string[] {
   return a;
 }
 
-export function createBag(rng: () => number): Bag {
+// `items` defaults to GUMBALL_ITEMS (keeps existing tests/callers unchanged);
+// GumballScene passes the full emoji set so the machine dispenses everything.
+export function createBag(rng: () => number, items: readonly string[] = GUMBALL_ITEMS): Bag {
   let bag: string[] = [];
   let last: string | null = null;
   let sinceJackpot = 0;
 
   const drawCutie = (): string => {
     if (bag.length === 0) {
-      bag = shuffle(GUMBALL_ITEMS, rng);
+      bag = shuffle(items, rng);
       // De-seam: the item we're about to draw (end of the array) must not repeat
       // the previous draw across a refill boundary. Swap it with any item that
       // differs from `last` (robust even if the item list ever has duplicates;

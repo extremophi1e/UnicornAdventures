@@ -10,13 +10,20 @@ import { findStarEnemyHits, circleOverlap, type Circle } from "../core/collision
 import { nearestEnemy, steerVelocity } from "../core/magnetism";
 import { createRng } from "../core/rng";
 import { Celebrations } from "./ui/Celebrations";
-import type { PlacedEnemy } from "../core/types";
+import type { PlacedEnemy, CuteType } from "../core/types";
 import { BossController } from "../core/boss";
 
 const STAR_SPEED = 900; // px/s upward
 const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/right for Zoe)
 const FIRE_INTERVAL = 0.18;
 const FINGER_LIFT = 120; // on touch, aim the unicorn this far above the finger so it isn't hidden
+
+// Rainbow Shoot uses ONLY creepy-crawly "bugs" + a robot + poop as enemies, so the
+// shooter reads as zapping pests (the other modes get the cute/full emoji set).
+// donut = the ladybug sheet, butterfly + ant + snail round out the bugs. These
+// override each level's authored type list at spawn time. Bosses are always the robot.
+const SHOOTER_TYPES: CuteType[] = ["ant", "snail", "butterfly", "donut", "robot", "poop"];
+const SHOOTER_BOSS_TYPE: CuteType = "robot";
 
 // Rainbow colours the shot stars cycle through (ROYGBIV), bright and kid-friendly.
 const RAINBOW_STAR_COLORS = [
@@ -193,7 +200,8 @@ export class GameScene extends Phaser.Scene {
     const spec = this.currentFormations()[this.formationIndex];
     const tpl = TEMPLATES[spec.templateId];
     const rng = createRng(this.levelIndex * 100 + this.formationIndex);
-    const assigned = assignTypes(tpl, spec.typing, spec.types, rng);
+    // Override the level's authored types: the shooter only ever fields bugs+robot+poop.
+    const assigned = assignTypes(tpl, spec.typing, SHOOTER_TYPES, rng);
     const placed: PlacedEnemy[] = layoutFormation(tpl, assigned, { width: this.scale.width, height: this.scale.height });
     for (const pe of placed) {
       let img = this.enemies.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
@@ -317,7 +325,7 @@ export class GameScene extends Phaser.Scene {
   protected startBoss() {
     const spec = getLevel(this.levelIndex).boss!;
     this.bossCtl = new BossController(spec);
-    this.boss = spawnEmoji(this, this.scale.width / 2, 320, spec.type).setScale(4 / 2);
+    this.boss = spawnEmoji(this, this.scale.width / 2, 320, SHOOTER_BOSS_TYPE).setScale(4 / 2);
     this.bossBar = this.add.graphics();
     this.tweens.add({ targets: this.boss, x: this.scale.width / 2 + 80, yoyo: true, repeat: -1, duration: 1600, ease: "Sine.inOut" });
   }
