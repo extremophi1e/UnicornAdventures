@@ -3,7 +3,7 @@ import { AquariumBackground } from "./ui/AquariumBackground";
 import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { Celebrations } from "./ui/Celebrations";
 import { pickNearestWithinRadius } from "../core/pop";
-import { pickReaction, initialAquariumState, type AquariumState, type Reaction } from "../core/aquarium";
+import { pickReaction, netAdds, initialAquariumState, type AquariumState, type Reaction } from "../core/aquarium";
 
 const BASELINE = 7;            // target ambient fish count
 const HARD_CAP = 16;          // max concurrent fish
@@ -168,7 +168,13 @@ export class AquariumScene extends Phaser.Scene {
       case "squash": this.rSquash(fish); break;
       case "colorflash": this.rColorFlash(fish); break;
       case "heart": this.rHeart(fish); break;
-      // Uncommon + Rare reactions are added in Tasks 6 & 7. Until then they fall
+      case "split": this.rSplit(fish, reaction); break;
+      case "bubblestream": this.rBubbleStream(fish); break;
+      case "zoom": this.rZoom(fish); break;
+      case "morph": this.rMorph(fish); break;
+      case "backflip": this.rBackflip(fish); break;
+      case "giant": this.rGiant(fish); break;
+      // Rare reactions are added in Task 7. Until then they fall
       // through to a gentle wiggle (always a pleasant, unbreakable response).
       default: this.rWiggle(fish); break;
     }
@@ -204,6 +210,64 @@ export class AquariumScene extends Phaser.Scene {
   private rHeart(fish: Fish) {
     const h = spawnEmoji(this, fish.x, fish.y, "heart").setScale(0.4).setDepth(60);
     this.tweens.add({ targets: h, y: h.y - 90, alpha: 0, duration: 700, ease: "Sine.out", onComplete: () => h.destroy() });
+  }
+
+  // --- Uncommon reaction handlers ---
+  // Split: the parent squashes and a same-species child pops out swimming the
+  // other way. Cap-safe via netAdds (and pickReaction already filters split at cap).
+  private rSplit(fish: Fish, reaction: Reaction) {
+    this.rSquash(fish);
+    const remaining = HARD_CAP - this.fish.countActive(true);
+    if (netAdds(reaction, remaining) > 0) {
+      const dir = -(fish.getData("dir") as number) || 1;
+      const child = this.spawnFishAt(fish.x, fish.y, dir, fish.getData("type") as string);
+      child.setScale(ITEM_SCALE * 0.6);
+      this.tweens.add({ targets: child, scale: ITEM_SCALE, duration: 300, ease: "Back.out" });
+      this.tweens.add({ targets: child, x: child.x + dir * 40, duration: 220, ease: "Sine.out" });
+    }
+    this.sound.play("sproing", { volume: 0.5 });
+  }
+  private rBubbleStream(fish: Fish) {
+    this.time.addEvent({
+      delay: 90, repeat: 7,
+      callback: () => { if (fish.active) this.emitBubbles(fish.x, fish.y - 10, 2, 14); },
+    });
+    this.sound.play("blub", { volume: 0.45 });
+  }
+  private rZoom(fish: Fish) {
+    const W = this.scale.width;
+    const nx = 80 + Math.random() * (W - 160);
+    this.emitBubbles(fish.x, fish.y, 5, 10);
+    this.tweens.add({ targets: fish, x: nx, duration: 340, ease: "Cubic.inOut" });
+    this.sound.play("blub", { volume: 0.4, detune: 200 });
+  }
+  private rMorph(fish: Fish) {
+    const cur = fish.getData("type") as string;
+    const others = AQUARIUM_TYPES.filter((t) => t !== cur);
+    const nt = others[Math.floor(Math.random() * others.length)];
+    this.emitBubbles(fish.x, fish.y, 8, 30);
+    this.tweens.add({
+      targets: fish, scale: ITEM_SCALE * 0.2, duration: 140, ease: "Sine.in",
+      onComplete: () => {
+        resetEmoji(fish, nt, fish.x, fish.y);
+        fish.setData("type", nt);
+        fish.setScale(ITEM_SCALE * 0.2);
+        this.tweens.add({ targets: fish, scale: ITEM_SCALE, duration: 220, ease: "Back.out" });
+      },
+    });
+    this.sound.play("blub", { volume: 0.4 });
+  }
+  private rBackflip(fish: Fish) {
+    const a = fish.angle;
+    this.tweens.add({ targets: fish, angle: a - 360, duration: 650, ease: "Back.inOut", onComplete: () => fish.setAngle(0) });
+    this.tweens.add({ targets: fish, scaleX: ITEM_SCALE * 1.15, scaleY: ITEM_SCALE * 1.15, yoyo: true, duration: 325, onComplete: () => fish.setScale(ITEM_SCALE) });
+  }
+  private rGiant(fish: Fish) {
+    this.tweens.add({
+      targets: fish, scale: ITEM_SCALE * 2.4, yoyo: true, hold: 200, duration: 260,
+      ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE),
+    });
+    this.sound.play("blub", { volume: 0.5, detune: -300 });
   }
 
   // --- Sleepy damper ---
