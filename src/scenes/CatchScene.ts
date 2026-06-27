@@ -18,7 +18,7 @@ const CELEBRATION_EVERY = 10;  // catches per milestone celebration
 const UNICORN_DISPLAY_H = 150; // target on-screen unicorn height in px
 const FINGER_LIFT = 120;       // on touch, float the unicorn this far above the finger so it isn't hidden
 const ITEM_SCALE = 1.1 / 2;    // /2: emoji frames are 144px (2x the old 72px)
-const GIANT_GEM_SCALE = 2.6 / 2; // the rare giant gem — ~2.4x a normal item, unmistakable
+const GIANT_GEM_SCALE = 1.8 / 2; // matches Pop's rainbow bonus size (BONUS_SCALE)
 const GIANT_CATCH_RADIUS = 150;  // bigger pickup radius to match the giant body
 
 // Every emoji EXCEPT the gem — the gem only appears as the rare GIANT gem power-up
