@@ -18,11 +18,11 @@ const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/rig
 const FIRE_INTERVAL = 0.18;
 const FINGER_LIFT = 120; // on touch, aim the unicorn this far above the finger so it isn't hidden
 
-// Rainbow Shoot enemy set: bugs (ant, snail, butterfly, donut=ladybug) + robot +
-// poop + a couple of sky/sea critters (cloud, star, trex, jellyfish). These override
-// each level's authored type list at spawn time. Bosses are always the robot.
+// Rainbow Shoot enemy set: bugs (ant, snail, butterfly, donut=ladybug, microbe) +
+// robot + poop + a couple of sky/sea critters (cloud, star, trex, jellyfish). These
+// override each level's authored type list at spawn time. Bosses are always the robot.
 const SHOOTER_TYPES: CuteType[] = [
-  "ant", "snail", "butterfly", "donut", "robot", "poop", "cloud", "star", "trex", "jellyfish",
+  "ant", "snail", "butterfly", "donut", "microbe", "robot", "poop", "cloud", "star", "trex", "jellyfish",
 ];
 const SHOOTER_BOSS_TYPE: CuteType = "robot";
 
