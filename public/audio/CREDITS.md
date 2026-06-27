@@ -29,6 +29,7 @@ Attribution: "Music by Kevin MacLeod — incompetech.com"
 | peekaboo1.mp3 | Sneaky Snitch        | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Sneaky%20Snitch.mp3          | CC-BY 4.0 |
 | peekaboo2.mp3 | Hyperfun             | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Hyperfun.mp3                 | CC-BY 4.0 |
 | peekaboo3.mp3 | Quirky Dog           | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Quirky%20Dog.mp3             | CC-BY 4.0 |
+| aquarium.mp3 | Carefree                | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3                 | CC-BY 4.0 |
 
 ## Sound Effects
 

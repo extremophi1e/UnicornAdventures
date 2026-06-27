@@ -17,6 +17,8 @@
     "gumball-audio": "node scripts/build-gumball-audio.mjs",
     "soundboard-audio": "node scripts/build-soundboard-audio.mjs",
     "peekaboo-audio": "node scripts/build-peekaboo-audio.mjs",
+    "aquarium-audio": "node scripts/build-aquarium-audio.mjs",
+    "aquarium-sfx": "node scripts/build-aquarium-sfx.mjs",
     "emoji": "node scripts/build-emoji.mjs",
     "eggs-audio": "node scripts/build-eggs-audio.mjs"
   },
