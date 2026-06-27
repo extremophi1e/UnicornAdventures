@@ -7,6 +7,8 @@ import { PopScene } from "./scenes/PopScene";
 import { GumballScene } from "./scenes/GumballScene";
 import { SoundboardScene } from "./scenes/SoundboardScene";
 import { PeekabooScene } from "./scenes/PeekabooScene";
+import { EggsScene } from "./scenes/EggsScene";
+import { AquariumScene } from "./scenes/AquariumScene";
 import { GardenScene } from "./scenes/GardenScene";
 import { computeLogicalWidth, LOGICAL_HEIGHT } from "./core/viewport";
 import { maybeShowIosInstallHint, requestFullscreenOnce } from "./pwa/installHint";
@@ -22,7 +24,7 @@ const game = new Phaser.Game({
     width: computeLogicalWidth(window.innerWidth, window.innerHeight),
     height: LOGICAL_HEIGHT,
   },
-  scene: [BootScene, TitleScene, GameScene, CatchScene, PopScene, GumballScene, SoundboardScene, PeekabooScene, GardenScene],
+  scene: [BootScene, TitleScene, GameScene, CatchScene, PopScene, GumballScene, SoundboardScene, PeekabooScene, EggsScene, AquariumScene, GardenScene],
 });
 
 (window as unknown as { __game?: Phaser.Game }).__game = game;

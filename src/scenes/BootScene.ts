@@ -20,6 +20,10 @@ export class BootScene extends Phaser.Scene {
     this.load.audio("popmusic2", ["audio/popmusic2.mp3"]);
     this.load.audio("gumball", ["audio/gumball.mp3"]);
     this.load.audio("gumball2", ["audio/gumball2.mp3"]);
+    this.load.audio("aquarium", ["audio/aquarium.mp3"]);
+    this.load.audio("blub", ["audio/blub.wav"]);
+    this.load.audio("sproing", ["audio/sproing.wav"]);
+    this.load.audio("chime", ["audio/chime.wav"]);
     this.load.audio("catch1", ["audio/catch1.mp3"]);
     this.load.audio("catch2", ["audio/catch2.mp3"]);
     this.load.audio("catch3", ["audio/catch3.mp3"]);
@@ -32,6 +36,13 @@ export class BootScene extends Phaser.Scene {
     this.load.audio("pop", ["audio/pop.mp3"]);
     this.load.audio("fanfare", ["audio/fanfare.mp3"]);
     this.load.audio("tada", ["audio/tada.mp3"]);
+    this.load.audio("crack1", ["audio/crack1.mp3"]);
+    this.load.audio("crack2", ["audio/crack2.mp3"]);
+    this.load.audio("crack3", ["audio/crack3.mp3"]);
+    this.load.audio("shatter", ["audio/shatter.mp3"]);
+    this.load.audio("eggsmusic", ["audio/eggsmusic.mp3"]);
+    this.load.audio("eggsmusic2", ["audio/eggsmusic2.mp3"]);
+    this.load.audio("eggsmusic3", ["audio/eggsmusic3.mp3"]);
     this.load.audioSprite("animalvoices", "audio/animalvoices.json", ["audio/animalvoices.mp3"]);
     this.load.audioSprite("gardennotes", "audio/gardennotes.json", ["audio/gardennotes.mp3"]);
     this.load.audio("giggle1", ["audio/giggle1.mp3"]);

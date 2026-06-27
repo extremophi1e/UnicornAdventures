@@ -95,6 +95,8 @@ Connect the repo on Netlify with build command `npm run build` and publish dir `
 | `npm run catch-audio` | Fetches the Rainbow Catch music playlist |
 | `npm run pop-audio` | Fetches the Pop the Cuties track (default: *Wallpaper*) |
 | `npm run gumball-audio` | Fetches the Unicorn Gumballs track (default: *The Builder*) |
+| `npm run aquarium-audio` | Fetches the Tap the Aquarium track (default: *Carefree*) |
+| `npm run aquarium-sfx` | Synthesizes the aquarium reaction sounds (blub / sproing / chime) |
 | `npm run catch-unicorn` | Builds the animated unicorn sprite sheet |
 | `npm run icons` | Generates the PWA icons |
 

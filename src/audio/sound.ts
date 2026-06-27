@@ -8,6 +8,7 @@ export const PEEKABOO_MUSIC_KEYS: readonly string[] = ["peekaboo1", "peekaboo2",
 // Garden reuses the calm meadow tracks as a quiet ambient bed (the tap-notes are the foreground).
 export const GARDEN_MUSIC_KEYS: readonly string[] = PEEKABOO_MUSIC_KEYS;
 export const GARDEN_NOTE_COUNT = 11;
+export const EGGS_MUSIC_KEYS: readonly string[] = ["eggsmusic", "eggsmusic2", "eggsmusic3"];
 const GIGGLE_KEYS = ["giggle1", "giggle2", "giggle3"] as const;
 
 export class Sound {
@@ -55,6 +56,17 @@ export class Sound {
   }
   tada(): void {
     this.scene.sound.play("tada", { volume: 0.8 });
+  }
+
+  // Crack "tok" for tap N (1..3) — rising pitch is baked into the assets.
+  crack(stage: number): void {
+    const k = ["crack1", "crack2", "crack3"][Math.min(Math.max(stage, 1), 3) - 1];
+    this.scene.sound.play(k, { volume: 0.6 });
+  }
+
+  // The shell-shatter on the final tap.
+  shatter(): void {
+    this.scene.sound.play("shatter", { volume: 0.7 });
   }
 
   // Play a random giggle variant — pitch variety avoids machine-gun fatigue on
