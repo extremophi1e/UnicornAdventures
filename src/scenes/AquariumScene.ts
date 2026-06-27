@@ -155,6 +155,12 @@ export class AquariumScene extends Phaser.Scene {
   }
 
   private applyReaction(fish: Fish, reaction: Reaction) {
+    // A fresh tap interrupts any in-flight reaction cleanly: kill the prior
+    // reaction tweens and restore the fish to its base angle/scale/tint, so an
+    // interrupted spin/squash/colorflash/giant can't leave it stuck rotated,
+    // resized, or tinted. (update() controls x/y drift separately — not tweened.)
+    this.tweens.killTweensOf(fish);
+    fish.setAngle(0).setScale(ITEM_SCALE).clearTint();
     switch (reaction.id) {
       case "spin": this.rSpin(fish); break;
       case "wiggle": this.rWiggle(fish); break;
