@@ -15,6 +15,7 @@
     "catch-audio": "node scripts/build-catch-audio.mjs",
     "pop-audio": "node scripts/build-pop-audio.mjs",
     "gumball-audio": "node scripts/build-gumball-audio.mjs",
+    "soundboard-audio": "node scripts/build-soundboard-audio.mjs",
     "emoji": "node scripts/build-emoji.mjs"
   },
   "dependencies": {
