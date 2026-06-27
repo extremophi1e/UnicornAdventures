@@ -246,15 +246,14 @@ export class GardenScene extends Phaser.Scene {
   // A bird drifts in from one edge, across the sky with a gentle bob, recycled at the far edge.
   private spawnFlier() {
     const W = this.scale.width;
-    const fromLeft = Math.random() < 0.5;
-    const startX = fromLeft ? -70 : W + 70;
-    const endX = fromLeft ? W + 70 : -70;
+    const startX = -70;   // always enter from the left...
+    const endX = W + 70;  // ...and drift off the right
     const baseY = 130 + Math.random() * Math.max(80, this.bg.horizon - 200);
     const key = SKY_KEYS[Math.floor(Math.random() * SKY_KEYS.length)];
     let f = this.skyFliers.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
     if (!f) { f = spawnEmoji(this, startX, baseY, key); this.skyFliers.add(f); }
     else { this.tweens.killTweensOf(f); resetEmoji(f, key, startX, baseY); }
-    f.setOrigin(0.5, 0.5).setAlpha(1).setDepth(SKY_DEPTH).setFlipX(!fromLeft)
+    f.setOrigin(0.5, 0.5).setAlpha(1).setDepth(SKY_DEPTH).setFlipX(false)
       .setScale(0.42 + Math.random() * 0.16);
     const dur = (this.reduce ? 16000 : 8000) + Math.random() * 5000;
     const amp = this.reduce ? 0 : 14;
