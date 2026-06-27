@@ -21,7 +21,7 @@
 
 There are **no scores to lose, no game-overs, no lives, no menus to get stuck in** — just a smiling unicorn, a lot of cute things, and four little games you reach with one big tap. Built for a 4-year-old and her sibling, tuned so a toddler mashing the screen with both hands always feels like a hero.
 
-## 🎮 Three games, one tap each
+## 🎮 Four games, one tap each
 
 <table>
 <tr>

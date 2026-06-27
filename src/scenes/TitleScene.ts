@@ -48,9 +48,10 @@ export class TitleScene extends Phaser.Scene {
     const uni = this.add.sprite(W / 2, 430, CATCH_UNICORN_KEY).setScale(0.8).play(CATCH_UNICORN_ANIM);
     this.tweens.add({ targets: uni, y: 400, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
 
-    this.makeButton(W / 2, 720, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
-    this.makeButton(W / 2, 880, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
-    this.makeButton(W / 2, 1040, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
+    this.makeButton(W / 2, 700, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
+    this.makeButton(W / 2, 850, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
+    this.makeButton(W / 2, 1000, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
+    this.makeButton(W / 2, 1150, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
