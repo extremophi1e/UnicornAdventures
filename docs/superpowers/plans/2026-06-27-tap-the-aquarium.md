@@ -13,7 +13,7 @@
 - **No new runtime dependencies** — Phaser 4 + existing helpers only.
 - **Reuse, don't duplicate:** multi-touch reuses `pickNearestWithinRadius` from `src/core/pop.ts`; sprites use `spawnEmoji`/`resetEmoji`; juice uses `Celebrations` (`popAt`/`banner`/`bigParty`) + `Sound` (`fanfare`/`tada`); music wiring copies `PopScene`'s robust-autoplay pattern verbatim.
 - **Pure logic is Vitest-tested** (`src/core/aquarium.ts`); scenes/backgrounds/scripts are not unit-tested (verified by running the game in Claude Preview).
-- **Existing modes must be untouched behaviorally.** New emoji are added to the global set (Pop the Cuties will also gain them — acceptable). The only `TitleScene` change is the button list (a 7th button on a new 4th grid row + two display-label renames; Peekaboo's grid + button stay).
+- **Existing modes must be untouched behaviorally.** No new emoji are added (the aquarium reuses the 9 existing aquatic creatures). The only `TitleScene` change is the button list (a 7th button on a new 4th grid row + two display-label renames; Peekaboo's grid + button stay).
 - **Surprise, not Skinner box:** NO score, count, currency, collection meter, persistence, or "tap to unlock." Each tap is guaranteed a pleasant reaction; rarity only varies which one.
 - **Unbreakable & calm:** no fail state; population can never overflow (hard cap + cap-filter) or empty (ambient recycle); reactions are fire-and-forget and overlap-safe; photosensitivity-safe (no strobe — slow low-contrast rainbow); honor `prefers-reduced-motion`.
 - **Phaser 4 gotchas:** no `setTintFill()` (use `setTint`/`clearTint`); no Tween `Timeline` and do NOT use `this.add.timeline` for duration-driven sequences — sequence with `this.time.delayedCall` + chained/concurrent tweens; avoid runtime `generateTexture` (blank-texture gotcha) — backgrounds/bubbles are shape GameObjects.
@@ -23,7 +23,13 @@
 
 ---
 
-### Task 1: Assets — add fish/blowfish/shark sea-creatures (+ dolphin, probe-gated)
+### Task 1: Cast — use the 9 existing aquatic creatures (NO new assets)
+
+> **SUPERSEDED (2026-06-27):** The original plan to add real fish (🐟/🐡/🦈/🐬) was dropped after hands-on probing. Noto animates them as swim-across / inflate-deflate / arc, so they drop to **0–7.5% opacity mid-loop** (vs ≥33% for proven creatures) and would flicker/vanish as drifting sprites — failing the project's ~15% loop-safety bar. **No new emoji are added.** The aquarium cast uses the **9 steady aquatic creatures already in `src/render/emoji.ts`**: whale, turtle, octopus, crab, lobster, jellyfish, penguin, seal, otter. 🐠 remains the title-button glyph only. **Nothing to build here** — confirm the 9 keys exist (`grep -E "^  (whale|turtle|octopus|crab|lobster|jellyfish|penguin|seal|otter):" src/render/emoji.ts`) and proceed to Task 2. The original (now void) steps are retained below for history only — do NOT execute them.
+
+---
+
+### Task 1 (VOID — historical): Assets — add fish/blowfish/shark sea-creatures (+ dolphin, probe-gated)
 
 **Files:**
 - Modify: `scripts/build-emoji.mjs` (the `TYPES` map)
@@ -779,12 +785,11 @@ const NAP_SECONDS = 2.5;
 const TAP_WINDOW = 2.0;       // seconds; a fish's tap counter resets if idle longer
 const NAP_SLOW = 0.3;         // drift multiplier while napping
 
-// Curated sea-creature cast (emoji keys). otter + the 8 aquatic creatures already
-// existed; fish/blowfish/shark were added in Task 1. If the dolphin probe passed
-// in Task 1, append "dolphin" to this list.
+// Curated sea-creature cast (emoji keys) — the 9 proven steady-looping aquatic
+// creatures already in src/render/emoji.ts. (Noto's real fish/shark/dolphin/
+// blowfish animations flicker/vanish mid-loop, so they are NOT used — see Task 1.)
 const AQUARIUM_TYPES = [
-  "whale", "turtle", "octopus", "crab", "lobster", "jellyfish", "penguin", "seal",
-  "otter", "fish", "blowfish", "shark",
+  "whale", "turtle", "octopus", "crab", "lobster", "jellyfish", "penguin", "seal", "otter",
 ];
 
 // Rainbow tint cycle (ROYGBIV) for color-flash + the shockwave overlay.
@@ -1342,7 +1347,7 @@ git commit -m "feat(aquarium): rare jackpots (school, rainbow shockwave, treasur
 - §3.5 `netAdds` → Task 2 + used in `rSplit`/`rSchool`. ✅
 - §3.6 sleepy damper (per-fish, ~5 taps, ~2.5 s, 💤) → Task 5 (`startNap`/`wake`/`sleepyMumble`). ✅
 - §3.7 jackpots (school cap-aware, slow shockwave, shape-chest treasure) → Task 7. ✅
-- §4 cast (8 aquatic + otter + fish/blowfish/shark, dolphin probe-gated) → Task 1 + `AQUARIUM_TYPES` (Task 5). ✅
+- §4 cast → the 9 existing aquatic creatures (whale/turtle/octopus/crab/lobster/jellyfish/penguin/seal/otter); real-fish additions dropped after failing the loop-safety probe (see Task 1) → `AQUARIUM_TYPES` (Task 5). ✅
 - §5 `AquariumBackground` (blue water/sand/kelp/coral) → Task 3. ✅
 - §6 own music + reaction SFX (blub/sproing/chime) → Task 4; used in handlers. ✅
 - §7 architecture (pure core + scene + bg; lifecycle discipline `killTweensOf` before recycle) → Tasks 2/3/5 (`recycle`/`spawnFishAt` kill tweens; SHUTDOWN stops music + destroys 💤). ✅
