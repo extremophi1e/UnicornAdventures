@@ -5,215 +5,215 @@
   "spritemap": {
     "cat": {
       "start": 0,
-      "end": 0.52
+      "end": 0.32
     },
     "dog": {
-      "start": 0.92,
-      "end": 1.16
+      "start": 0.72,
+      "end": 1.18
     },
     "rabbit": {
-      "start": 1.56,
-      "end": 1.78
+      "start": 1.58,
+      "end": 2.18
     },
     "chipmunk": {
-      "start": 2.18,
-      "end": 2.4
+      "start": 2.58,
+      "end": 3.12
     },
     "rat": {
-      "start": 2.8,
-      "end": 3.02
+      "start": 3.52,
+      "end": 3.82
     },
     "cow": {
-      "start": 3.42,
-      "end": 4.12
+      "start": 4.22,
+      "end": 4.52
     },
     "pig": {
-      "start": 4.52,
-      "end": 4.8
+      "start": 4.92,
+      "end": 5.28
     },
     "horse": {
-      "start": 5.2,
-      "end": 5.54
+      "start": 5.68,
+      "end": 5.88
     },
     "goat": {
-      "start": 5.94,
-      "end": 6.24
+      "start": 6.28,
+      "end": 6.6
     },
     "ox": {
-      "start": 6.64,
-      "end": 7.34
+      "start": 7,
+      "end": 7.46
     },
     "chick": {
-      "start": 7.74,
-      "end": 7.92
+      "start": 7.86,
+      "end": 8.46
     },
     "rooster": {
-      "start": 8.32,
-      "end": 8.7
+      "start": 8.86,
+      "end": 9.4
     },
     "fox": {
-      "start": 9.1,
-      "end": 9.34
+      "start": 9.8,
+      "end": 10.1
     },
     "bear": {
-      "start": 9.74,
-      "end": 10.44
+      "start": 10.5,
+      "end": 10.8
     },
     "panda": {
-      "start": 10.84,
-      "end": 11.2
+      "start": 11.2,
+      "end": 11.56
     },
     "lion": {
-      "start": 11.6,
-      "end": 12.32
+      "start": 11.96,
+      "end": 12.16
     },
     "tiger": {
-      "start": 12.72,
-      "end": 13.36
+      "start": 12.56,
+      "end": 12.88
     },
     "sloth": {
-      "start": 13.76,
-      "end": 14.12
+      "start": 13.28,
+      "end": 13.74
     },
     "raccoon": {
-      "start": 14.52,
-      "end": 14.82
+      "start": 14.14,
+      "end": 14.74
     },
     "hedgehog": {
-      "start": 15.22,
-      "end": 15.44
+      "start": 15.14,
+      "end": 15.68
     },
     "kangaroo": {
-      "start": 15.84,
-      "end": 16.18
+      "start": 16.08,
+      "end": 16.38
     },
     "monkey": {
-      "start": 16.58,
-      "end": 16.88
+      "start": 16.78,
+      "end": 17.08
     },
     "gorilla": {
-      "start": 17.28,
-      "end": 17.98
+      "start": 17.48,
+      "end": 17.84
     },
     "orangutan": {
-      "start": 18.38,
-      "end": 19.08
+      "start": 18.24,
+      "end": 18.44
     },
     "octopus": {
-      "start": 19.48,
-      "end": 19.84
+      "start": 18.84,
+      "end": 19.16
     },
     "turtle": {
-      "start": 20.24,
-      "end": 20.6
+      "start": 19.56,
+      "end": 20.02
     },
     "whale": {
-      "start": 21,
-      "end": 21.76
+      "start": 20.42,
+      "end": 21.02
     },
     "crab": {
-      "start": 22.16,
-      "end": 22.46
+      "start": 21.42,
+      "end": 21.96
     },
     "penguin": {
-      "start": 22.86,
-      "end": 23.2
+      "start": 22.36,
+      "end": 22.66
     },
     "otter": {
-      "start": 23.6,
-      "end": 23.82
+      "start": 23.06,
+      "end": 23.36
     },
     "seal": {
-      "start": 24.22,
-      "end": 24.56
+      "start": 23.76,
+      "end": 24.12
     },
     "lobster": {
-      "start": 24.96,
-      "end": 25.26
+      "start": 24.52,
+      "end": 24.72
     },
     "jellyfish": {
-      "start": 25.66,
-      "end": 26.02
+      "start": 25.12,
+      "end": 25.44
     },
     "owl": {
-      "start": 26.42,
-      "end": 26.78
+      "start": 25.84,
+      "end": 26.3
     },
     "peacock": {
-      "start": 27.18,
-      "end": 27.44
+      "start": 26.7,
+      "end": 27.3
     },
     "eagle": {
-      "start": 27.84,
-      "end": 28.06
+      "start": 27.7,
+      "end": 28.24
     },
     "flamingo": {
-      "start": 28.46,
-      "end": 28.8
+      "start": 28.64,
+      "end": 28.94
     },
     "dove": {
-      "start": 29.2,
-      "end": 29.56
+      "start": 29.34,
+      "end": 29.64
     },
     "frog": {
-      "start": 29.96,
-      "end": 30.28
+      "start": 30.04,
+      "end": 30.4
     },
     "snake": {
-      "start": 30.68,
-      "end": 31.04
+      "start": 30.8,
+      "end": 31
     },
     "lizard": {
-      "start": 31.44,
-      "end": 31.68
+      "start": 31.4,
+      "end": 31.72
     },
     "butterfly": {
-      "start": 32.08,
-      "end": 32.3
+      "start": 32.12,
+      "end": 32.58
     },
     "snail": {
-      "start": 32.7,
-      "end": 33.06
+      "start": 32.98,
+      "end": 33.58
     },
     "ant": {
-      "start": 33.46,
-      "end": 33.76
+      "start": 33.98,
+      "end": 34.52
     },
     "donut": {
-      "start": 34.16,
-      "end": 34.46
+      "start": 34.92,
+      "end": 35.22
     },
     "microbe": {
-      "start": 34.86,
-      "end": 35.16
+      "start": 35.62,
+      "end": 35.92
     },
     "trex": {
-      "start": 35.56,
-      "end": 36.32
+      "start": 36.32,
+      "end": 36.68
     },
     "sauropod": {
-      "start": 36.72,
-      "end": 37.48
+      "start": 37.08,
+      "end": 37.28
     },
     "robot": {
-      "start": 37.88,
-      "end": 38.24
+      "start": 37.68,
+      "end": 38
     },
     "alien": {
-      "start": 38.64,
-      "end": 39.1
+      "start": 38.4,
+      "end": 38.86
     },
     "ghost": {
-      "start": 39.5,
-      "end": 40.14
+      "start": 39.26,
+      "end": 39.86
     },
     "poop": {
-      "start": 40.54,
-      "end": 40.9
+      "start": 40.26,
+      "end": 40.8
     },
     "unicorn": {
-      "start": 41.3,
-      "end": 41.92
+      "start": 41.2,
+      "end": 41.5
     }
   }
 }
