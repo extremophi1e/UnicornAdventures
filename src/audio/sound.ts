@@ -48,6 +48,17 @@ export class Sound {
     this.scene.sound.play("tada", { volume: 0.8 });
   }
 
+  // Crack "tok" for tap N (1..3) — rising pitch is baked into the assets.
+  crack(stage: number): void {
+    const k = ["crack1", "crack2", "crack3"][Math.min(Math.max(stage, 1), 3) - 1];
+    this.scene.sound.play(k, { volume: 0.6 });
+  }
+
+  // The shell-shatter on the final tap.
+  shatter(): void {
+    this.scene.sound.play("shatter", { volume: 0.7 });
+  }
+
   // Play one fun musical note from the soundboard audio sprite. Fire-and-forget /
   // polyphonic so rapid taps overlap and ring out into music (no cut-off).
   voice(marker: string, volume = 0.55): void {

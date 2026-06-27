@@ -16,7 +16,8 @@
     "pop-audio": "node scripts/build-pop-audio.mjs",
     "gumball-audio": "node scripts/build-gumball-audio.mjs",
     "soundboard-audio": "node scripts/build-soundboard-audio.mjs",
-    "emoji": "node scripts/build-emoji.mjs"
+    "emoji": "node scripts/build-emoji.mjs",
+    "eggs-audio": "node scripts/build-eggs-audio.mjs"
   },
   "dependencies": {
     "phaser": "^4.0.0"
