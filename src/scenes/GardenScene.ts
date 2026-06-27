@@ -4,9 +4,10 @@ import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { Sound, GARDEN_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
-import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, spreadPosition, BLOOM_TARGET, type Tier } from "../core/garden";
+import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, spreadPosition, BLOOM_TARGET, TIER_PLANTS, type Tier } from "../core/garden";
 import { EMOJI } from "../render/emoji";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar } from "../render/assets";
 
 const LINGER = 2;           // creatures kept across the reset (continuity, not erasure)
 const CLEAR_STAGGER = 45;   // ms between each plant wilting
@@ -15,12 +16,15 @@ const SWAP_AT = 420;          // ms into the grow when 🌱 becomes the final pl
 const TIER_SCALE = [0.63, 0.93, 1.425]; // base setScale per tier (144px frames) — 50% larger
 const FX_DEPTH = 100000;      // sparkles/unicorn always in front
 const PLANT_MIN_GAP = 70;     // min spacing between plant centers so taps don't stack
-const CREATURE_CAP = 12;
+const CREATURE_CAP = 5;
 // 🐝 bee only if it baked loop-safe in Task 1; else 🍩 donut is the 2nd flyer.
 const CREATURE_KEYS = ["butterfly", EMOJI["bee"] ? "bee" : "donut"];
 const CREATURE_SCALE = 0.5;   // 144px frames
 const SKY_KEYS = ["dove", "eagle", "flamingo", "owl"]; // existing flying birds for the sky
-const SKY_CAP = 4;            // max birds drifting across at once
+const SKY_CAP = 2;            // max birds drifting across at once
+// Every emoji this mode can spawn: the 🌱 sprout, all maturity-ladder plants, the
+// pollinators, and the sky birds. Lazy-loaded on first entry.
+const GARDEN_EMOJI_KEYS = ["sprout", ...TIER_PLANTS.flat(), ...CREATURE_KEYS, ...SKY_KEYS];
 const SKY_DEPTH = 5;          // above the background, behind the meadow plants
 
 export class GardenScene extends Phaser.Scene {
@@ -38,7 +42,15 @@ export class GardenScene extends Phaser.Scene {
 
   constructor() { super("Garden"); }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, GARDEN_EMOJI_KEYS);
+    loadAudio(this, ["gardennotes", "fanfare", "tada"]);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, GARDEN_EMOJI_KEYS);
     const W = this.scale.width, H = this.scale.height;
     this.reduce = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
