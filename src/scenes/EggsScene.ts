@@ -5,7 +5,7 @@ import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { Sound, EGGS_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
-import { createBag, JACKPOT, type Bag } from "../core/gumballs";
+import { createBag, JACKPOT, GUMBALL_ITEMS, type Bag } from "../core/gumballs";
 import { pickNearestWithinRadius } from "../core/pop";
 import { nextStage, type Stage } from "../core/eggs";
 import { EMOJI } from "../render/emoji";
@@ -65,7 +65,9 @@ export class EggsScene extends Phaser.Scene {
     this.bg = new EggsBackground(this, W, H);
     this.sound2 = new Sound(this);
     this.fx = new Celebrations(this);
-    this.bag = createBag(Math.random, Object.keys(EMOJI)); // one shared bag (global no-repeat + jackpot gate)
+    // Creatures only (no plants/objects): the curated GUMBALL_ITEMS list, not the
+    // full emoji set. One shared bag (global no-repeat + jackpot gate).
+    this.bag = createBag(Math.random, GUMBALL_ITEMS);
     this.eggs = [];
 
     // One pooled shatter/celebration burst (sparkle frame), shards fall via gravity.
