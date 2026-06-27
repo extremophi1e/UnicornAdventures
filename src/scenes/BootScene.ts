@@ -13,12 +13,21 @@ export class BootScene extends Phaser.Scene {
     this.load.audio("music2", ["audio/music2.mp3"]);
     this.load.audio("music3", ["audio/music3.mp3"]);
     this.load.audio("music4", ["audio/music4.mp3"]);
+    this.load.audio("music5", ["audio/music5.mp3"]);
+    this.load.audio("music6", ["audio/music6.mp3"]);
     this.load.audio("title", ["audio/title.mp3"]);
     this.load.audio("popmusic", ["audio/popmusic.mp3"]);
+    this.load.audio("popmusic2", ["audio/popmusic2.mp3"]);
     this.load.audio("gumball", ["audio/gumball.mp3"]);
+    this.load.audio("gumball2", ["audio/gumball2.mp3"]);
     this.load.audio("catch1", ["audio/catch1.mp3"]);
     this.load.audio("catch2", ["audio/catch2.mp3"]);
     this.load.audio("catch3", ["audio/catch3.mp3"]);
+    this.load.audio("catch4", ["audio/catch4.mp3"]);
+    this.load.audio("catch5", ["audio/catch5.mp3"]);
+    this.load.audio("peekaboo1", ["audio/peekaboo1.mp3"]);
+    this.load.audio("peekaboo2", ["audio/peekaboo2.mp3"]);
+    this.load.audio("peekaboo3", ["audio/peekaboo3.mp3"]);
     this.load.audio("collect", ["audio/collect.mp3"]);
     this.load.audio("pop", ["audio/pop.mp3"]);
     this.load.audio("fanfare", ["audio/fanfare.mp3"]);
@@ -29,6 +38,9 @@ export class BootScene extends Phaser.Scene {
     this.load.audio("shatter", ["audio/shatter.mp3"]);
     this.load.audio("eggsmusic", ["audio/eggsmusic.mp3"]);
     this.load.audioSprite("animalvoices", "audio/animalvoices.json", ["audio/animalvoices.mp3"]);
+    this.load.audio("giggle1", ["audio/giggle1.mp3"]);
+    this.load.audio("giggle2", ["audio/giggle2.mp3"]);
+    this.load.audio("giggle3", ["audio/giggle3.mp3"]);
     this.load.spritesheet(CATCH_UNICORN_KEY, CATCH_UNICORN_SHEET, {
       frameWidth: CATCH_UNICORN.frameWidth,
       frameHeight: CATCH_UNICORN.frameHeight,

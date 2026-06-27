@@ -20,6 +20,15 @@ Attribution: "Music by Kevin MacLeod — incompetech.com"
 | title.mp3  | Bit Quest         | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bit%20Quest.mp3         | CC-BY 4.0 |
 | popmusic.mp3 | Wallpaper                | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wallpaper.mp3                | CC-BY 4.0 |
 | gumball.mp3 | The Builder              | https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Builder.mp3            | CC-BY 4.0 |
+| music5.mp3 | Happy Bee                | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Happy%20Bee.mp3              | CC-BY 4.0 |
+| music6.mp3 | Wholesome                | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wholesome.mp3                | CC-BY 4.0 |
+| catch4.mp3 | Beach Party              | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Beach%20Party.mp3            | CC-BY 4.0 |
+| catch5.mp3 | Bumbly March             | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bumbly%20March.mp3           | CC-BY 4.0 |
+| popmusic2.mp3 | Investigations        | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Investigations.mp3           | CC-BY 4.0 |
+| gumball2.mp3 | Itty Bitty 8 Bit       | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Itty%20Bitty%208%20Bit.mp3   | CC-BY 4.0 |
+| peekaboo1.mp3 | Sneaky Snitch        | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Sneaky%20Snitch.mp3          | CC-BY 4.0 |
+| peekaboo2.mp3 | Hyperfun             | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Hyperfun.mp3                 | CC-BY 4.0 |
+| peekaboo3.mp3 | Quirky Dog           | https://incompetech.com/music/royalty-free/mp3-royaltyfree/Quirky%20Dog.mp3             | CC-BY 4.0 |
 
 ## Sound Effects
 

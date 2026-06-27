@@ -16,6 +16,7 @@
     "pop-audio": "node scripts/build-pop-audio.mjs",
     "gumball-audio": "node scripts/build-gumball-audio.mjs",
     "soundboard-audio": "node scripts/build-soundboard-audio.mjs",
+    "peekaboo-audio": "node scripts/build-peekaboo-audio.mjs",
     "emoji": "node scripts/build-emoji.mjs",
     "eggs-audio": "node scripts/build-eggs-audio.mjs"
   },

@@ -38,22 +38,27 @@ export class TitleScene extends Phaser.Scene {
     });
 
     this.add
-      .text(W / 2, 220, `✨ ${PLAYER_NAME}'s Rainbow Unicorn Adventures ✨`, {
+      .text(W / 2, 150, `✨ ${PLAYER_NAME}'s Rainbow Unicorn Adventures ✨`, {
         fontSize: "40px", color: "#7a3fa0", fontStyle: "bold", align: "center",
         wordWrap: { width: W - 80 },
       })
       .setOrigin(0.5);
 
     // The one unified animated unicorn, used on the title and in both games.
-    const uni = this.add.sprite(W / 2, 380, CATCH_UNICORN_KEY).setScale(0.7).play(CATCH_UNICORN_ANIM);
-    this.tweens.add({ targets: uni, y: 350, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
+    const uni = this.add.sprite(W / 2, 340, CATCH_UNICORN_KEY).setScale(0.55).play(CATCH_UNICORN_ANIM);
+    this.tweens.add({ targets: uni, y: 310, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
 
-    this.makeButton(W / 2, 630, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
-    this.makeButton(W / 2, 748, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
-    this.makeButton(W / 2, 866, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
-    this.makeButton(W / 2, 984, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
-    this.makeButton(W / 2, 1102, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
-    this.makeButton(W / 2, 1220, "🥚", "Surprise Eggs", 0xb39ddb, () => this.go("Eggs"));
+    const MARGIN = 24, GAP = 24, BH = 150;
+    const BW = (W - 2 * MARGIN - GAP) / 2;
+    const colL = W / 2 - (BW / 2 + GAP / 2), colR = W / 2 + (BW / 2 + GAP / 2);
+    const rowY = [590, 770, 950, 1130];
+    this.makeGridButton(colL, rowY[0], BW, BH, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
+    this.makeGridButton(colR, rowY[0], BW, BH, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
+    this.makeGridButton(colL, rowY[1], BW, BH, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
+    this.makeGridButton(colR, rowY[1], BW, BH, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
+    this.makeGridButton(colL, rowY[2], BW, BH, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
+    this.makeGridButton(colR, rowY[2], BW, BH, "🐹", "Peekaboo", 0xffd23f, () => this.go("Peekaboo"));
+    this.makeGridButton(W / 2, rowY[3], BW, BH, "🥚", "Surprise Eggs", 0xb39ddb, () => this.go("Eggs"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
@@ -68,21 +73,14 @@ export class TitleScene extends Phaser.Scene {
     this.scene.start(key);
   }
 
-  private makeButton(x: number, y: number, emoji: string, label: string, color: number, onTap: () => void) {
-    const w = 460, h = 110;
-    const ICON_W = 42; // reserved visual width for the emoji glyph (≈ fontSize)
-    const GAP = 14;    // small, comfortable gap between the emoji and the label
+  private makeGridButton(x: number, y: number, w: number, h: number, emoji: string, label: string, color: number, onTap: () => void) {
     const g = this.add.graphics();
-    g.fillStyle(color, 1).fillRoundedRect(x - w / 2, y - h / 2, w, h, 28);
-    // Render the emoji and label as separate objects (one centered string would
-    // split the emoji's wide trailing advance into a large visible gap). The
-    // emoji+label group is centered as a unit; the gap between them is fixed.
-    const t = this.add.text(0, y, label, { fontSize: "40px", color: "#ffffff", fontStyle: "bold" }).setOrigin(0, 0.5);
-    const left = x - (ICON_W + GAP + t.width) / 2;
-    t.x = left + ICON_W + GAP;
-    const icon = this.add.text(left, y, emoji, { fontSize: "40px" }).setOrigin(0, 0.5);
+    g.fillStyle(color, 1).fillRoundedRect(x - w / 2, y - h / 2, w, h, 26);
+    this.add.text(x, y - 28, emoji, { fontSize: "48px" }).setOrigin(0.5);
+    this.add.text(x, y + 34, label, {
+      fontSize: "26px", color: "#ffffff", fontStyle: "bold", align: "center", wordWrap: { width: w - 24 },
+    }).setOrigin(0.5);
     const zone = this.add.zone(x, y, w, h).setInteractive({ useHandCursor: true });
     zone.on("pointerdown", onTap);
-    return { g, t, icon, zone };
   }
 }

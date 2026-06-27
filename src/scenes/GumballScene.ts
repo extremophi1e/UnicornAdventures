@@ -3,7 +3,7 @@ import { PlayroomBackground } from "./ui/PlayroomBackground";
 import { resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
-import { Sound } from "../audio/sound";
+import { Sound, GUMBALL_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { createBag, JACKPOT, type Bag } from "../core/gumballs";
 import { EMOJI } from "../render/emoji";
@@ -72,14 +72,9 @@ export class GumballScene extends Phaser.Scene {
     this.item = this.add.sprite(this.chuteX, this.chuteY, "emoji-star").setVisible(false).setDepth(50);
     this.jackpotSprite = this.add.sprite(this.chuteX, this.chuteY, CATCH_UNICORN_KEY).setVisible(false).setDepth(50);
 
-    // Dedicated looping music (low volume), robust autoplay, stopped on shutdown.
-    const music = this.sound.add("gumball", { loop: true, volume: 0.38 });
-    const startMusic = () => { if (!music.isPlaying) music.play(); };
-    startMusic();
-    this.time.delayedCall(200, startMusic);
-    if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
-    this.input.once("pointerdown", startMusic);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { music.stop(); this.sound.stopAll(); });
+    // Shuffled background music (low volume), stopped on shutdown.
+    this.sound2.playMusic(GUMBALL_MUSIC_KEYS, 0.38);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.sound.stopAll());
 
     const back = this.add.text(W - 24, 24, "⬅", { fontSize: "44px", color: "#5a3b8c" })
       .setOrigin(1, 0).setDepth(1000).setInteractive({ useHandCursor: true });
