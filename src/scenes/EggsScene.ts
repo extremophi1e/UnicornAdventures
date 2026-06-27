@@ -168,7 +168,6 @@ export class EggsScene extends Phaser.Scene {
 
   private tapEgg(e: EggView) {
     e.stage = nextStage(e.stage);
-    this.tweens.add({ targets: e.container, scaleX: 1.12, scaleY: 0.9, duration: 90, yoyo: true, ease: "Sine.easeInOut" });
     if (e.stage === "burst") {
       e.active = false;
       this.sound2.crack(3);
@@ -177,6 +176,8 @@ export class EggsScene extends Phaser.Scene {
       e.container.setAngle(0).setScale(1);
       this.time.delayedCall(WEB_FLASH_MS, () => this.hatch(e)); // ...then shatter
     } else {
+      // Squish feedback on the non-final taps (the burst tap's feedback is the shatter).
+      this.tweens.add({ targets: e.container, scaleX: 1.12, scaleY: 0.9, duration: 90, yoyo: true, ease: "Sine.easeInOut" });
       this.sound2.crack(e.stage === "crack1" ? 1 : 2);
       this.drawCracks(e.cracks, e.stage);
     }
