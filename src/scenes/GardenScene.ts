@@ -6,7 +6,10 @@ import { Sound, GARDEN_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, type Tier } from "../core/garden";
 import { EMOJI } from "../render/emoji";
+import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 
+const LINGER = 2;           // creatures kept across the reset (continuity, not erasure)
+const CLEAR_STAGGER = 45;   // ms between each plant wilting
 const GROW_MS = 700;          // sprout -> full-size grow
 const SWAP_AT = 420;          // ms into the grow when 🌱 becomes the final plant
 const TIER_SCALE = [0.42, 0.62, 0.95]; // base setScale per tier (144px frames)
@@ -19,9 +22,9 @@ const CREATURE_SCALE = 0.5;   // 144px frames
 export class GardenScene extends Phaser.Scene {
   private bg!: GardenBackground;
   private sound2!: Sound;
-  private fx!: Celebrations; // used in Task 6 (bloom celebrations)
+  private fx!: Celebrations;
   private plants!: Phaser.GameObjects.Group;
-  private creatures!: Phaser.GameObjects.Group; // used in Task 5 (pollinators)
+  private creatures!: Phaser.GameObjects.Group;
   private placed = 0;
   private lastTier = 0;
   private phase: "building" | "celebrating" | "clearing" = "building";
@@ -41,8 +44,7 @@ export class GardenScene extends Phaser.Scene {
 
     this.placed = 0; this.lastTier = 0; this.phase = "building"; this.noteIndex = 0;
     this.plants = this.add.group();
-    this.creatures = this.add.group(); // populated in Task 5
-    void this.fx;       // used in Task 6 (bloom); suppress noUnusedLocals
+    this.creatures = this.add.group();
 
     this.add.text(W - 24, 24, "⬅", { fontSize: "44px" }).setOrigin(1, 0).setDepth(FX_DEPTH)
       .setInteractive({ useHandCursor: true })
@@ -92,9 +94,9 @@ export class GardenScene extends Phaser.Scene {
     this.time.delayedCall(this.reduce ? 240 : GROW_MS, () => { if (c!.active) this.finishPlant(c!, tier); });
   }
 
-  // Called when a plant finishes growing: sparkle + note + ladder cue. (Task 5 adds
-  // the pollinator release; Task 6 adds the bloom trigger.)
+  // Called when a plant finishes growing: sparkle + note + ladder cue.
   private finishPlant(c: Phaser.GameObjects.Sprite, tier: Tier) {
+    if (this.phase !== "building") return;
     this.placed += 1;
     this.sparkle(c.x, c.y - 40 * (c.scaleY || 1) * 1.4, this.reduce ? 3 : 8);
     this.sound2.note(this.noteIndex++);
@@ -107,7 +109,7 @@ export class GardenScene extends Phaser.Scene {
     if (this.creatures.countActive(true) < CREATURE_CAP && shouldRelease(tier, Math.random)) {
       this.releaseCreature(c.x, c.y - 50 * (c.scaleY || 1));
     }
-    if (isFull(this.placed)) { /* Task 6: this.bloom(); */ }
+    if (isFull(this.placed)) this.bloom();
   }
 
   private releaseCreature(x: number, y: number) {
@@ -139,6 +141,65 @@ export class GardenScene extends Phaser.Scene {
     (this.creatures.getChildren() as Phaser.GameObjects.Sprite[]).forEach((c) => {
       if (c.active) c.setDepth(Math.round(c.y));
     });
+  }
+
+  // The whole meadow she built celebrates at once, then gently clears.
+  private bloom() {
+    this.phase = "celebrating";
+    const W = this.scale.width, H = this.scale.height;
+
+    // Every plant pops in place + sparkles.
+    (this.plants.getChildren() as Phaser.GameObjects.Sprite[]).forEach((p) => {
+      if (!p.active) return;
+      const base = p.scaleX || 0.5;
+      this.tweens.add({ targets: p, scaleX: base * 1.18, scaleY: base * 1.18, duration: this.reduce ? 260 : 220, yoyo: true, ease: this.reduce ? "Sine.inOut" : "Elastic.Out" });
+      this.sparkle(p.x, p.y - 40 * (p.scaleY || 1), this.reduce ? 2 : 6);
+    });
+
+    if (this.reduce) { this.fx.bigPartyNoShake(); } else { this.fx.bigParty(); }
+    this.fx.banner("🌈");
+    this.sound2.fanfare();
+    this.sound2.tada();
+
+    if (!this.reduce) {
+      const uni = this.add.sprite(-140, H * 0.32, CATCH_UNICORN_KEY).setScale(0.5).setDepth(FX_DEPTH).play(CATCH_UNICORN_ANIM);
+      this.tweens.add({ targets: uni, x: W + 140, duration: 1700, ease: "Sine.inOut", onComplete: () => uni.destroy() });
+    }
+
+    this.time.delayedCall(this.reduce ? 700 : 1400, () => this.clearMeadow());
+  }
+
+  // Wilt-fade every plant in a staggered wave; keep a couple of butterflies.
+  private clearMeadow() {
+    this.phase = "clearing";
+    const plants = (this.plants.getChildren() as Phaser.GameObjects.Sprite[]).filter((p) => p.active);
+    plants.forEach((p, i) => {
+      this.time.delayedCall(this.reduce ? 0 : i * CLEAR_STAGGER, () => {
+        this.tweens.add({
+          targets: p, scale: 0, alpha: 0, duration: this.reduce ? 200 : 320, ease: "Back.In",
+          onComplete: () => this.plants.killAndHide(p),
+        });
+      });
+    });
+
+    // Retire all but LINGER creatures (the survivors keep wandering into the next round).
+    const creatures = (this.creatures.getChildren() as Phaser.GameObjects.Sprite[]).filter((c) => c.active);
+    creatures.slice(LINGER).forEach((c) => {
+      this.tweens.killTweensOf(c);
+      this.tweens.add({ targets: c, alpha: 0, duration: 300, onComplete: () => this.creatures.killAndHide(c) });
+    });
+
+    const total = this.reduce ? 400 : plants.length * CLEAR_STAGGER + 400;
+    this.time.delayedCall(total, () => this.freshCanvas());
+  }
+
+  private freshCanvas() {
+    this.placed = 0; this.noteIndex = 0; this.lastTier = 0; this.phase = "building";
+    this.bg.setWarmth(0);
+    // A soft glow invites the first tap of the new round.
+    const W = this.scale.width, H = this.scale.height;
+    const g = this.add.image(W / 2, H * 0.78, ATLAS_KEY, frameFor("sparkle")).setScale(1.2).setDepth(FX_DEPTH).setAlpha(0.9);
+    this.tweens.add({ targets: g, scale: 1.8, alpha: 0, duration: 900, onComplete: () => g.destroy() });
   }
 
   private teardownAll() {
