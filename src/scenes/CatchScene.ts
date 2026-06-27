@@ -112,10 +112,10 @@ export class CatchScene extends Phaser.Scene {
     const x = 80 + Math.random() * (this.scale.width - 160);
     let c = this.items.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
     if (!c) {
-      c = spawnEmoji(this, x, -40, type).setScale(1.1);
+      c = spawnEmoji(this, x, -40, type).setScale(1.1 / 3);
       this.items.add(c);
     } else {
-      resetEmoji(c, type, x, -40).setScale(1.1);
+      resetEmoji(c, type, x, -40).setScale(1.1 / 3);
     }
   }
 

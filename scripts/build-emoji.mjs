@@ -20,7 +20,8 @@ const ROOT = join(__dirname, "..");
 const OUT_DIR = join(ROOT, "public", "emoji");
 const OUT_TS = join(ROOT, "src", "render", "emoji.ts");
 
-const FRAME_SIZE = 72;     // px/frame — matches the old OpenMoji cell so scene scales are unchanged
+const FRAME_SIZE = 216;    // px/frame (3x the old 72px) for retina-crisp emoji. Scenes divide their
+                           // emoji setScale values by 3 to keep on-screen sizes unchanged.
 const TARGET_FRAMES = 24;  // sampled frames per emoji (down from the source's ~70-84)
 const MAX_ROW = 2016;      // grid width cap (mobile texture safety)
 

@@ -11,8 +11,9 @@ const ANTICIPATION_MS = 1100;        // rattle + flash before the reveal
 const FLASH_INTERVAL_MS = 260;       // toggle every 260ms -> ~1.9 flashes/sec (seizure-safe)
 const BURST_PARTICLES = 16;
 const BURST_PARTICLES_REDUCED = 5;
-const ITEM_REVEAL_SCALE = 2.2;       // emoji frame is 72px
-const JACKPOT_REVEAL_SCALE = 0.85;   // catchUnicorn frame is 256px
+const ITEM_REVEAL_SCALE = (2.2 / 3) * 1.5;   // 216px emoji frames (/3) + prize shown 50% larger
+const JACKPOT_REVEAL_SCALE = 0.85 * 1.5;     // catchUnicorn 256px sheet + prize 50% larger
+const MACHINE_SCALE = 0.75;                  // gumball machine drawn 25% smaller
 // Flashing bulbs avoid saturated red (photosensitivity); soft coral replaces it.
 const BULB_COLORS = [0xff7f7f, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
 const BULB_DIM = 0xcfd8e0;
@@ -86,7 +87,7 @@ export class GumballScene extends Phaser.Scene {
   private buildMachine(W: number, H: number) {
     const mx = W / 2, my = H * 0.34;
     this.machineBaseX = mx;
-    const c = this.add.container(mx, my).setDepth(10);
+    const c = this.add.container(mx, my).setDepth(10).setScale(MACHINE_SCALE);
 
     const g = this.add.graphics();
     // Base + foot.
@@ -111,7 +112,7 @@ export class GumballScene extends Phaser.Scene {
 
     this.machine = c;
     this.chuteX = mx;
-    this.chuteY = my + 172;
+    this.chuteY = my + 172 * MACHINE_SCALE; // chute exit of the (smaller) machine
     this.revealY = my + 300;
   }
 
