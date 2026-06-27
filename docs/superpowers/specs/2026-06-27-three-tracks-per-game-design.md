@@ -119,7 +119,9 @@ is unchanged.
 ### Assets
 - Delete `public/audio/music4.mp3`, `music5.mp3`, `music6.mp3`, `catch4.mp3`, `catch5.mp3`.
 - Run the four widened/extended scripts to fetch the 8 new mp3s into `public/audio/`.
-- `public/audio/CREDITS.md`: remove the 5 deleted rows; add the 8 new rows.
+- `public/audio/CREDITS.md`: remove the 5 deleted rows; update the `aquarium.mp3` row
+  (Carefree → Deep Haze); add the 7 new rows (`popmusic3`, `gumball3`, `garden1–3`,
+  `aquarium2`, `aquarium3`).
 
 ## Verification
 
