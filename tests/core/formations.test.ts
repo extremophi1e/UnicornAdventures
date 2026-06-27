@@ -85,6 +85,17 @@ describe("layoutFormation", () => {
     }
   });
 
+  it("fits the widest formation on a phone width with room to sway", () => {
+    const phone = { width: 540, height: 1280 };
+    const t = TEMPLATES.pyramid; // 7 columns — the widest template
+    const assigned = assignTypes(t, "uniform", ["star"], createRng(1));
+    const placed = layoutFormation(t, assigned, phone);
+    const xs = placed.map((p) => p.pos.x);
+    // every enemy must stay clear of both edges so the sway can't push it off-screen
+    expect(Math.min(...xs)).toBeGreaterThanOrEqual(50);
+    expect(Math.max(...xs)).toBeLessThanOrEqual(phone.width - 50);
+  });
+
   it("centers horizontally — leftmost and rightmost margins are equal", () => {
     const t = TEMPLATES.twoRows;
     const assigned = assignTypes(t, "uniform", ["donut"], createRng(1));

@@ -100,11 +100,16 @@ export function layoutFormation(
   const topMargin = opts.topMargin ?? 180;
   const FILL = 0.82;       // target fraction of width the formation should span on wide screens
   const MAX_FACTOR = 1.7;  // cap spread so small formations don't get too sparse
+  const SWAY_HEADROOM = 70; // px kept clear each side for the formation's side-to-side sway
   const cols = template.cols;
   let xCell = baseCell;
   if (cols > 1) {
     const target = (field.width * FILL) / (cols - 1);
     xCell = Math.min(Math.max(target, baseCell), baseCell * MAX_FACTOR);
+    // On narrow (phone) screens a wide formation must still fit with room to sway,
+    // so cap the cell so the whole formation spans at most width - 2*headroom.
+    const fitCell = (field.width - 2 * SWAY_HEADROOM) / (cols - 1);
+    xCell = Math.min(xCell, fitCell);
   }
   const totalWidth = (cols - 1) * xCell;
   const originX = (field.width - totalWidth) / 2;
