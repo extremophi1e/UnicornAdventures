@@ -36,6 +36,7 @@ export class GumballScene extends Phaser.Scene {
   private button!: Phaser.GameObjects.Container;
   private wiggle?: Phaser.Tweens.Tween;
   private rattle?: Phaser.Tweens.Tween;
+  private flashEvent?: Phaser.Time.TimerEvent;
   private glow!: Phaser.GameObjects.Rectangle;
 
   private chuteX = 0;
@@ -164,7 +165,7 @@ export class GumballScene extends Phaser.Scene {
         targets: this.machine, x: this.machineBaseX + 10, duration: 60, yoyo: true,
         repeat: Math.floor(ANTICIPATION_MS / 120), ease: "Sine.inOut",
       });
-      this.time.addEvent({
+      this.flashEvent = this.time.addEvent({
         delay: FLASH_INTERVAL_MS, repeat: Math.floor(ANTICIPATION_MS / FLASH_INTERVAL_MS),
         callback: () => this.toggleBulbs(),
       });
@@ -178,6 +179,8 @@ export class GumballScene extends Phaser.Scene {
   }
 
   private reveal() {
+    this.flashEvent?.remove(false);
+    this.flashEvent = undefined;
     this.rattle?.stop(); this.rattle = undefined;
     this.machine.x = this.machineBaseX;
     this.bulbsLit = false; this.bulbs.forEach((b) => b.setFillStyle(BULB_DIM, 1));
