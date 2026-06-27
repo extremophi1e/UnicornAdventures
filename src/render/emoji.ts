@@ -72,6 +72,14 @@ export const EMOJI: Record<string, EmojiDef> = {
   jellyfish: { key: "emoji-jellyfish", sheet: "emoji/jellyfish.png", anim: "emoji-jellyfish", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 11 },
   ant: { key: "emoji-ant", sheet: "emoji/ant.png", anim: "emoji-ant", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 7 },
   microbe: { key: "emoji-microbe", sheet: "emoji/microbe.png", anim: "emoji-microbe", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 22 },
+  sprout: { key: "emoji-sprout", sheet: "emoji/sprout.png", anim: "emoji-sprout", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 6 },
+  daisy: { key: "emoji-daisy", sheet: "emoji/daisy.png", anim: "emoji-daisy", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 7 },
+  tulip: { key: "emoji-tulip", sheet: "emoji/tulip.png", anim: "emoji-tulip", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 7 },
+  rose: { key: "emoji-rose", sheet: "emoji/rose.png", anim: "emoji-rose", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 11 },
+  herb: { key: "emoji-herb", sheet: "emoji/herb.png", anim: "emoji-herb", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 10 },
+  cactus: { key: "emoji-cactus", sheet: "emoji/cactus.png", anim: "emoji-cactus", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 9 },
+  evergreen: { key: "emoji-evergreen", sheet: "emoji/evergreen.png", anim: "emoji-evergreen", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 12 },
+  bee: { key: "emoji-bee", sheet: "emoji/bee.png", anim: "emoji-bee", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 6 },
 };
 
 export const EMOJI_DEFS: EmojiDef[] = Object.values(EMOJI);

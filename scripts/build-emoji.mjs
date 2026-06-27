@@ -56,6 +56,11 @@ const TYPES = {
   orangutan: "1f9a7", kangaroo: "1f998", seal: "1f9ad", chipmunk: "1f43f", peacock: "1f99a",
   rooster: "1f413", eagle: "1f985", flamingo: "1f9a9", dove: "1f54a_fe0f", snake: "1f40d",
   lizard: "1f98e", lobster: "1f99e", jellyfish: "1fabc", ant: "1f41c", microbe: "1f9a0",
+  // Tap-to-Grow Garden flora (probed loop-safe) + a bee pollinator.
+  // sunflower "1f33b" dropped — 404. tree "1f333" dropped — 404.
+  sprout: "1f331", daisy: "1f33c", tulip: "1f337", rose: "1f339",
+  herb: "1f33f", cactus: "1f335",
+  evergreen: "1f332", bee: "1f41d",
 };
 
 function fetchBuffer(url, redirects = 0) {

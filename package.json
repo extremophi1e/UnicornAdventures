@@ -17,7 +17,8 @@
     "gumball-audio": "node scripts/build-gumball-audio.mjs",
     "soundboard-audio": "node scripts/build-soundboard-audio.mjs",
     "peekaboo-audio": "node scripts/build-peekaboo-audio.mjs",
-    "emoji": "node scripts/build-emoji.mjs"
+    "emoji": "node scripts/build-emoji.mjs",
+    "garden-audio": "node scripts/build-garden-audio.mjs"
   },
   "dependencies": {
     "phaser": "^4.0.0"

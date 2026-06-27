@@ -5,6 +5,9 @@ export const CATCH_MUSIC_KEYS: readonly string[] = ["catch1", "catch2", "catch3"
 export const POP_MUSIC_KEYS: readonly string[] = ["popmusic", "popmusic2"];
 export const GUMBALL_MUSIC_KEYS: readonly string[] = ["gumball", "gumball2"];
 export const PEEKABOO_MUSIC_KEYS: readonly string[] = ["peekaboo1", "peekaboo2", "peekaboo3"];
+// Garden reuses the calm meadow tracks as a quiet ambient bed (the tap-notes are the foreground).
+export const GARDEN_MUSIC_KEYS: readonly string[] = PEEKABOO_MUSIC_KEYS;
+export const GARDEN_NOTE_COUNT = 11;
 const GIGGLE_KEYS = ["giggle1", "giggle2", "giggle3"] as const;
 
 export class Sound {
@@ -65,5 +68,10 @@ export class Sound {
   // polyphonic so rapid taps overlap and ring out into music (no cut-off).
   voice(marker: string, volume = 0.55): void {
     this.scene.sound.playAudioSprite("animalvoices", marker, { volume });
+  }
+
+  // Play the i-th pentatonic note (wraps). Polyphonic so rapid taps ring into a melody.
+  note(i: number, volume = 0.4): void {
+    this.scene.sound.playAudioSprite("gardennotes", `n${((i % GARDEN_NOTE_COUNT) + GARDEN_NOTE_COUNT) % GARDEN_NOTE_COUNT}`, { volume });
   }
 }
