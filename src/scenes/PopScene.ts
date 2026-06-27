@@ -11,6 +11,7 @@ const SPAWN_INTERVAL = 0.9;          // seconds, fixed (independent of float spe
 const MAX_CONCURRENT = 12;           // cap on-screen cuties
 const POP_RADIUS = 90;               // generous tap radius (~1.5x sprite)
 const CELEBRATION_EVERY = 20;        // pops per milestone celebration
+const POP_SPEED_SCALE = 0.75;        // float 25% slower than the shared catch.ts ladder
 const ITEM_SCALE = 1.1;
 const BONUS_SCALE = 1.8;
 const BURST_PARTICLES = 12;
@@ -220,7 +221,7 @@ export class PopScene extends Phaser.Scene {
       if (this.cuties.countActive(true) < MAX_CONCURRENT) this.spawnCutie();
     }
 
-    const speed = speedForNotch(this.state.notch);
+    const speed = speedForNotch(this.state.notch) * POP_SPEED_SCALE;
     (this.cuties.getChildren() as Phaser.GameObjects.Sprite[]).forEach((c) => {
       if (!c.active) return;
       c.y -= speed * (c.getData("speedMul") as number) * dt;
