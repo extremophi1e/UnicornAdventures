@@ -41,6 +41,14 @@ const TYPES = {
   gem: "1f48e",
   cupcake: "1f340",  // four-leaf clover
   lollipop: "1f431", // cat face
+  // Unicorn Gumballs prize pool — 25 cute creatures/critters/etc. (no inanimate
+  // objects). All verified to loop without disappearing. Keys are descriptive.
+  cat: "1f431", fox: "1f98a", bear: "1f43b", panda: "1f43c", lion: "1f981",
+  cow: "1f42e", sloth: "1f9a5", otter: "1f9a6", raccoon: "1f99d", hedgehog: "1f994",
+  octopus: "1f419", turtle: "1f422", whale: "1f433", crab: "1f980", penguin: "1f427",
+  chick: "1f425", owl: "1f989", frog: "1f438", snail: "1f40c",
+  trex: "1f996", sauropod: "1f995", robot: "1f916", alien: "1f47e", ghost: "1f47b",
+  poop: "1f4a9",
 };
 
 function fetchBuffer(url, redirects = 0) {

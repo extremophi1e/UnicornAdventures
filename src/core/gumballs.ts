@@ -2,11 +2,13 @@
 // unit-tested headlessly. A shuffle-bag gives no-immediate-repeat cuties with
 // bounded droughts; the unicorn jackpot is a gated periodic surprise.
 
-// Ordinary cuties — keys from src/render/emoji.ts (icecream/donut/cupcake/lollipop
-// render tulip/ladybug/clover/cat).
+// The 25 prizes — cute creatures only (animals, critters, sea life, dinos, a
+// robot, an alien, a ghost, and the obligatory poop). No inanimate objects.
+// Keys map to animated Noto emoji sheets in src/render/emoji.ts.
 export const GUMBALL_ITEMS: readonly string[] = [
-  "star", "heart", "flower", "butterfly", "gem", "balloon",
-  "icecream", "donut", "cupcake", "lollipop", "cloud",
+  "cat", "fox", "bear", "panda", "lion", "cow", "sloth", "otter", "raccoon",
+  "hedgehog", "octopus", "turtle", "whale", "crab", "penguin", "chick", "owl",
+  "frog", "snail", "trex", "sauropod", "robot", "alien", "ghost", "poop",
 ];
 export const JACKPOT = "unicorn";   // special: rendered from the catchUnicorn sheet
 export const JACKPOT_MIN_GAP = 8;   // ordinary pulls required before a jackpot is eligible
