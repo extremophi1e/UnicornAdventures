@@ -45,13 +45,14 @@ export class TitleScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     // The one unified animated unicorn, used on the title and in both games.
-    const uni = this.add.sprite(W / 2, 430, CATCH_UNICORN_KEY).setScale(0.8).play(CATCH_UNICORN_ANIM);
-    this.tweens.add({ targets: uni, y: 400, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
+    const uni = this.add.sprite(W / 2, 380, CATCH_UNICORN_KEY).setScale(0.7).play(CATCH_UNICORN_ANIM);
+    this.tweens.add({ targets: uni, y: 350, yoyo: true, repeat: -1, duration: 900, ease: "Sine.inOut" });
 
-    this.makeButton(W / 2, 700, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
-    this.makeButton(W / 2, 850, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
-    this.makeButton(W / 2, 1000, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
-    this.makeButton(W / 2, 1150, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
+    this.makeButton(W / 2, 630, "🌈", "Rainbow Shoot", 0x9b6bff, () => this.go("Game"));
+    this.makeButton(W / 2, 748, "🌈", "Rainbow Catch", 0x7ed957, () => this.go("Catch"));
+    this.makeButton(W / 2, 866, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
+    this.makeButton(W / 2, 984, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
+    this.makeButton(W / 2, 1102, "🔊", "Animal Sounds", 0x00b4d8, () => this.go("Soundboard"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
