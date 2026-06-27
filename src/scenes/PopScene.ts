@@ -18,9 +18,10 @@ const BONUS_SCALE = 1.8 / 2;
 const BURST_PARTICLES = 12;
 const BURST_PARTICLES_REDUCED = 4;
 
-// Every emoji in the set (the original cuties + the 25 gumball creatures + poop) —
-// all are loop-safe (verified non-disappearing). Auto-updates if more are added.
-const POP_ITEM_TYPES = Object.keys(EMOJI);
+// Every emoji in the set EXCEPT the gem — the gem is reserved for the special
+// rainbow bonus cutie below, so it never appears as an ordinary tappable item.
+// All are loop-safe (verified non-disappearing). Auto-updates if more are added.
+const POP_ITEM_TYPES = Object.keys(EMOJI).filter((k) => k !== "gem");
 
 // Rainbow tint cycle for the bonus cutie (ROYGBIV).
 const RAINBOW_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];

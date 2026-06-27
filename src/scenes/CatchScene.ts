@@ -7,6 +7,8 @@ import { circleOverlap } from "../core/collision";
 import { Sound, CATCH_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, speedForNotch, type CatchState } from "../core/catch";
+import { shouldSpawnBonus } from "../core/pop";
+import { EMOJI } from "../render/emoji";
 
 const KEY_SPEED = 4800;        // px/s for arrow-key movement (3x faster)
 const SPAWN_INTERVAL = 1.1;    // seconds, fixed (independent of fall speed)
@@ -15,9 +17,13 @@ const CATCH_RADIUS = 95;       // generous; larger than the visible unicorn
 const CELEBRATION_EVERY = 10;  // catches per milestone celebration
 const UNICORN_DISPLAY_H = 150; // target on-screen unicorn height in px
 const FINGER_LIFT = 120;       // on touch, float the unicorn this far above the finger so it isn't hidden
+const ITEM_SCALE = 1.1 / 2;    // /2: emoji frames are 144px (2x the old 72px)
+const GIANT_GEM_SCALE = 2.6 / 2; // the rare giant gem — ~2.4x a normal item, unmistakable
+const GIANT_CATCH_RADIUS = 150;  // bigger pickup radius to match the giant body
 
-// Cosmetic variety only (no balloon, no cloud). All caught the same way.
-const CATCH_ITEM_TYPES = ["gem", "heart", "cupcake", "star", "lollipop", "icecream", "donut", "flower", "butterfly"];
+// Every emoji EXCEPT the gem — the gem only appears as the rare GIANT gem power-up
+// (caught, it sweeps up everything on screen). Auto-updates if more emoji are added.
+const CATCH_ITEM_TYPES = Object.keys(EMOJI).filter((k) => k !== "gem");
 
 // Rainbow trail colours dropped behind the unicorn while it moves (ROYGBIV).
 const RAINBOW_TRAIL_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
@@ -33,6 +39,7 @@ export class CatchScene extends Phaser.Scene {
 
   private items!: Phaser.GameObjects.Group;
   private spawnTimer = 0;
+  private spawnsSinceGiant = 0;
 
   private state: CatchState = initialCatchState();
   private score = 0;
@@ -80,6 +87,7 @@ export class CatchScene extends Phaser.Scene {
 
     this.items = this.add.group();
     this.spawnTimer = 0;
+    this.spawnsSinceGiant = 0;
 
     this.scoreText = this.add.text(24, 24, "⭐ 0", {
       fontSize: "44px", color: "#ffffff", fontStyle: "bold", stroke: "#2f7d2a", strokeThickness: 6,
@@ -108,21 +116,48 @@ export class CatchScene extends Phaser.Scene {
   }
 
   private spawnItem() {
-    const type = CATCH_ITEM_TYPES[Math.floor(Math.random() * CATCH_ITEM_TYPES.length)];
+    // Rarely (gated by the shared bonus cadence) spawn a GIANT gem power-up instead.
+    const giant = shouldSpawnBonus(this.spawnsSinceGiant, Math.random);
+    this.spawnsSinceGiant = giant ? 0 : this.spawnsSinceGiant + 1;
+
+    const type = giant ? "gem" : CATCH_ITEM_TYPES[Math.floor(Math.random() * CATCH_ITEM_TYPES.length)];
+    const scale = giant ? GIANT_GEM_SCALE : ITEM_SCALE;
     const x = 80 + Math.random() * (this.scale.width - 160);
     let c = this.items.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
     if (!c) {
-      c = spawnEmoji(this, x, -40, type).setScale(1.1 / 2);
+      c = spawnEmoji(this, x, -40, type).setScale(scale);
       this.items.add(c);
     } else {
-      resetEmoji(c, type, x, -40).setScale(1.1 / 2);
+      resetEmoji(c, type, x, -40).setScale(scale);
     }
+    c.setData("giant", giant);
   }
 
   private celebrate() {
     this.fx.bigParty();
     this.fx.banner("🌈");
     this.sound2.fanfare();
+  }
+
+  // Catch one item: count it, sparkle + sound, recycle. No milestone check here —
+  // callers decide when to celebrate so the giant sweep doesn't double-fire it.
+  private catchOne(c: Phaser.GameObjects.Sprite) {
+    this.items.killAndHide(c);
+    this.state = recordCatch(this.state);
+    this.score += 1;
+    this.scoreText.setText(`⭐ ${this.score}`);
+    this.fx.popAt(c.x, c.y);
+    this.sound2.collect();
+  }
+
+  // The rare GIANT gem: catches every falling item at once (each counts +1),
+  // then one big celebration. No difficulty reset — just the per-catch ladder.
+  private catchGiant(giant: Phaser.GameObjects.Sprite) {
+    this.catchOne(giant);
+    (this.items.getChildren() as Phaser.GameObjects.Sprite[])
+      .filter((c) => c.active && c !== giant)
+      .forEach((c) => this.catchOne(c));
+    this.celebrate();
   }
 
   update(_t: number, dms: number) {
@@ -173,14 +208,15 @@ export class CatchScene extends Phaser.Scene {
       if (!c.active) return;
       c.y += speed * dt;
 
-      if (circleOverlap({ x: c.x, y: c.y, r: CATCH_RADIUS }, { x: ux, y: uy, r: 0 })) {
-        this.items.killAndHide(c);
-        this.state = recordCatch(this.state);
-        this.score += 1;
-        this.scoreText.setText(`⭐ ${this.score}`);
-        this.fx.popAt(c.x, c.y);
-        this.sound2.collect();
-        if (this.score % CELEBRATION_EVERY === 0) this.celebrate();
+      const giant = c.getData("giant") as boolean;
+      const r = giant ? GIANT_CATCH_RADIUS : CATCH_RADIUS;
+      if (circleOverlap({ x: c.x, y: c.y, r }, { x: ux, y: uy, r: 0 })) {
+        if (giant) {
+          this.catchGiant(c);
+        } else {
+          this.catchOne(c);
+          if (this.score % CELEBRATION_EVERY === 0) this.celebrate();
+        }
         return;
       }
 

@@ -6,6 +6,7 @@ import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { Sound } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { createBag, JACKPOT, type Bag } from "../core/gumballs";
+import { EMOJI } from "../render/emoji";
 
 const ANTICIPATION_MS = 1100;        // rattle + flash before the reveal
 const FLASH_INTERVAL_MS = 260;       // toggle every 260ms -> ~1.9 flashes/sec (seizure-safe)
@@ -53,7 +54,8 @@ export class GumballScene extends Phaser.Scene {
     this.bg = new PlayroomBackground(this, W, H);
     this.sound2 = new Sound(this);
     this.fx = new Celebrations(this);
-    this.bag = createBag(Math.random);
+    // Dispense every emoji in the set (the unicorn jackpot is injected separately).
+    this.bag = createBag(Math.random, Object.keys(EMOJI));
     this.busy = false;
 
     this.burst = this.add.particles(0, 0, ATLAS_KEY, {
