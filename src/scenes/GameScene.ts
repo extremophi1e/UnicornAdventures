@@ -18,11 +18,12 @@ const KEY_SPEED = 2100; // px/s for arrow-key movement (3x — snappier left/rig
 const FIRE_INTERVAL = 0.18;
 const FINGER_LIFT = 120; // on touch, aim the unicorn this far above the finger so it isn't hidden
 
-// Rainbow Shoot uses ONLY creepy-crawly "bugs" + a robot + poop as enemies, so the
-// shooter reads as zapping pests (the other modes get the cute/full emoji set).
-// donut = the ladybug sheet, butterfly + ant + snail round out the bugs. These
-// override each level's authored type list at spawn time. Bosses are always the robot.
-const SHOOTER_TYPES: CuteType[] = ["ant", "snail", "butterfly", "donut", "robot", "poop"];
+// Rainbow Shoot enemy set: bugs (ant, snail, butterfly, donut=ladybug) + robot +
+// poop + a couple of sky/sea critters (cloud, star, trex, jellyfish). These override
+// each level's authored type list at spawn time. Bosses are always the robot.
+const SHOOTER_TYPES: CuteType[] = [
+  "ant", "snail", "butterfly", "donut", "robot", "poop", "cloud", "star", "trex", "jellyfish",
+];
 const SHOOTER_BOSS_TYPE: CuteType = "robot";
 
 // Rainbow colours the shot stars cycle through (ROYGBIV), bright and kid-friendly.

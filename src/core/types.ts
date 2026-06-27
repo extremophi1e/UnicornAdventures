@@ -3,9 +3,10 @@ export type Vec2 = { x: number; y: number };
 export type CuteType =
   | "cloud" | "cupcake" | "star" | "lollipop" | "icecream"
   | "balloon" | "flower" | "donut" | "butterfly"
-  // Shooter-only enemy emoji (bugs + robot + poop). Deliberately NOT added to
-  // CUTE_TYPES below, which stays the OpenMoji-atlas cosmetic set (render/sprites.ts).
-  | "ant" | "snail" | "robot" | "poop";
+  // Shooter-only enemy emoji (bugs + robot + poop + trex + jellyfish). Deliberately
+  // NOT added to CUTE_TYPES below, which stays the OpenMoji-atlas cosmetic set
+  // (render/sprites.ts). cloud + star are already in the union above.
+  | "ant" | "snail" | "robot" | "poop" | "trex" | "jellyfish";
 
 export const CUTE_TYPES: CuteType[] = [
   "cloud", "cupcake", "star", "lollipop", "icecream",
