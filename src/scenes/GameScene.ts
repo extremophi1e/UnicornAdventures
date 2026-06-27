@@ -5,10 +5,9 @@ import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { AutoFire, resolveTarget, type AimInput, type Bounds } from "../core/input";
 import { Sound } from "../audio/sound";
 import { getLevel } from "../core/levels";
-import { TEMPLATES, assignTypes, layoutFormation } from "../core/formations";
+import { TEMPLATES, layoutFormation } from "../core/formations";
 import { findStarEnemyHits, circleOverlap, type Circle } from "../core/collision";
 import { nearestEnemy, steerVelocity } from "../core/magnetism";
-import { createRng } from "../core/rng";
 import { Celebrations } from "./ui/Celebrations";
 import type { PlacedEnemy, CuteType } from "../core/types";
 import { BossController } from "../core/boss";
@@ -24,7 +23,8 @@ const FINGER_LIFT = 120; // on touch, aim the unicorn this far above the finger 
 const SHOOTER_TYPES: CuteType[] = [
   "ant", "snail", "butterfly", "donut", "microbe", "robot", "poop", "cloud", "star", "trex", "jellyfish",
 ];
-const SHOOTER_BOSS_TYPE: CuteType = "robot";
+// Each boss level fields a distinct enemy as its boss (was always the robot).
+const SHOOTER_BOSS_TYPES: Record<number, CuteType> = { 5: "trex", 10: "microbe", 12: "robot" };
 
 // Rainbow colours the shot stars cycle through (ROYGBIV), bright and kid-friendly.
 const RAINBOW_STAR_COLORS = [
@@ -54,6 +54,7 @@ export class GameScene extends Phaser.Scene {
   protected formationIndex = 0;
   protected t = 0;
   protected transitioning = false;
+  protected enemyBag: CuteType[] = []; // shuffle-bag for even enemy-type distribution
 
   protected boss?: Phaser.GameObjects.Sprite;
   protected bossCtl?: BossController;
@@ -148,6 +149,7 @@ export class GameScene extends Phaser.Scene {
     this.formationIndex = 0;
     this.t = 0;
     this.transitioning = false;
+    this.enemyBag = [];
     this.boss = undefined;
     this.bossCtl = undefined;
     this.bossBar = undefined;
@@ -197,12 +199,25 @@ export class GameScene extends Phaser.Scene {
     return getLevel(this.levelIndex).formations;
   }
 
+  // Shuffle-bag draw: each SHOOTER_TYPES entry comes out once per cycle, so every
+  // enemy type appears with equal frequency (the authored typing rules biased
+  // uniform/byRow waves heavily toward index 0 = ant).
+  protected drawEnemyType(): CuteType {
+    if (this.enemyBag.length === 0) {
+      this.enemyBag = SHOOTER_TYPES.slice();
+      for (let i = this.enemyBag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [this.enemyBag[i], this.enemyBag[j]] = [this.enemyBag[j], this.enemyBag[i]];
+      }
+    }
+    return this.enemyBag.pop()!;
+  }
+
   protected spawnFormation() {
     const spec = this.currentFormations()[this.formationIndex];
     const tpl = TEMPLATES[spec.templateId];
-    const rng = createRng(this.levelIndex * 100 + this.formationIndex);
-    // Override the level's authored types: the shooter only ever fields bugs+robot+poop.
-    const assigned = assignTypes(tpl, spec.typing, SHOOTER_TYPES, rng);
+    // Assign each enemy a type from the shuffle-bag for an even spread of all types.
+    const assigned: CuteType[] = tpl.cells.map(() => this.drawEnemyType());
     const placed: PlacedEnemy[] = layoutFormation(tpl, assigned, { width: this.scale.width, height: this.scale.height });
     for (const pe of placed) {
       let img = this.enemies.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
@@ -326,7 +341,8 @@ export class GameScene extends Phaser.Scene {
   protected startBoss() {
     const spec = getLevel(this.levelIndex).boss!;
     this.bossCtl = new BossController(spec);
-    this.boss = spawnEmoji(this, this.scale.width / 2, 320, SHOOTER_BOSS_TYPE).setScale(4 / 2);
+    const bossType = SHOOTER_BOSS_TYPES[this.levelIndex] ?? "robot";
+    this.boss = spawnEmoji(this, this.scale.width / 2, 320, bossType).setScale(4 / 2);
     this.bossBar = this.add.graphics();
     this.tweens.add({ targets: this.boss, x: this.scale.width / 2 + 80, yoyo: true, repeat: -1, duration: 1600, ease: "Sine.inOut" });
   }
