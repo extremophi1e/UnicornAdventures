@@ -16,12 +16,16 @@ const SPOT_COOLDOWN_MS = 500;   // min idle time after a spot frees before it ca
 const MILESTONE_EVERY = 15;     // catches per celebration
 const CRITTER_SCALE = 1.4 / 2;  // /2: 144px emoji frames
 const EMERGE_MS = 250, DUCK_MS = 150;
-// Only living creatures peek: exclude objects/plants AND the non-animal "silly" set
-// (robot, alien, ghost, poop). Kept: all animals, dinos (trex/sauropod), bugs
-// (butterfly/snail/ant/donut=ladybug), and the microbe (a living germ).
+// Only creatures peek — exclude inanimate objects/props/plants from the shared emoji
+// set. Kept: all animals, bugs (butterfly/snail/ant/donut=ladybug/bee), dinos
+// (trex/sauropod), microbe, and the fun critters (robot/alien/ghost/poop).
 const NON_CREATURES = [
+  // objects / food / weather
   "cloud", "star", "icecream", "balloon", "heart", "flower", "gem", "cupcake", "lollipop",
-  "robot", "alien", "ghost", "poop",
+  // plants
+  "sprout", "daisy", "tulip", "rose", "herb", "cactus", "evergreen",
+  // sea props / objects
+  "ringbuoy", "sailboat", "bottle", "ring",
 ];
 const CRITTER_KEYS = Object.keys(EMOJI).filter((k) => !NON_CREATURES.includes(k));
 
