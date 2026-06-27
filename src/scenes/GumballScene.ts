@@ -14,6 +14,8 @@ const BURST_PARTICLES_REDUCED = 5;
 const ITEM_REVEAL_SCALE = 2.2;       // emoji frame is 72px
 const JACKPOT_REVEAL_SCALE = 0.85;   // catchUnicorn frame is 256px
 const RAINBOW_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
+// Flashing bulbs avoid saturated red (photosensitivity); soft coral replaces it.
+const BULB_COLORS = [0xff7f7f, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
 const BULB_DIM = 0xcfd8e0;
 
 export class GumballScene extends Phaser.Scene {
@@ -172,7 +174,7 @@ export class GumballScene extends Phaser.Scene {
 
   private toggleBulbs() {
     this.bulbsLit = !this.bulbsLit;
-    this.bulbs.forEach((b, i) => b.setFillStyle(this.bulbsLit ? RAINBOW_COLORS[i % RAINBOW_COLORS.length] : BULB_DIM, 1));
+    this.bulbs.forEach((b, i) => b.setFillStyle(this.bulbsLit ? BULB_COLORS[i % BULB_COLORS.length] : BULB_DIM, 1));
   }
 
   private reveal() {
@@ -198,7 +200,7 @@ export class GumballScene extends Phaser.Scene {
     const finalScale = jackpot ? JACKPOT_REVEAL_SCALE : ITEM_REVEAL_SCALE;
     this.tweens.add({ targets: spr, y: this.revealY, duration: 480, ease: "Bounce.easeOut" });
     this.tweens.add({
-      targets: spr, scale: finalScale, duration: 440, ease: "Back.easeOut",
+      targets: spr, scale: finalScale, duration: 480, ease: "Back.easeOut",
       onComplete: () => this.payoff(jackpot, spr),
     });
   }
@@ -212,6 +214,7 @@ export class GumballScene extends Phaser.Scene {
       this.sound2.tada();
       if (!this.reduceMotion) this.tweens.add({ targets: this.glow, alpha: { from: 0, to: 0.22 }, duration: 350, yoyo: true, hold: 250 });
     } else {
+      this.fx.bigParty();
       this.fx.popAt(x, y);
       this.sound2.fanfare();
     }
