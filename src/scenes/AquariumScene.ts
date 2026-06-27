@@ -67,6 +67,8 @@ export class AquariumScene extends Phaser.Scene {
     if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
     this.input.once("pointerdown", startMusic);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.tweens.killAll();
+      this.time.removeAllEvents();
       music.stop();
       this.sound.stopAll();
       // Destroy any lingering 💤 labels.
@@ -253,6 +255,7 @@ export class AquariumScene extends Phaser.Scene {
     this.tweens.add({
       targets: fish, scale: ITEM_SCALE * 0.2, duration: 140, ease: "Sine.in",
       onComplete: () => {
+        if (!fish.active) return;
         resetEmoji(fish, nt, fish.x, fish.y);
         fish.setData("type", nt);
         fish.setScale(ITEM_SCALE * 0.2);
