@@ -128,9 +128,28 @@ export class CatchScene extends Phaser.Scene {
       c = spawnEmoji(this, x, -40, type).setScale(scale);
       this.items.add(c);
     } else {
+      this.clearGemRainbow(c);          // drop any leftover tint/tween before reuse
       resetEmoji(c, type, x, -40).setScale(scale);
     }
     c.setData("giant", giant);
+    if (giant) this.startGemRainbow(c); // colour-cycle exactly like Pop's bonus
+  }
+
+  // Rainbow colour-cycle for the giant gem — the same ROYGBIV walk Pop's bonus uses.
+  private startGemRainbow(c: Phaser.GameObjects.Sprite) {
+    const tw = this.tweens.addCounter({
+      from: 0, to: RAINBOW_TRAIL_COLORS.length, duration: 1400, repeat: -1,
+      onUpdate: (t) => {
+        if (c.active) c.setTint(RAINBOW_TRAIL_COLORS[Math.floor(t.getValue() ?? 0) % RAINBOW_TRAIL_COLORS.length]);
+      },
+    });
+    c.setData("rainbowTween", tw);
+  }
+
+  private clearGemRainbow(c: Phaser.GameObjects.Sprite) {
+    const tw = c.getData("rainbowTween") as Phaser.Tweens.Tween | undefined;
+    if (tw) { tw.remove(); c.setData("rainbowTween", undefined); }
+    c.clearTint();
   }
 
   private celebrate() {
@@ -142,6 +161,7 @@ export class CatchScene extends Phaser.Scene {
   // Catch one item: count it, sparkle + sound, recycle. No milestone check here —
   // callers decide when to celebrate so the giant sweep doesn't double-fire it.
   private catchOne(c: Phaser.GameObjects.Sprite) {
+    this.clearGemRainbow(c);            // stop the colour-cycle if this was the giant gem
     this.items.killAndHide(c);
     this.state = recordCatch(this.state);
     this.score += 1;
@@ -221,6 +241,7 @@ export class CatchScene extends Phaser.Scene {
       }
 
       if (c.y > this.scale.height + 50) {
+        this.clearGemRainbow(c);
         this.items.killAndHide(c);
         this.state = recordMiss(this.state);
       }
