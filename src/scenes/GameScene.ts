@@ -332,7 +332,7 @@ export class GameScene extends Phaser.Scene {
     this.formationIndex = 0;
     if (this.levelIndex >= 12) {
       // Final level: one BIG finale (boss already played bigParty+tada). No medium tier.
-      this.fx.finale("Zoe"); this.sound2.tada();
+      this.fx.finale(); this.sound2.tada();
       this.time.delayedCall(5500, () => this.scene.start("Title"));
       return;
     }

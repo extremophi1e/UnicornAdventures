@@ -31,9 +31,9 @@ export class Celebrations {
     this.scene.cameras.main.shake(250, 0.004);
   }
 
-  finale(name = "Zoe") {
+  finale() {
     this.bigParty();
-    this.banner(`YOU DID IT, ${name.toUpperCase()}! 🦄🌈`, "#ff3f8a", 4500);
+    this.banner(`YOU DID IT! 🦄🌈`, "#ff3f8a", 4500);
     // Keep the party going: two extra bigParty bursts spread across the hold window.
     this.scene.time.delayedCall(1500, () => this.bigParty());
     this.scene.time.delayedCall(3000, () => this.bigParty());
