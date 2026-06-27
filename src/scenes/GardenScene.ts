@@ -4,7 +4,7 @@ import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { Sound, GARDEN_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
-import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, BLOOM_TARGET, type Tier } from "../core/garden";
+import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, spreadPosition, BLOOM_TARGET, type Tier } from "../core/garden";
 import { EMOJI } from "../render/emoji";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 
@@ -14,6 +14,7 @@ const GROW_MS = 700;          // sprout -> full-size grow
 const SWAP_AT = 420;          // ms into the grow when 🌱 becomes the final plant
 const TIER_SCALE = [0.63, 0.93, 1.425]; // base setScale per tier (144px frames) — 50% larger
 const FX_DEPTH = 100000;      // sparkles/unicorn always in front
+const PLANT_MIN_GAP = 70;     // min spacing between plant centers so taps don't stack
 const CREATURE_CAP = 12;
 // 🐝 bee only if it baked loop-safe in Task 1; else 🍩 donut is the 2nd flyer.
 const CREATURE_KEYS = ["butterfly", EMOJI["bee"] ? "bee" : "donut"];
@@ -73,9 +74,18 @@ export class GardenScene extends Phaser.Scene {
   }
 
   private growPlant(x: number, y: number) {
+    const H = this.scale.height, W = this.scale.width;
+    // Don't stack plants: if this lands on a crowd, nudge it to a nearby free spot
+    // (keeps it near the finger but fanned out), clamped to the meadow band.
+    const existing = (this.plants.getChildren() as Phaser.GameObjects.Sprite[])
+      .filter((p) => p.active)
+      .map((p) => ({ x: p.x, y: p.y }));
+    const pos = spreadPosition(x, y, existing, PLANT_MIN_GAP,
+      { minX: 36, maxX: W - 36, minY: this.bg.horizon + 12, maxY: H - 24 }, Math.random);
+    x = pos.x; y = pos.y;
+
     const tier = pickTier(this.placed, Math.random) as Tier;
     const key = plantForTier(tier, Math.random);
-    const H = this.scale.height;
     // Nearer (lower) plants are bigger; y also drives draw order.
     const depthFactor = 0.7 + 0.45 * ((y - this.bg.horizon) / (H - this.bg.horizon));
     const target = TIER_SCALE[tier] * depthFactor;

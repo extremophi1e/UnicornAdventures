@@ -51,3 +51,53 @@ export function shouldRelease(tier: Tier, rng: () => number): boolean {
 export function isFull(placed: number): boolean {
   return placed >= BLOOM_TARGET;
 }
+
+export interface Pt { x: number; y: number; }
+
+// Pick a spot for a new plant near (x, y) that doesn't stack on existing plants.
+// If the tapped point is already at least `minDist` from every plant, it's used
+// as-is. Otherwise we search outward in expanding rings for the nearest free spot
+// (so plants still appear near the finger, just fanned out). If the meadow is too
+// crowded to find a clear spot, the least-crowded nearby candidate is returned
+// (best effort — growth is never blocked). Always clamped inside `bounds`.
+export function spreadPosition(
+  x: number,
+  y: number,
+  existing: readonly Pt[],
+  minDist: number,
+  bounds: { minX: number; maxX: number; minY: number; maxY: number },
+  rng: () => number,
+): Pt {
+  const clampX = (v: number) => Math.max(bounds.minX, Math.min(bounds.maxX, v));
+  const clampY = (v: number) => Math.max(bounds.minY, Math.min(bounds.maxY, v));
+  const nearestD2 = (px: number, py: number): number => {
+    let best = Infinity;
+    for (const p of existing) {
+      const dx = p.x - px, dy = p.y - py;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < best) best = d2;
+    }
+    return best;
+  };
+  const d2min = minDist * minDist;
+
+  const sx = clampX(x), sy = clampY(y);
+  if (nearestD2(sx, sy) >= d2min) return { x: sx, y: sy };
+
+  let best: Pt = { x: sx, y: sy };
+  let bestD2 = nearestD2(sx, sy);
+  const RINGS = 6, PER_RING = 8;
+  for (let ring = 1; ring <= RINGS; ring++) {
+    const r = minDist * ring;
+    const a0 = rng() * Math.PI * 2; // random start angle: repeated taps fan out in varied directions
+    for (let k = 0; k < PER_RING; k++) {
+      const a = a0 + (Math.PI * 2 * k) / PER_RING;
+      const cx = clampX(x + Math.cos(a) * r);
+      const cy = clampY(y + Math.sin(a) * r);
+      const d2 = nearestD2(cx, cy);
+      if (d2 >= d2min) return { x: cx, y: cy };
+      if (d2 > bestD2) { bestD2 = d2; best = { x: cx, y: cy }; }
+    }
+  }
+  return best;
+}
