@@ -38,7 +38,6 @@ interface EggView {
   stage: Stage;
   contents: string;                             // animal key or JACKPOT
   golden: boolean;
-  fill: number;
   active: boolean;                              // tappable? (false during drop/reveal/refill)
   wobble?: Phaser.Tweens.Tween;
   breathe?: Phaser.Tweens.Tween;
@@ -111,7 +110,7 @@ export class EggsScene extends Phaser.Scene {
     const shell = this.add.graphics();
     const cracks = this.add.graphics();
     const container = this.add.container(x, y, [shell, cracks]).setDepth(20).setVisible(false);
-    return { x, y, container, shell, cracks, stage: "intact", contents: "cat", golden: false, fill: EGG_COLORS[0].fill, active: false };
+    return { x, y, container, shell, cracks, stage: "intact", contents: "cat", golden: false, active: false };
   }
 
   // (Re)fill a slot with a fresh egg that drops in from above.
@@ -119,7 +118,6 @@ export class EggsScene extends Phaser.Scene {
     e.contents = this.bag.next();
     e.golden = e.contents === JACKPOT;
     const pal = e.golden ? GOLD : EGG_COLORS[Math.floor(Math.random() * EGG_COLORS.length)];
-    e.fill = pal.fill;
     e.stage = "intact";
     this.drawEgg(e.shell, pal.fill, pal.line, e.golden);
     e.cracks.clear();
