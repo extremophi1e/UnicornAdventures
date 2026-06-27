@@ -72,11 +72,13 @@ export class AquariumScene extends Phaser.Scene {
       this.time.removeAllEvents();
       music.stop();
       this.sound.stopAll();
-      // Destroy any lingering 💤 labels.
-      (this.fish.getChildren() as Fish[]).forEach((f) => {
-        const z = f.getData("zzz") as Phaser.GameObjects.Text | null;
-        if (z) z.destroy();
-      });
+      // NOTE: do NOT iterate `this.fish` here. The Group registers its own
+      // SHUTDOWN listener when created (earlier in create()), so it destroys
+      // itself BEFORE this handler runs — calling this.fish.getChildren() would
+      // then throw ("Array.from(undefined)") and abort the whole scene
+      // transition, leaving no active scene (a hard freeze). The 💤 labels are
+      // scene display-list objects and are auto-destroyed by the shutdown, so no
+      // manual cleanup is needed.
     });
 
     // Multi-touch: up to 4 fingers; each taps the nearest fish.
