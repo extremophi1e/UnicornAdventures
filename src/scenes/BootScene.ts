@@ -29,10 +29,12 @@ export class BootScene extends Phaser.Scene {
     for (const d of EMOJI_DEFS) {
       this.load.spritesheet(d.key, d.sheet, { frameWidth: d.frameWidth, frameHeight: d.frameHeight });
     }
-    // Loading progress bar (no text — pre-readers).
+    // Loading progress bar (no text — pre-readers). Centered so it fits any width.
     const g = this.add.graphics();
+    const barW = 400;
+    const barX = (this.scale.width - barW) / 2;
     this.load.on("progress", (p: number) => {
-      g.clear().fillStyle(0xffffff, 0.9).fillRect(160, 630, 400 * p, 20);
+      g.clear().fillStyle(0xffffff, 0.9).fillRect(barX, 630, barW * p, 20);
     });
   }
   create() {
