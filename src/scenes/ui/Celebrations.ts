@@ -31,6 +31,16 @@ export class Celebrations {
     this.scene.cameras.main.shake(250, 0.004);
   }
 
+  bigPartyNoShake() {
+    const W = this.scene.scale.width, H = this.scene.scale.height;
+    const n = 70;
+    for (let i = 0; i < n; i++) {
+      const x = Math.random() * W;
+      const s = this.scene.add.image(x, -20, ATLAS_KEY, frameFor("sparkle")).setScale(0.5 + Math.random());
+      this.scene.tweens.add({ targets: s, y: H + 40, alpha: 0, duration: 1200 + Math.random() * 1200, onComplete: () => s.destroy() });
+    }
+  }
+
   finale() {
     this.bigParty();
     this.banner(`YOU DID IT! 🦄🌈`, "#ff3f8a", 4500);

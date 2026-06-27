@@ -2,6 +2,7 @@ import Phaser from "phaser";
 
 const MUSIC_KEYS = ["music1", "music2", "music3", "music4"] as const;
 export const CATCH_MUSIC_KEYS: readonly string[] = ["catch1", "catch2", "catch3"];
+const GIGGLE_KEYS = ["giggle1", "giggle2", "giggle3"] as const;
 
 export class Sound {
   private _lastMusicKey: string | null = null;
@@ -46,6 +47,13 @@ export class Sound {
   }
   tada(): void {
     this.scene.sound.play("tada", { volume: 0.8 });
+  }
+
+  // Play a random giggle variant — pitch variety avoids machine-gun fatigue on
+  // repeated catches.
+  giggle(volume = 0.6): void {
+    const k = GIGGLE_KEYS[Math.floor(Math.random() * GIGGLE_KEYS.length)];
+    this.scene.sound.play(k, { volume });
   }
 
   // Play one fun musical note from the soundboard audio sprite. Fire-and-forget /
