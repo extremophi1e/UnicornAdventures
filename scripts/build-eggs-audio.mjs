@@ -84,7 +84,7 @@ write("shatter.mp3", mix(decay(noise(0.18, 0.7), 12), decay(sine(300, 0.18, 0.3)
 const TRACKS = [
   { file: "eggsmusic.mp3",  title: "Run Amok",          url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Run%20Amok.mp3" },
   { file: "eggsmusic2.mp3", title: "The Curtain Rises", url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Curtain%20Rises.mp3" },
-  { file: "eggsmusic3.mp3", title: "Spazzmatica Polka", url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Spazzmatica%20Polka.mp3" },
+  { file: "eggsmusic3.mp3", title: "Barroom Ballet",   url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Barroom%20Ballet.mp3" },
 ];
 function download(url, dest, redirects = 0) {
   return new Promise((resolve, reject) => {
