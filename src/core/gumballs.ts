@@ -34,9 +34,14 @@ export function createBag(rng: () => number): Bag {
     if (bag.length === 0) {
       bag = shuffle(GUMBALL_ITEMS, rng);
       // De-seam: the item we're about to draw (end of the array) must not repeat
-      // the previous draw across a refill boundary.
+      // the previous draw across a refill boundary. Swap it with any item that
+      // differs from `last` (robust even if the item list ever has duplicates;
+      // for the current distinct list, `alt` is simply index 0).
       if (bag.length > 1 && bag[bag.length - 1] === last) {
-        const t = bag[bag.length - 1]; bag[bag.length - 1] = bag[0]; bag[0] = t;
+        const alt = bag.findIndex((x) => x !== last);
+        if (alt !== -1) {
+          const t = bag[bag.length - 1]; bag[bag.length - 1] = bag[alt]; bag[alt] = t;
+        }
       }
     }
     const x = bag.pop() as string;

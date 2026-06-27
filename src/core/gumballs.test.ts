@@ -1,11 +1,25 @@
 import { describe, it, expect } from "vitest";
 import { createBag, GUMBALL_ITEMS, JACKPOT, JACKPOT_MIN_GAP, JACKPOT_CHANCE } from "./gumballs";
+import { createRng } from "./rng";
 
 describe("createBag", () => {
   it("never returns the same value twice in a row", () => {
     const bag = createBag(Math.random);
     let prev = "";
     for (let i = 0; i < 1000; i++) {
+      const x = bag.next();
+      expect(x).not.toBe(prev);
+      prev = x;
+    }
+  });
+
+  it("never repeats across thousands of deterministic draws (exercises the refill de-seam)", () => {
+    // Seeded RNG -> deterministic. 5000 draws span hundreds of bag refills, so the
+    // refill de-seam (next-to-draw === previous draw) is hit dozens of times; a
+    // broken de-seam would surface here as an immediate repeat.
+    const bag = createBag(createRng(98765));
+    let prev = "";
+    for (let i = 0; i < 5000; i++) {
       const x = bag.next();
       expect(x).not.toBe(prev);
       prev = x;
