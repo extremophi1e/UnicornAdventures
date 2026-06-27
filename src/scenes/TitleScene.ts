@@ -53,6 +53,7 @@ export class TitleScene extends Phaser.Scene {
     this.makeButton(W / 2, 866, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
     this.makeButton(W / 2, 984, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
     this.makeButton(W / 2, 1102, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
+    this.makeButton(W / 2, 1220, "🥚", "Surprise Eggs", 0xb39ddb, () => this.go("Eggs"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }
