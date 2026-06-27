@@ -4,12 +4,17 @@ import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { Sound, GARDEN_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
-import { pickTier, plantForTier, unlockedTier, isFull, type Tier } from "../core/garden";
+import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, type Tier } from "../core/garden";
+import { EMOJI } from "../render/emoji";
 
 const GROW_MS = 700;          // sprout -> full-size grow
 const SWAP_AT = 420;          // ms into the grow when 🌱 becomes the final plant
 const TIER_SCALE = [0.42, 0.62, 0.95]; // base setScale per tier (144px frames)
 const FX_DEPTH = 100000;      // sparkles/unicorn always in front
+const CREATURE_CAP = 12;
+// 🐝 bee only if it baked loop-safe in Task 1; else 🍩 donut is the 2nd flyer.
+const CREATURE_KEYS = ["butterfly", EMOJI["bee"] ? "bee" : "donut"];
+const CREATURE_SCALE = 0.5;   // 144px frames
 
 export class GardenScene extends Phaser.Scene {
   private bg!: GardenBackground;
@@ -38,7 +43,6 @@ export class GardenScene extends Phaser.Scene {
     this.plants = this.add.group();
     this.creatures = this.add.group(); // populated in Task 5
     void this.fx;       // used in Task 6 (bloom); suppress noUnusedLocals
-    void this.creatures; // used in Task 5 (pollinators); suppress noUnusedLocals
 
     this.add.text(W - 24, 24, "⬅", { fontSize: "44px" }).setOrigin(1, 0).setDepth(FX_DEPTH)
       .setInteractive({ useHandCursor: true })
@@ -90,7 +94,7 @@ export class GardenScene extends Phaser.Scene {
 
   // Called when a plant finishes growing: sparkle + note + ladder cue. (Task 5 adds
   // the pollinator release; Task 6 adds the bloom trigger.)
-  private finishPlant(c: Phaser.GameObjects.Sprite, _tier: Tier) {
+  private finishPlant(c: Phaser.GameObjects.Sprite, tier: Tier) {
     this.placed += 1;
     this.sparkle(c.x, c.y - 40 * (c.scaleY || 1) * 1.4, this.reduce ? 3 : 8);
     this.sound2.note(this.noteIndex++);
@@ -100,7 +104,41 @@ export class GardenScene extends Phaser.Scene {
     const top = unlockedTier(this.placed);
     if (top > this.lastTier) { this.lastTier = top; this.sound2.note(this.noteIndex + 2); this.sound2.fanfare(); }
 
+    if (this.creatures.countActive(true) < CREATURE_CAP && shouldRelease(tier, Math.random)) {
+      this.releaseCreature(c.x, c.y - 50 * (c.scaleY || 1));
+    }
     if (isFull(this.placed)) { /* Task 6: this.bloom(); */ }
+  }
+
+  private releaseCreature(x: number, y: number) {
+    const key = CREATURE_KEYS[Math.floor(Math.random() * CREATURE_KEYS.length)];
+    let c = this.creatures.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
+    if (!c) { c = spawnEmoji(this, x, y, key); this.creatures.add(c); }
+    else { this.tweens.killTweensOf(c); resetEmoji(c, key, x, y); }
+    c.setOrigin(0.5, 0.5).setAlpha(1).setScale(CREATURE_SCALE).setDepth(Math.round(y));
+    this.sparkle(x, y, this.reduce ? 2 : 5);
+    this.wander(c);
+  }
+
+  // Gentle, bounded, recursive drift to a nearby point (no Timeline; animated emoji
+  // keeps its own flutter loop). Slower under reduced motion.
+  private wander(c: Phaser.GameObjects.Sprite) {
+    const W = this.scale.width;
+    const nx = Phaser.Math.Clamp(c.x + (Math.random() * 2 - 1) * 180, 40, W - 40);
+    const ny = Phaser.Math.Clamp(c.y + (Math.random() * 2 - 1) * 120, 70, this.bg.horizon + 60);
+    c.setFlipX(nx < c.x);
+    this.tweens.add({
+      targets: c, x: nx, y: ny,
+      duration: this.reduce ? 5000 : 2200 + Math.random() * 1600,
+      ease: "Sine.inOut",
+      onComplete: () => { if (c.active) this.wander(c); },
+    });
+  }
+
+  private updateCreatureDepths() {
+    (this.creatures.getChildren() as Phaser.GameObjects.Sprite[]).forEach((c) => {
+      if (c.active) c.setDepth(Math.round(c.y));
+    });
   }
 
   private teardownAll() {
@@ -111,5 +149,6 @@ export class GardenScene extends Phaser.Scene {
 
   update(_t: number, dms: number) {
     this.bg.update(dms / 1000);
+    this.updateCreatureDepths();
   }
 }
