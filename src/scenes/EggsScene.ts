@@ -9,6 +9,7 @@ import { createBag, JACKPOT, GUMBALL_ITEMS, type Bag } from "../core/gumballs";
 import { pickNearestWithinRadius } from "../core/pop";
 import { nextStage, type Stage } from "../core/eggs";
 import { EMOJI } from "../render/emoji";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, preloadFirstTrack } from "../render/assets";
 
 const EGG_RX = 46, EGG_RY = 60;
 const EGG_HIT_RADIUS = 100;
@@ -57,7 +58,16 @@ export class EggsScene extends Phaser.Scene {
 
   constructor() { super("Eggs"); }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, GUMBALL_ITEMS);
+    loadAudio(this, ["crack1", "crack2", "crack3", "shatter", "tada", "fanfare"]);
+    preloadFirstTrack(this, EGGS_MUSIC_KEYS);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, GUMBALL_ITEMS);
     const W = this.scale.width, H = this.scale.height;
     this.reduceMotion = (typeof window !== "undefined" && window.matchMedia)
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;

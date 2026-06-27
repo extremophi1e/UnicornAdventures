@@ -1,6 +1,7 @@
 import Phaser from "phaser";
+import { ensureAudioLoaded, takeFirstTrack } from "../render/assets";
 
-const MUSIC_KEYS = ["music1", "music2", "music3", "music4", "music5", "music6"] as const;
+export const MUSIC_KEYS = ["music1", "music2", "music3", "music4", "music5", "music6"] as const;
 export const CATCH_MUSIC_KEYS: readonly string[] = ["catch1", "catch2", "catch3", "catch4", "catch5"];
 export const POP_MUSIC_KEYS: readonly string[] = ["popmusic", "popmusic2"];
 export const GUMBALL_MUSIC_KEYS: readonly string[] = ["gumball", "gumball2"];
@@ -14,10 +15,16 @@ const GIGGLE_KEYS = ["giggle1", "giggle2", "giggle3"] as const;
 export class Sound {
   private _lastMusicKey: string | null = null;
   private _current?: Phaser.Sound.BaseSound;
+  private _next: string | null = null;
   private _playlist: readonly string[] = MUSIC_KEYS;
   private _musicVolume = 0.5;
+  private _stopped = false;
 
-  constructor(private scene: Phaser.Scene) {}
+  constructor(private scene: Phaser.Scene) {
+    // Once the scene shuts down, a still-in-flight track load must not resurrect
+    // music on the dead scene (the lazy loader's callback may fire late).
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this._stopped = true; });
+  }
 
   private _pickNextTrack(): string {
     const candidates = this._playlist.filter((k) => k !== this._lastMusicKey);
@@ -27,22 +34,35 @@ export class Sound {
 
   private _playTrack(key: string): void {
     this._lastMusicKey = key;
-    const prev = this._current;
-    const m = this.scene.sound.add(key, { loop: false, volume: this._musicVolume });
-    this._current = m;
-    m.once("complete", () => {
-      this._playTrack(this._pickNextTrack());
+    // Stream the track only when it's about to play — most playlists never get
+    // past their first track, so the rest are never downloaded.
+    ensureAudioLoaded(this.scene, key, () => {
+      if (this._stopped) return;
+      const prev = this._current;
+      const m = this.scene.sound.add(key, { loop: false, volume: this._musicVolume });
+      this._current = m;
+      // Decide + prefetch the NEXT track now, while this one plays, so the hand-off
+      // is gapless: tracks run for minutes but download in seconds, so it's cached
+      // well before this one ends. Deciding it up front means the track we prefetch
+      // is the same one we play next (not a fresh random pick at completion).
+      this._next = this._pickNextTrack();
+      ensureAudioLoaded(this.scene, this._next, () => {});
+      m.once("complete", () => {
+        this._playTrack(this._next ?? this._pickNextTrack());
+      });
+      m.play();
+      // Free the just-finished previous track so finished tracks don't accumulate.
+      if (prev) prev.destroy();
     });
-    m.play();
-    // Free the just-finished previous track so finished tracks don't accumulate.
-    if (prev) prev.destroy();
   }
 
   playMusic(playlist: readonly string[] = MUSIC_KEYS, volume = 0.5): void {
     this._playlist = playlist;
     this._musicVolume = volume;
     this._lastMusicKey = null;
-    this._playTrack(this._pickNextTrack());
+    // If the scene preloaded a first track (preloadFirstTrack), start with it so
+    // music begins the instant the scene shows; otherwise pick one to stream now.
+    this._playTrack(takeFirstTrack(this.scene) ?? this._pickNextTrack());
   }
 
   collect(): void {

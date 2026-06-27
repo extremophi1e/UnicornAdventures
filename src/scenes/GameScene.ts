@@ -3,12 +3,13 @@ import { SpaceBackground } from "./ui/SpaceBackground";
 import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { AutoFire, resolveTarget, type AimInput, type Bounds } from "../core/input";
-import { Sound } from "../audio/sound";
+import { Sound, MUSIC_KEYS } from "../audio/sound";
 import { getLevel } from "../core/levels";
 import { TEMPLATES, layoutFormation } from "../core/formations";
 import { findStarEnemyHits, circleOverlap, type Circle } from "../core/collision";
 import { nearestEnemy, steerVelocity } from "../core/magnetism";
 import { Celebrations } from "./ui/Celebrations";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, preloadFirstTrack } from "../render/assets";
 import type { PlacedEnemy, CuteType } from "../core/types";
 import { BossController } from "../core/boss";
 
@@ -74,7 +75,16 @@ export class GameScene extends Phaser.Scene {
     super(key);
   }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, SHOOTER_TYPES);
+    loadAudio(this, ["pop", "tada", "fanfare"]);
+    preloadFirstTrack(this, MUSIC_KEYS);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, SHOOTER_TYPES);
     const W = this.scale.width;
     const H = this.scale.height;
     this.bg = new SpaceBackground(this, W, H);

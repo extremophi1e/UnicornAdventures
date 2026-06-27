@@ -6,6 +6,7 @@ import { Sound } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { pickNearestWithinRadius } from "../core/pop";
 import { pickReaction, netAdds, initialAquariumState, pickTreasureReaction, type AquariumState, type Reaction, type TreasureReactionId } from "../core/aquarium";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, ensureAudioLoaded } from "../render/assets";
 
 const BASELINE = 7;            // target ambient fish count
 const HARD_CAP = 16;          // max concurrent fish
@@ -51,7 +52,15 @@ export class AquariumScene extends Phaser.Scene {
 
   constructor() { super("Aquarium"); }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, [...AQUARIUM_TYPES, ...TREASURE_TYPES]);
+    loadAudio(this, ["aquarium", "blub", "sproing", "chime", "fanfare", "tada"]);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, [...AQUARIUM_TYPES, ...TREASURE_TYPES]);
     const W = this.scale.width;
     const H = this.scale.height;
 
@@ -68,18 +77,27 @@ export class AquariumScene extends Phaser.Scene {
     this.aqState = initialAquariumState();
     this.lastTreasure = null;
 
-    // Dedicated looping music (quieter so SFX stay crisp). Robust autoplay
-    // (immediate + delayed retry + unlock/first-tap), stopped on shutdown.
-    const music = this.sound.add("aquarium", { loop: true, volume: 0.38 });
-    const startMusic = () => { if (!music.isPlaying) music.play(); };
-    startMusic();
-    this.time.delayedCall(200, startMusic);
-    if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
-    this.input.once("pointerdown", startMusic);
+    // Dedicated looping music (quieter so SFX stay crisp), streamed on first
+    // entry so it isn't part of the initial download. Robust autoplay (immediate
+    // + delayed retry + unlock/first-tap); `left` guards every deferred path so a
+    // late track-load or retry can't resurrect music after we've left the scene.
+    let music: Phaser.Sound.BaseSound | undefined;
+    let left = false;
+    const startMusic = () => { if (!left && music && !music.isPlaying) music.play(); };
+    ensureAudioLoaded(this, "aquarium", () => {
+      if (left) return;
+      music = this.sound.add("aquarium", { loop: true, volume: 0.38 });
+      startMusic();
+      this.time.delayedCall(200, startMusic);
+      if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, startMusic);
+      this.input.once("pointerdown", startMusic);
+    });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      left = true;
       this.tweens.killAll();
       this.time.removeAllEvents();
-      music.stop();
+      this.sound.off(Phaser.Sound.Events.UNLOCKED, startMusic);
+      music?.stop();
       this.sound.stopAll();
       // NOTE: do NOT iterate `this.fish` here. The Group registers its own
       // SHUTDOWN listener when created (earlier in create()), so it destroys

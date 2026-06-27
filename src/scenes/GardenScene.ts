@@ -7,7 +7,7 @@ import { Celebrations } from "./ui/Celebrations";
 import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, spreadPosition, BLOOM_TARGET, TIER_PLANTS, type Tier } from "../core/garden";
 import { EMOJI } from "../render/emoji";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
-import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar } from "../render/assets";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, preloadFirstTrack } from "../render/assets";
 
 const LINGER = 2;           // creatures kept across the reset (continuity, not erasure)
 const CLEAR_STAGGER = 45;   // ms between each plant wilting
@@ -46,6 +46,7 @@ export class GardenScene extends Phaser.Scene {
     loadAtlas(this);
     loadEmoji(this, GARDEN_EMOJI_KEYS);
     loadAudio(this, ["gardennotes", "fanfare", "tada"]);
+    preloadFirstTrack(this, GARDEN_MUSIC_KEYS);
     showLoadingBar(this);
   }
 

@@ -3,14 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-    <title>Zoe and Desi's Rainbow Unicorn Adventures</title>
+    <title>Rainbow Unicorn Adventures</title>
     <style>
       html, body { margin: 0; height: 100%; overflow: hidden; background: #8ec5ff; touch-action: none; }
       #game { width: 100vw; height: 100dvh; }
+
+      /* Instant rainbow loading bar — pure CSS so it paints on the very first
+         frame, while the JS bundle is still downloading and Phaser hasn't booted.
+         Removed by TitleScene once the game is ready (see src/scenes/TitleScene.ts). */
+      #boot-loader {
+        position: fixed; inset: 0; z-index: 9999;
+        background: #8ec5ff;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.35s ease;
+      }
+      #boot-loader.hide { opacity: 0; pointer-events: none; }
+      #boot-loader .track {
+        position: relative; width: min(440px, 78vw); height: 28px;
+        border-radius: 14px; overflow: hidden;
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.55), 0 8px 22px rgba(26,26,46,0.28), 0 0 18px rgba(255,255,255,0.4);
+        animation: bl-glow 1.4s ease-in-out infinite;
+      }
+      #boot-loader .bar {
+        position: absolute; top: 0; height: 100%; width: 46%;
+        border-radius: 14px;
+        background: linear-gradient(90deg,#ff3b30,#ff9500,#ffcc00,#34c759,#00a3ff,#5e5ce6,#af52de);
+        animation: bl-slide 1.15s cubic-bezier(.6,.05,.35,.95) infinite;
+      }
+      #boot-loader .bar::after {
+        content: ""; position: absolute; left: 4px; right: 4px; top: 2px; height: 36%;
+        border-radius: 10px; background: rgba(255, 255, 255, 0.30);
+      }
+      @keyframes bl-slide { 0% { left: -50%; } 100% { left: 100%; } }
+      @keyframes bl-glow {
+        0%, 100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.55), 0 8px 22px rgba(26,26,46,0.28), 0 0 16px rgba(255,255,255,0.32); }
+        50%      { box-shadow: 0 0 0 2px rgba(255,255,255,0.72), 0 8px 22px rgba(26,26,46,0.28), 0 0 34px rgba(255,255,255,0.6); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-loader .bar { animation-duration: 2.2s; }
+        #boot-loader .track { animation: none; }
+      }
     </style>
   </head>
   <body>
     <div id="game"></div>
+    <div id="boot-loader"><div class="track"><div class="bar"></div></div></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

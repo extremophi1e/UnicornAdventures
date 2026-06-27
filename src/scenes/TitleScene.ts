@@ -2,14 +2,20 @@ import Phaser from "phaser";
 import { Background } from "./ui/Background";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 
-const PLAYER_NAME = "Zoe and Desi";
-
 export class TitleScene extends Phaser.Scene {
   private bg!: Background;
   constructor() {
     super("Title");
   }
   create() {
+    // The game is up — fade out the pure-CSS boot loader from index.html (it
+    // covered the blank period while the JS bundle downloaded and Phaser booted).
+    const boot = typeof document !== "undefined" ? document.getElementById("boot-loader") : null;
+    if (boot) {
+      boot.classList.add("hide");
+      setTimeout(() => boot.remove(), 400);
+    }
+
     const W = this.scale.width;
     const H = this.scale.height;
     this.bg = new Background(this, W, H);
@@ -38,7 +44,7 @@ export class TitleScene extends Phaser.Scene {
     });
 
     this.add
-      .text(W / 2, 150, `✨ ${PLAYER_NAME}'s Rainbow Unicorn Adventures ✨`, {
+      .text(W / 2, 150, "✨ Rainbow Unicorn Adventures ✨", {
         fontSize: "40px", color: "#7a3fa0", fontStyle: "bold", align: "center",
         wordWrap: { width: W - 80 },
       })
@@ -51,17 +57,17 @@ export class TitleScene extends Phaser.Scene {
     const MARGIN = 24, GAP = 24, BH = 140;
     const BW = (W - 2 * MARGIN - GAP) / 2;
     const colL = W / 2 - (BW / 2 + GAP / 2), colR = W / 2 + (BW / 2 + GAP / 2);
-    // 9 modes: 4 rows of two + a full-width Garden button on the 5th row.
+    // 9 modes: 4 rows of two + a full-width Soundboard button on the 5th row.
     const rowY = [545, 705, 865, 1025, 1185];
     this.makeGridButton(colL, rowY[0], BW, BH, "⭐", "Star Blaster", 0x9b6bff, () => this.go("Game"));
     this.makeGridButton(colR, rowY[0], BW, BH, "🌈", "Catch the Cuties", 0x7ed957, () => this.go("Catch"));
     this.makeGridButton(colL, rowY[1], BW, BH, "🫧", "Pop the Cuties", 0xff5fa2, () => this.go("Pop"));
     this.makeGridButton(colR, rowY[1], BW, BH, "🎁", "Unicorn Gumballs", 0xff9f43, () => this.go("Gumball"));
-    this.makeGridButton(colL, rowY[2], BW, BH, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
+    this.makeGridButton(colL, rowY[2], BW, BH, "🌱", "Grow a Garden", 0x35c46a, () => this.go("Garden"));
     this.makeGridButton(colR, rowY[2], BW, BH, "🐹", "Peekaboo", 0xffd23f, () => this.go("Peekaboo"));
     this.makeGridButton(colL, rowY[3], BW, BH, "🥚", "Surprise Eggs", 0xb39ddb, () => this.go("Eggs"));
     this.makeGridButton(colR, rowY[3], BW, BH, "🐠", "Tap the Aquarium", 0x0077b6, () => this.go("Aquarium"));
-    this.makeGridButton(W / 2, rowY[4], W - 2 * MARGIN, BH, "🌱", "Grow a Garden", 0x35c46a, () => this.go("Garden"));
+    this.makeGridButton(W / 2, rowY[4], W - 2 * MARGIN, BH, "🔊", "Animal Soundboard", 0x00b4d8, () => this.go("Soundboard"));
 
     this.events.on("update", (_t: number, dms: number) => this.bg.update(dms / 1000, this.scale.width));
   }

@@ -5,6 +5,7 @@ import { Celebrations } from "./ui/Celebrations";
 import { EMOJI } from "../render/emoji";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 import { computeGrid, pageSlice, type GridLayout } from "../core/soundboardLayout";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar } from "../render/assets";
 
 // Canonical order: 52 emoji creatures + the unicorn (rendered from the catchUnicorn
 // sheet). Each name is also the audio-sprite marker. `donut` is the ladybug glyph.
@@ -36,7 +37,15 @@ export class SoundboardScene extends Phaser.Scene {
 
   constructor() { super("Soundboard"); }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, SOUNDBOARD_ORDER);
+    loadAudio(this, ["animalvoices"]);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, SOUNDBOARD_ORDER);
     const W = this.scale.width, H = this.scale.height;
     this.bg = new PlayroomBackground(this, W, H);
     this.sound2 = new Sound(this);

@@ -9,6 +9,7 @@ import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, speedForNotch, type CatchState } from "../core/catch";
 import { shouldSpawnBonus } from "../core/pop";
 import { EMOJI } from "../render/emoji";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, ALL_EMOJI_KEYS, preloadFirstTrack } from "../render/assets";
 
 const KEY_SPEED = 4800;        // px/s for arrow-key movement (3x faster)
 const SPAWN_INTERVAL = 1.1;    // seconds, fixed (independent of fall speed)
@@ -55,7 +56,16 @@ export class CatchScene extends Phaser.Scene {
     super("Catch");
   }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, ALL_EMOJI_KEYS);
+    loadAudio(this, ["collect", "fanfare"]);
+    preloadFirstTrack(this, CATCH_MUSIC_KEYS);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, ALL_EMOJI_KEYS);
     const W = this.scale.width;
     const H = this.scale.height;
 

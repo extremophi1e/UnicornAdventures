@@ -7,6 +7,7 @@ import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, speedForNotch, type CatchState } from "../core/catch";
 import { pickNearestWithinRadius, shouldSpawnBonus } from "../core/pop";
 import { EMOJI } from "../render/emoji";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, ALL_EMOJI_KEYS, preloadFirstTrack } from "../render/assets";
 
 const SPAWN_INTERVAL = 0.9;          // seconds, fixed (independent of float speed)
 const MAX_CONCURRENT = 12;           // cap on-screen cuties
@@ -45,7 +46,16 @@ export class PopScene extends Phaser.Scene {
 
   constructor() { super("Pop"); }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, ALL_EMOJI_KEYS);
+    loadAudio(this, ["pop", "tada", "fanfare"]);
+    preloadFirstTrack(this, POP_MUSIC_KEYS);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, ALL_EMOJI_KEYS);
     const W = this.scale.width;
     const H = this.scale.height;
 

@@ -7,7 +7,7 @@ import { Sound, GUMBALL_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { createBag, JACKPOT, type Bag } from "../core/gumballs";
 import { EMOJI } from "../render/emoji";
-import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, ALL_EMOJI_KEYS } from "../render/assets";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, ALL_EMOJI_KEYS, preloadFirstTrack } from "../render/assets";
 
 const ANTICIPATION_MS = 1100;        // rattle + flash before the reveal
 const FLASH_INTERVAL_MS = 260;       // toggle every 260ms -> ~1.9 flashes/sec (seizure-safe)
@@ -51,6 +51,7 @@ export class GumballScene extends Phaser.Scene {
     loadAtlas(this);
     loadEmoji(this, ALL_EMOJI_KEYS);
     loadAudio(this, ["pop", "tada", "fanfare"]);
+    preloadFirstTrack(this, GUMBALL_MUSIC_KEYS);
     showLoadingBar(this);
   }
 

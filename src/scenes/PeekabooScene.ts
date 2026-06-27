@@ -6,6 +6,7 @@ import { Sound, PEEKABOO_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { initialCatchState, recordCatch, recordMiss, type CatchState } from "../core/catch";
 import { computeSpots, windowForNotch, concurrentForNotch, shouldSurprise, chooseSpot, type Spot } from "../core/peekaboo";
+import { loadAtlas, loadEmoji, loadAudio, registerEmojiAnims, showLoadingBar, preloadFirstTrack } from "../render/assets";
 
 const SPAWN_INTERVAL = 850;     // ms between scheduler ticks
 const PEEK_RISE = 96;           // px a ground critter rises when peeking
@@ -34,7 +35,16 @@ export class PeekabooScene extends Phaser.Scene {
 
   constructor() { super("Peekaboo"); }
 
+  preload() {
+    loadAtlas(this);
+    loadEmoji(this, CRITTER_KEYS);
+    loadAudio(this, ["giggle1", "giggle2", "giggle3", "fanfare"]);
+    preloadFirstTrack(this, PEEKABOO_MUSIC_KEYS);
+    showLoadingBar(this);
+  }
+
   create() {
+    registerEmojiAnims(this, CRITTER_KEYS);
     const W = this.scale.width, H = this.scale.height;
     this.bg = new PeekabooBackground(this, W, H);
     this.sound2 = new Sound(this);
