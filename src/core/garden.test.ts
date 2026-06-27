@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  Tier, BLOOM_TARGET, TIER2_AT, TIER3_AT, TIER_PLANTS, NEWEST_WEIGHT,
+  BLOOM_TARGET, TIER2_AT, TIER3_AT, TIER_PLANTS, NEWEST_WEIGHT,
   unlockedTier, pickTier, plantForTier, RELEASE_PROB, shouldRelease, isFull,
 } from "./garden";
 
