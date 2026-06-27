@@ -19,7 +19,7 @@
 
 ---
 
-There are **no scores to lose, no game-overs, no lives, no menus to get stuck in** — just a smiling unicorn, a lot of cute things, and three little games you reach with one big tap. Built for a 4-year-old and her sibling, tuned so a toddler mashing the screen with both hands always feels like a hero.
+There are **no scores to lose, no game-overs, no lives, no menus to get stuck in** — just a smiling unicorn, a lot of cute things, and four little games you reach with one big tap. Built for a 4-year-old and her sibling, tuned so a toddler mashing the screen with both hands always feels like a hero.
 
 ## 🎮 Three games, one tap each
 
@@ -94,6 +94,7 @@ Connect the repo on Netlify with build command `npm run build` and publish dir `
 | `npm run audio` | Generates the sound effects |
 | `npm run catch-audio` | Fetches the Rainbow Catch music playlist |
 | `npm run pop-audio` | Fetches the Pop the Cuties track (default: *Wallpaper*) |
+| `npm run gumball-audio` | Fetches the Unicorn Gumballs track (default: *The Builder*) |
 | `npm run catch-unicorn` | Builds the animated unicorn sprite sheet |
 | `npm run icons` | Generates the PWA icons |
 
