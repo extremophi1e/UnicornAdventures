@@ -11,7 +11,7 @@ const ANTICIPATION_MS = 1100;        // rattle + flash before the reveal
 const FLASH_INTERVAL_MS = 260;       // toggle every 260ms -> ~1.9 flashes/sec (seizure-safe)
 const BURST_PARTICLES = 16;
 const BURST_PARTICLES_REDUCED = 5;
-const ITEM_REVEAL_SCALE = (2.2 / 3) * 1.5;   // 216px emoji frames (/3) + prize shown 50% larger
+const ITEM_REVEAL_SCALE = (2.2 / 2) * 1.5;   // 144px emoji frames (/2) + prize shown 50% larger
 const JACKPOT_REVEAL_SCALE = 0.85 * 1.5;     // catchUnicorn 256px sheet + prize 50% larger
 const MACHINE_SCALE = 0.75;                  // gumball machine drawn 25% smaller
 // Flashing bulbs avoid saturated red (photosensitivity); soft coral replaces it.

@@ -20,8 +20,8 @@ const ROOT = join(__dirname, "..");
 const OUT_DIR = join(ROOT, "public", "emoji");
 const OUT_TS = join(ROOT, "src", "render", "emoji.ts");
 
-const FRAME_SIZE = 216;    // px/frame (3x the old 72px) for retina-crisp emoji. Scenes divide their
-                           // emoji setScale values by 3 to keep on-screen sizes unchanged.
+const FRAME_SIZE = 144;    // px/frame (2x the old 72px) — crisp but lighter than 216. Scenes divide
+                           // their emoji setScale values by 2 to keep on-screen sizes unchanged.
 const TARGET_FRAMES = 24;  // sampled frames per emoji (down from the source's ~70-84)
 const MAX_ROW = 2016;      // grid width cap (mobile texture safety)
 
@@ -50,6 +50,12 @@ const TYPES = {
   chick: "1f425", owl: "1f989", frog: "1f438", snail: "1f40c",
   trex: "1f996", sauropod: "1f995", robot: "1f916", alien: "1f47e", ghost: "1f47b",
   poop: "1f4a9",
+  // +25 more creatures (probed loop-safe).
+  dog: "1f415", rabbit: "1f407", monkey: "1f412", pig: "1f416", tiger: "1f405",
+  horse: "1f40e", goat: "1f410", ox: "1f402", rat: "1f400", gorilla: "1f98d",
+  orangutan: "1f9a7", kangaroo: "1f998", seal: "1f9ad", chipmunk: "1f43f", peacock: "1f99a",
+  rooster: "1f413", eagle: "1f985", flamingo: "1f9a9", dove: "1f54a_fe0f", snake: "1f40d",
+  lizard: "1f98e", lobster: "1f99e", jellyfish: "1fabc", ant: "1f41c", microbe: "1f9a0",
 };
 
 function fetchBuffer(url, redirects = 0) {

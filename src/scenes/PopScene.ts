@@ -13,8 +13,8 @@ const MAX_CONCURRENT = 12;           // cap on-screen cuties
 const POP_RADIUS = 90;               // generous tap radius (~1.5x sprite)
 const CELEBRATION_EVERY = 20;        // pops per milestone celebration
 const POP_SPEED_SCALE = 0.75;        // float 25% slower than the shared catch.ts ladder
-const ITEM_SCALE = 1.1 / 3;   // /3: emoji frames are now 216px (3x the old 72px)
-const BONUS_SCALE = 1.8 / 3;
+const ITEM_SCALE = 1.1 / 2;   // /2: emoji frames are now 144px (2x the old 72px)
+const BONUS_SCALE = 1.8 / 2;
 const BURST_PARTICLES = 12;
 const BURST_PARTICLES_REDUCED = 4;
 

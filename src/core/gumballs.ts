@@ -9,6 +9,9 @@ export const GUMBALL_ITEMS: readonly string[] = [
   "cat", "fox", "bear", "panda", "lion", "cow", "sloth", "otter", "raccoon",
   "hedgehog", "octopus", "turtle", "whale", "crab", "penguin", "chick", "owl",
   "frog", "snail", "trex", "sauropod", "robot", "alien", "ghost", "poop",
+  "dog", "rabbit", "monkey", "pig", "tiger", "horse", "goat", "ox", "rat",
+  "gorilla", "orangutan", "kangaroo", "seal", "chipmunk", "peacock", "rooster",
+  "eagle", "flamingo", "dove", "snake", "lizard", "lobster", "jellyfish", "ant", "microbe",
 ];
 export const JACKPOT = "unicorn";   // special: rendered from the catchUnicorn sheet
 export const JACKPOT_MIN_GAP = 8;   // ordinary pulls required before a jackpot is eligible

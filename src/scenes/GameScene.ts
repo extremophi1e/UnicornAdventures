@@ -198,12 +198,12 @@ export class GameScene extends Phaser.Scene {
     for (const pe of placed) {
       let img = this.enemies.getFirstDead(false) as Phaser.GameObjects.Sprite | null;
       if (!img) {
-        img = spawnEmoji(this, pe.pos.x, pe.pos.y, pe.type).setScale(1.1 / 3);
+        img = spawnEmoji(this, pe.pos.x, pe.pos.y, pe.type).setScale(1.1 / 2);
         this.enemies.add(img);
         // ── Item 5: Per-enemy random phase for sine pulse ─────────────────
         img.setData("phase", Math.random() * Math.PI * 2);
       } else {
-        resetEmoji(img, pe.type, pe.pos.x, pe.pos.y).setScale(1.1 / 3);
+        resetEmoji(img, pe.type, pe.pos.x, pe.pos.y).setScale(1.1 / 2);
         // Re-assign phase on reuse so each wave feels fresh
         img.setData("phase", Math.random() * Math.PI * 2);
       }
@@ -223,7 +223,7 @@ export class GameScene extends Phaser.Scene {
       // ── Item 5: Sine-based breathe (scale + rotation) ───────────────────
       const phase = e.getData("phase") as number;
       const breathe = Math.sin(this.t * 1.8 + phase);
-      e.setScale((1.1 + breathe * 0.055) / 3); // ±5% around base (/3 for 216px emoji frames)
+      e.setScale((1.1 + breathe * 0.055) / 2); // ±5% around base (/2 for 144px emoji frames)
       e.setAngle(breathe * 5);                 // ±5°
     });
 
@@ -317,7 +317,7 @@ export class GameScene extends Phaser.Scene {
   protected startBoss() {
     const spec = getLevel(this.levelIndex).boss!;
     this.bossCtl = new BossController(spec);
-    this.boss = spawnEmoji(this, this.scale.width / 2, 320, spec.type).setScale(4 / 3);
+    this.boss = spawnEmoji(this, this.scale.width / 2, 320, spec.type).setScale(4 / 2);
     this.bossBar = this.add.graphics();
     this.tweens.add({ targets: this.boss, x: this.scale.width / 2 + 80, yoyo: true, repeat: -1, duration: 1600, ease: "Sine.inOut" });
   }
