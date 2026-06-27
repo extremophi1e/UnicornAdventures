@@ -5,7 +5,7 @@ import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { Sound } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { pickNearestWithinRadius } from "../core/pop";
-import { pickReaction, netAdds, initialAquariumState, type AquariumState, type Reaction } from "../core/aquarium";
+import { pickReaction, netAdds, initialAquariumState, pickTreasureReaction, type AquariumState, type Reaction, type TreasureReactionId } from "../core/aquarium";
 
 const BASELINE = 7;            // target ambient fish count
 const HARD_CAP = 16;          // max concurrent fish
@@ -25,8 +25,15 @@ const AQUARIUM_TYPES = [
   "whale", "turtle", "octopus", "crab", "lobster", "jellyfish", "penguin", "seal", "otter",
 ];
 
+// Floating sea OBJECTS (emoji keys) — tappable "treasures" that drift among the
+// creatures but get their own object-only reactions (never split/morph/swim).
+const TREASURE_TYPES = ["ringbuoy", "sailboat", "bottle", "ring"];
+const TREASURE_CHANCE = 0.2;   // ~1 in 5 ambient spawns is a treasure
+
 // Rainbow tint cycle (ROYGBIV) for color-flash + the shockwave overlay.
 const RAINBOW_COLORS = [0xff3b30, 0xff9500, 0xffcc00, 0x34c759, 0x00a3ff, 0x5e5ce6, 0xaf52de];
+// Warm gold tints for the treasure "gleam" reaction.
+const GOLD_COLORS = [0xffd700, 0xfff3b0, 0xffe066, 0xffffff, 0xffcf40];
 
 type Fish = Phaser.GameObjects.Sprite;
 
@@ -40,6 +47,7 @@ export class AquariumScene extends Phaser.Scene {
   private _t = 0;
   private reduceMotion = false;
   private aqState: AquariumState = initialAquariumState();
+  private lastTreasure: TreasureReactionId | null = null;
 
   constructor() { super("Aquarium"); }
 
@@ -58,6 +66,7 @@ export class AquariumScene extends Phaser.Scene {
     this.spawnTimer = 0;
     this._t = 0;
     this.aqState = initialAquariumState();
+    this.lastTreasure = null;
 
     // Dedicated looping music (quieter so SFX stay crisp). Robust autoplay
     // (immediate + delayed retry + unlock/first-tap), stopped on shutdown.
@@ -95,7 +104,7 @@ export class AquariumScene extends Phaser.Scene {
       const x = 60 + Math.random() * (W - 120);
       const y = 150 + Math.random() * (H - 320);
       const dir = Math.random() < 0.5 ? 1 : -1;
-      this.spawnFishAt(x, y, dir, AQUARIUM_TYPES[Math.floor(Math.random() * AQUARIUM_TYPES.length)]);
+      this.spawnAmbient(x, y, dir);
     }
   }
 
@@ -116,6 +125,18 @@ export class AquariumScene extends Phaser.Scene {
     f.setData("lastTapT", 0);
     f.setData("napUntil", 0);
     f.setData("zzz", null);
+    f.setData("treasure", false);
+    return f;
+  }
+
+  // Ambient/initial spawn: ~1 in 5 is a floating treasure (object) instead of a
+  // creature. Split/school call spawnFishAt directly, so they only ever produce
+  // creatures (treasure stays false there).
+  private spawnAmbient(x: number, y: number, dir: number): Fish {
+    const isTreasure = Math.random() < TREASURE_CHANCE;
+    const pool = isTreasure ? TREASURE_TYPES : AQUARIUM_TYPES;
+    const f = this.spawnFishAt(x, y, dir, pool[Math.floor(Math.random() * pool.length)]);
+    f.setData("treasure", isTreasure);
     return f;
   }
 
@@ -167,6 +188,10 @@ export class AquariumScene extends Phaser.Scene {
     const fish = actives[idx];
     const now = this._t;
 
+    // Treasures (floating objects) get their own reactions, never nap, and never
+    // a creature pick — so a drifting ring/sailboat/bottle never acts "alive."
+    if (fish.getData("treasure")) { this.applyTreasureReaction(fish); return; }
+
     // Napping fish only mumble — no big reaction.
     if ((fish.getData("napUntil") as number) > now) { this.sleepyMumble(fish); return; }
 
@@ -214,6 +239,45 @@ export class AquariumScene extends Phaser.Scene {
       case "treasure": this.rTreasure(fish); break;
       default: this.rWiggle(fish); break;
     }
+  }
+
+  // --- Treasure (floating object) reactions: curated, object-only ---
+  private applyTreasureReaction(f: Fish) {
+    this.tweens.killTweensOf(f);
+    f.setAngle(0).setScale(ITEM_SCALE).clearTint();
+    this.tapBurst(f.x, f.y);
+    const r = pickTreasureReaction(Math.random, this.lastTreasure);
+    this.lastTreasure = r;
+    switch (r) {
+      case "gleam": this.tGleam(f); break;
+      case "spin": this.rSpin(f); break;
+      case "bubble": this.rBubble(f); break;
+      case "grow": this.tGrow(f); break;
+      case "reveal": this.tReveal(f); break;
+      default: this.tGleam(f); break;
+    }
+  }
+  private tGleam(f: Fish) {
+    const cols = GOLD_COLORS;
+    this.tweens.addCounter({
+      from: 0, to: cols.length * 2, duration: 650,
+      onUpdate: (tw) => { if (f.active) f.setTint(cols[Math.floor(tw.getValue() ?? 0) % cols.length]); },
+      onComplete: () => { if (f.active) f.clearTint(); },
+    });
+    this.tweens.add({ targets: f, scale: ITEM_SCALE * 1.4, yoyo: true, duration: 320, ease: "Sine.inOut", onComplete: () => f.setScale(ITEM_SCALE) });
+    this.tapBurst(f.x, f.y);
+    this.sound.play("chime", { volume: 0.5 });
+  }
+  private tGrow(f: Fish) {
+    this.tweens.add({ targets: f, scale: ITEM_SCALE * 2.6, yoyo: true, hold: 250, duration: 300, ease: "Back.inOut", onComplete: () => f.setScale(ITEM_SCALE) });
+    this.sound.play("blub", { volume: 0.5, detune: -200 });
+  }
+  private tReveal(f: Fish) {
+    const which = Math.random() < 0.5 ? "heart" : "gem";
+    const o = spawnEmoji(this, f.x, f.y, which).setScale(0.15).setDepth(60);
+    this.tweens.add({ targets: o, scale: 0.6, duration: 220, ease: "Back.out" });
+    this.tweens.add({ targets: o, y: o.y - (130 + Math.random() * 60), alpha: 0, delay: 90, duration: 900, ease: "Sine.out", onComplete: () => o.destroy() });
+    this.sound.play("chime", { volume: 0.45 });
   }
 
   // --- Common reaction handlers (amplified: big motion + sound on every one) ---
@@ -454,7 +518,7 @@ export class AquariumScene extends Phaser.Scene {
         const dir = Math.random() < 0.5 ? 1 : -1;
         const x = dir > 0 ? -50 : W + 50;
         const y = 150 + Math.random() * (H - 320);
-        this.spawnFishAt(x, y, dir, AQUARIUM_TYPES[Math.floor(Math.random() * AQUARIUM_TYPES.length)]);
+        this.spawnAmbient(x, y, dir);
       }
     }
 

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   pickReaction, netAdds, initialAquariumState, REACTIONS,
   MIN_GAP, PITY_CEILING, type AquariumState, type Reaction,
+  pickTreasureReaction, TREASURE_REACTIONS,
 } from "./aquarium";
 
 // Small deterministic RNG (mulberry32) for seeded distribution tests.
@@ -125,5 +126,36 @@ describe("netAdds", () => {
   it("returns 0 for non-additive reactions", () => {
     expect(netAdds(byId("spin"), 10)).toBe(0);
     expect(netAdds(byId("shockwave"), 10)).toBe(0);
+  });
+});
+
+describe("pickTreasureReaction", () => {
+  it("only ever returns a known treasure reaction", () => {
+    const rng = mulberry32(3);
+    let last: ReturnType<typeof pickTreasureReaction> | null = null;
+    for (let i = 0; i < 1000; i++) {
+      const r = pickTreasureReaction(rng, last);
+      expect(TREASURE_REACTIONS).toContain(r);
+      last = r;
+    }
+  });
+  it("never returns the same reaction twice in a row", () => {
+    const rng = mulberry32(99);
+    let last: ReturnType<typeof pickTreasureReaction> | null = null;
+    for (let i = 0; i < 2000; i++) {
+      const r = pickTreasureReaction(rng, last);
+      if (last !== null) expect(r).not.toBe(last);
+      last = r;
+    }
+  });
+  it("never returns one of the creature-only reactions", () => {
+    const banned = ["split", "morph", "school", "backflip", "zoom"];
+    const rng = mulberry32(7);
+    let last: ReturnType<typeof pickTreasureReaction> | null = null;
+    for (let i = 0; i < 500; i++) {
+      const r = pickTreasureReaction(rng, last);
+      expect(banned).not.toContain(r);
+      last = r;
+    }
   });
 });

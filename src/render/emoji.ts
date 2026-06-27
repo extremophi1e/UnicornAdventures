@@ -80,6 +80,10 @@ export const EMOJI: Record<string, EmojiDef> = {
   cactus: { key: "emoji-cactus", sheet: "emoji/cactus.png", anim: "emoji-cactus", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 9 },
   evergreen: { key: "emoji-evergreen", sheet: "emoji/evergreen.png", anim: "emoji-evergreen", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 12 },
   bee: { key: "emoji-bee", sheet: "emoji/bee.png", anim: "emoji-bee", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 6 },
+  ringbuoy: { key: "emoji-ringbuoy", sheet: "emoji/ringbuoy.png", anim: "emoji-ringbuoy", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 10 },
+  sailboat: { key: "emoji-sailboat", sheet: "emoji/sailboat.png", anim: "emoji-sailboat", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 7 },
+  bottle: { key: "emoji-bottle", sheet: "emoji/bottle.png", anim: "emoji-bottle", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 11 },
+  ring: { key: "emoji-ring", sheet: "emoji/ring.png", anim: "emoji-ring", frameWidth: 144, frameHeight: 144, frameCount: 24, frameRate: 18 },
 };
 
 export const EMOJI_DEFS: EmojiDef[] = Object.values(EMOJI);

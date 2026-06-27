@@ -108,3 +108,18 @@ export function netAdds(reaction: Reaction, remainingCapacity: number): number {
   if (reaction.kind === "school") return Math.min(reaction.schoolCount ?? 0, remainingCapacity);
   return 0;
 }
+
+// --- Treasures (floating sea OBJECTS: ring buoy / sailboat / bottle / ring) ---
+// Objects get their own curated reactions — never the creature ones (split /
+// morph / school / swim-away), which would make a drifting object look "alive."
+export type TreasureReactionId = "gleam" | "spin" | "bubble" | "grow" | "reveal";
+export const TREASURE_REACTIONS: TreasureReactionId[] = ["gleam", "spin", "bubble", "grow", "reveal"];
+
+// Pick the next treasure reaction, never repeating the last one (so a treasure
+// tapped twice in a row always does something different). Pure + deterministic
+// given `rng` (in [0,1)).
+export function pickTreasureReaction(rng: () => number, last: TreasureReactionId | null): TreasureReactionId {
+  const pool = TREASURE_REACTIONS.filter((r) => r !== last);
+  const candidates = pool.length ? pool : TREASURE_REACTIONS;
+  return candidates[Math.floor(rng() * candidates.length)];
+}

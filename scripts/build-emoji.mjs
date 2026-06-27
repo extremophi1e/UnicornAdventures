@@ -61,6 +61,9 @@ const TYPES = {
   sprout: "1f331", daisy: "1f33c", tulip: "1f337", rose: "1f339",
   herb: "1f33f", cactus: "1f335",
   evergreen: "1f332", bee: "1f41d",
+  // Tap the Aquarium — sea/nautical OBJECTS (not creatures; probed loop-safe).
+  // These drift as tappable "treasures" with object-only reactions.
+  ringbuoy: "1f6df", sailboat: "26f5", bottle: "1f37e", ring: "1f48d",
 };
 
 function fetchBuffer(url, redirects = 0) {
