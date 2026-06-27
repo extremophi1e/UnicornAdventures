@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { AquariumBackground } from "./ui/AquariumBackground";
 import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
+import { Sound } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
 import { pickNearestWithinRadius } from "../core/pop";
 import { pickReaction, netAdds, initialAquariumState, type AquariumState, type Reaction } from "../core/aquarium";
@@ -30,6 +31,7 @@ type Fish = Phaser.GameObjects.Sprite;
 
 export class AquariumScene extends Phaser.Scene {
   private bg!: AquariumBackground;
+  private sound2!: Sound;
   private fx!: Celebrations;
 
   private fish!: Phaser.GameObjects.Group;
@@ -48,6 +50,7 @@ export class AquariumScene extends Phaser.Scene {
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
 
     this.bg = new AquariumBackground(this, W, H);
+    this.sound2 = new Sound(this);
     this.fx = new Celebrations(this);
 
     this.fish = this.add.group();
@@ -174,8 +177,9 @@ export class AquariumScene extends Phaser.Scene {
       case "morph": this.rMorph(fish); break;
       case "backflip": this.rBackflip(fish); break;
       case "giant": this.rGiant(fish); break;
-      // Rare reactions are added in Task 7. Until then they fall
-      // through to a gentle wiggle (always a pleasant, unbreakable response).
+      case "school": this.rSchool(fish, reaction); break;
+      case "shockwave": this.rShockwave(fish); break;
+      case "treasure": this.rTreasure(fish); break;
       default: this.rWiggle(fish); break;
     }
   }
@@ -268,6 +272,86 @@ export class AquariumScene extends Phaser.Scene {
       ease: "Sine.inOut", onComplete: () => fish.setScale(ITEM_SCALE),
     });
     this.sound.play("blub", { volume: 0.5, detune: -300 });
+  }
+
+  // --- Rare jackpot handlers ---
+  // School: a few mixed friends swim in from an edge. Cap-safe via netAdds
+  // (and pickReaction filters school out entirely when already at cap).
+  private rSchool(_fish: Fish, reaction: Reaction) {
+    const W = this.scale.width, H = this.scale.height;
+    const remaining = HARD_CAP - this.fish.countActive(true);
+    const adds = netAdds(reaction, remaining);
+    for (let i = 0; i < adds; i++) {
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      const x = dir > 0 ? -50 - i * 60 : W + 50 + i * 60;
+      const y = 150 + Math.random() * (H - 320);
+      const t = AQUARIUM_TYPES[Math.floor(Math.random() * AQUARIUM_TYPES.length)];
+      const f = this.spawnFishAt(x, y, dir, t);
+      f.setScale(ITEM_SCALE * 0.4);
+      this.tweens.add({ targets: f, scale: ITEM_SCALE, duration: 300, ease: "Back.out" });
+    }
+    this.fx.banner("🐟", "#0077b6");
+    this.sound2.fanfare();
+  }
+  // Rainbow shockwave: a slow low-contrast rainbow overlay (NOT a strobe) +
+  // every fish reacts in a staggered wave. Reduced-motion -> a single soft pulse.
+  private rShockwave(_fish: Fish) {
+    const W = this.scale.width, H = this.scale.height;
+    const cols = RAINBOW_COLORS;
+    const dur = this.reduceMotion ? 600 : 1100;
+    const overlay = this.add.rectangle(W / 2, H / 2, W, H, cols[0], 1).setDepth(40).setAlpha(0);
+    this.tweens.addCounter({
+      from: 0, to: cols.length, duration: dur,
+      onUpdate: (tw) => { overlay.fillColor = cols[Math.floor(tw.getValue() ?? 0) % cols.length]; },
+    });
+    this.tweens.add({
+      targets: overlay, alpha: this.reduceMotion ? 0.12 : 0.22, yoyo: true, hold: 200,
+      duration: this.reduceMotion ? 300 : 550, ease: "Sine.inOut", onComplete: () => overlay.destroy(),
+    });
+    const actives = (this.fish.getChildren() as Fish[]).filter((f) => f.active && (f.getData("napUntil") as number) <= this._t);
+    actives.forEach((f, i) => {
+      this.time.delayedCall(this.reduceMotion ? 0 : i * 70, () => { if (f.active) this.rWiggle(f); });
+    });
+    this.fx.banner("🌈");
+    this.sound2.tada();
+  }
+  // Treasure chest: a shape-based chest rises from the floor, pops open into a
+  // gem/sparkle/bubble fountain + fanfare, then sinks. Non-additive (the tapped
+  // fish keeps drifting), so always cap-safe.
+  private rTreasure(fish: Fish) {
+    const H = this.scale.height;
+    const floorY = H - 70;
+    const cx = fish.x;
+
+    const chest = this.add.container(cx, floorY + 90).setDepth(45);
+    const body = this.add.graphics();
+    body.fillStyle(0x8a5a2b, 1).fillRoundedRect(-50, -28, 100, 52, 8);
+    body.fillStyle(0xffd54a, 1).fillRect(-50, -4, 100, 8);
+    const lid = this.add.graphics();
+    lid.fillStyle(0x6e4420, 1).fillRoundedRect(-50, -46, 100, 22, 8);
+    chest.add([body, lid]);
+
+    this.tweens.add({
+      targets: chest, y: floorY, duration: 360, ease: "Back.out",
+      onComplete: () => {
+        this.tweens.add({ targets: lid, y: -64, angle: -12, duration: 240, ease: "Sine.out" });
+        this.emitBubbles(cx, floorY - 20, 16, 40);
+        this.fx.popAt(cx, floorY - 20);
+        for (let i = 0; i < 5; i++) {
+          const gem = spawnEmoji(this, cx + (Math.random() * 2 - 1) * 40, floorY - 20, "gem").setScale(0.35).setDepth(46);
+          this.tweens.add({
+            targets: gem, y: gem.y - (120 + Math.random() * 100), x: gem.x + (Math.random() * 2 - 1) * 50,
+            alpha: 0, duration: 1000 + Math.random() * 400, ease: "Sine.out", onComplete: () => gem.destroy(),
+          });
+        }
+        this.fx.banner("💎", "#ffd54a");
+        this.sound2.fanfare();
+        this.sound.play("chime", { volume: 0.6 });
+        this.time.delayedCall(1600, () => {
+          this.tweens.add({ targets: chest, y: floorY + 90, alpha: 0, duration: 400, onComplete: () => chest.destroy() });
+        });
+      },
+    });
   }
 
   // --- Sleepy damper ---
