@@ -12,7 +12,7 @@ const LINGER = 2;           // creatures kept across the reset (continuity, not 
 const CLEAR_STAGGER = 45;   // ms between each plant wilting
 const GROW_MS = 700;          // sprout -> full-size grow
 const SWAP_AT = 420;          // ms into the grow when 🌱 becomes the final plant
-const TIER_SCALE = [0.42, 0.62, 0.95]; // base setScale per tier (144px frames)
+const TIER_SCALE = [0.63, 0.93, 1.425]; // base setScale per tier (144px frames) — 50% larger
 const FX_DEPTH = 100000;      // sparkles/unicorn always in front
 const CREATURE_CAP = 12;
 // 🐝 bee only if it baked loop-safe in Task 1; else 🍩 donut is the 2nd flyer.

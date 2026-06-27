@@ -26,7 +26,7 @@ export class GardenBackground extends Phaser.GameObjects.Container {
       this.clouds.push(c); this.add(c);
     }
 
-    this.sun = scene.add.container(width - 130, 140);
+    this.sun = scene.add.container(width - 185, 200);
     const rays = scene.add.graphics();
     rays.lineStyle(6, 0xffe27a, 0.9);
     for (let i = 0; i < 8; i++) {
@@ -39,6 +39,7 @@ export class GardenBackground extends Phaser.GameObjects.Container {
     this.sun.add(rays);
     this.sun.add(scene.add.circle(0, 0, 30, 0xffe27a));
     this.add(this.sun);
+    this.sun.setScale(3); // 3x larger (repositioned above to stay clear of the top/right edges)
 
     this.hills = scene.add.graphics();
     this.add(this.hills);
