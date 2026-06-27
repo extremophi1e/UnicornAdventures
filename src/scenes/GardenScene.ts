@@ -4,7 +4,7 @@ import { spawnEmoji, resetEmoji } from "../render/emojiSprite";
 import { ATLAS_KEY, frameFor } from "../render/sprites";
 import { Sound, GARDEN_MUSIC_KEYS } from "../audio/sound";
 import { Celebrations } from "./ui/Celebrations";
-import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, type Tier } from "../core/garden";
+import { pickTier, plantForTier, unlockedTier, isFull, shouldRelease, BLOOM_TARGET, type Tier } from "../core/garden";
 import { EMOJI } from "../render/emoji";
 import { CATCH_UNICORN_KEY, CATCH_UNICORN_ANIM } from "../render/catchUnicorn";
 
@@ -100,7 +100,7 @@ export class GardenScene extends Phaser.Scene {
     this.placed += 1;
     this.sparkle(c.x, c.y - 40 * (c.scaleY || 1) * 1.4, this.reduce ? 3 : 8);
     this.sound2.note(this.noteIndex++);
-    this.bg.setWarmth(this.placed / 22);
+    this.bg.setWarmth(this.placed / BLOOM_TARGET);
 
     // Ladder-unlock chord cue when a new tier first appears.
     const top = unlockedTier(this.placed);
@@ -175,6 +175,7 @@ export class GardenScene extends Phaser.Scene {
     const plants = (this.plants.getChildren() as Phaser.GameObjects.Sprite[]).filter((p) => p.active);
     plants.forEach((p, i) => {
       this.time.delayedCall(this.reduce ? 0 : i * CLEAR_STAGGER, () => {
+        this.tweens.killTweensOf(p);
         this.tweens.add({
           targets: p, scale: 0, alpha: 0, duration: this.reduce ? 200 : 320, ease: "Back.In",
           onComplete: () => this.plants.killAndHide(p),
