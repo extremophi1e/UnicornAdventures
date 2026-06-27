@@ -25,6 +25,9 @@ export class BootScene extends Phaser.Scene {
     this.load.audio("catch3", ["audio/catch3.mp3"]);
     this.load.audio("catch4", ["audio/catch4.mp3"]);
     this.load.audio("catch5", ["audio/catch5.mp3"]);
+    this.load.audio("peekaboo1", ["audio/peekaboo1.mp3"]);
+    this.load.audio("peekaboo2", ["audio/peekaboo2.mp3"]);
+    this.load.audio("peekaboo3", ["audio/peekaboo3.mp3"]);
     this.load.audio("collect", ["audio/collect.mp3"]);
     this.load.audio("pop", ["audio/pop.mp3"]);
     this.load.audio("fanfare", ["audio/fanfare.mp3"]);
