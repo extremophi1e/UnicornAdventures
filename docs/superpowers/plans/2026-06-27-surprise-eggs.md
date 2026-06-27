@@ -444,7 +444,7 @@ const EGG_HIT_RADIUS = 100;
 const WOBBLE_DEG = 5, WOBBLE_MS = 550;
 const WEB_FLASH_MS = 80;
 const REVEAL_HOLD_MS = 2500;
-const BURST_PARTICLES = 14, BURST_PARTICLES_REDUCED = 5;
+const BURST_PARTICLES = 14;
 const ITEM_REVEAL_SCALE = (2.2 / 2) * 1.3;   // 144px emoji frames (/2), shown 30% larger
 const JACKPOT_REVEAL_SCALE = 0.85 * 1.3;     // catchUnicorn 256px sheet
 
@@ -612,11 +612,15 @@ export class EggsScene extends Phaser.Scene {
   }
 
   private hatch(e: EggView) {
-    e.container.setVisible(false);
-    this.sound2.shatter();
-    this.burst.explode(this.reduceMotion ? BURST_PARTICLES_REDUCED : BURST_PARTICLES, e.x, e.y);
-
     const jackpot = e.contents === JACKPOT;
+    this.sound2.shatter();
+    if (this.reduceMotion) {
+      // Calm path (prefers-reduced-motion): quietly fade the shell out — no flying shards.
+      this.tweens.add({ targets: e.container, alpha: 0, duration: 200, onComplete: () => e.container.setVisible(false).setAlpha(1) });
+    } else {
+      e.container.setVisible(false);
+      this.burst.explode(BURST_PARTICLES, e.x, e.y);
+    }
     const spr = this.showReveal(e, jackpot);
     const finalScale = jackpot ? JACKPOT_REVEAL_SCALE : ITEM_REVEAL_SCALE;
     this.tweens.add({ targets: spr, y: e.y - 30, duration: 420, ease: "Sine.easeOut" });
