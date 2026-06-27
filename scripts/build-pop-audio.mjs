@@ -1,8 +1,8 @@
 /**
  * build-pop-audio.mjs
- * Downloads one upbeat royalty-free Kevin MacLeod track (CC-BY) as the default
- * music for Pop the Cuties. Output: public/audio/popmusic.mp3
- * The user can replace this file with their own track (keep the filename).
+ * Downloads Pop the Cuties' 3-track playlist (CC-BY, Kevin MacLeod).
+ * Output: public/audio/popmusic.mp3, popmusic2.mp3, popmusic3.mp3
+ * Replace any file with your own track (keep the filename).
  * See public/audio/CREDITS.md for attribution. Run: node scripts/build-pop-audio.mjs
  */
 import { createWriteStream, mkdirSync, existsSync, unlinkSync } from "fs";
@@ -13,11 +13,11 @@ import https from "https";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, "..", "public", "audio");
 
-const TRACK = {
-  file: "popmusic.mp3",
-  title: "Wallpaper",
-  url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wallpaper.mp3",
-};
+const TRACKS = [
+  { file: "popmusic.mp3",  title: "Wallpaper",      url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wallpaper.mp3" },
+  { file: "popmusic2.mp3", title: "Investigations", url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Investigations.mp3" },
+  { file: "popmusic3.mp3", title: "Beach Party",    url: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Beach%20Party.mp3" },
+];
 
 function download(url, dest, redirects = 0) {
   return new Promise((resolve, reject) => {
@@ -40,9 +40,10 @@ function download(url, dest, redirects = 0) {
 
 async function main() {
   if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
-  const dest = join(OUT_DIR, TRACK.file);
-  process.stdout.write(`Downloading ${TRACK.title} -> ${TRACK.file} ... `);
-  try { await download(TRACK.url, dest); console.log("ok"); }
-  catch (e) { console.error(`FAILED: ${e.message} — pick another upbeat CC-BY track and update the URL + CREDITS.md`); process.exitCode = 1; }
+  for (const t of TRACKS) {
+    process.stdout.write(`Downloading ${t.title} -> ${t.file} ... `);
+    try { await download(t.url, join(OUT_DIR, t.file)); console.log("ok"); }
+    catch (e) { console.error(`FAILED: ${e.message} — pick another upbeat CC-BY track and update the URL + CREDITS.md`); process.exitCode = 1; }
+  }
 }
 main();
