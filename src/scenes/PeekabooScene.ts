@@ -15,7 +15,8 @@ const SPOT_COOLDOWN_MS = 500;   // min idle time after a spot frees before it ca
 const MILESTONE_EVERY = 15;     // catches per celebration
 const CRITTER_SCALE = 1.4 / 2;  // /2: 144px emoji frames
 const EMERGE_MS = 250, DUCK_MS = 150;
-const CRITTER_KEYS = Object.keys(EMOJI);
+const NON_CREATURES = ["cloud", "star", "icecream", "balloon", "heart", "flower", "gem", "cupcake", "lollipop"];
+const CRITTER_KEYS = Object.keys(EMOJI).filter((k) => !NON_CREATURES.includes(k));
 
 export class PeekabooScene extends Phaser.Scene {
   private bg!: PeekabooBackground;
@@ -191,7 +192,7 @@ export class PeekabooScene extends Phaser.Scene {
     const m = Math.floor(this.score / MILESTONE_EVERY);
     if (m > this.celebratedUpTo) {
       this.celebratedUpTo = m;
-      this.fx.bigParty();
+      this.fx.bigPartyNoShake();
       this.fx.banner("🌈");
       this.sound2.fanfare();
     }
