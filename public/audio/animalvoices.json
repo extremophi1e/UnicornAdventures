@@ -1,0 +1,219 @@
+{
+  "resources": [
+    "animalvoices.mp3"
+  ],
+  "spritemap": {
+    "cat": {
+      "start": 0,
+      "end": 0.52
+    },
+    "dog": {
+      "start": 0.92,
+      "end": 1.16
+    },
+    "rabbit": {
+      "start": 1.56,
+      "end": 1.78
+    },
+    "chipmunk": {
+      "start": 2.18,
+      "end": 2.4
+    },
+    "rat": {
+      "start": 2.8,
+      "end": 3.02
+    },
+    "cow": {
+      "start": 3.42,
+      "end": 4.12
+    },
+    "pig": {
+      "start": 4.52,
+      "end": 4.8
+    },
+    "horse": {
+      "start": 5.2,
+      "end": 5.54
+    },
+    "goat": {
+      "start": 5.94,
+      "end": 6.24
+    },
+    "ox": {
+      "start": 6.64,
+      "end": 7.34
+    },
+    "chick": {
+      "start": 7.74,
+      "end": 7.92
+    },
+    "rooster": {
+      "start": 8.32,
+      "end": 8.7
+    },
+    "fox": {
+      "start": 9.1,
+      "end": 9.34
+    },
+    "bear": {
+      "start": 9.74,
+      "end": 10.44
+    },
+    "panda": {
+      "start": 10.84,
+      "end": 11.2
+    },
+    "lion": {
+      "start": 11.6,
+      "end": 12.32
+    },
+    "tiger": {
+      "start": 12.72,
+      "end": 13.36
+    },
+    "sloth": {
+      "start": 13.76,
+      "end": 14.12
+    },
+    "raccoon": {
+      "start": 14.52,
+      "end": 14.82
+    },
+    "hedgehog": {
+      "start": 15.22,
+      "end": 15.44
+    },
+    "kangaroo": {
+      "start": 15.84,
+      "end": 16.18
+    },
+    "monkey": {
+      "start": 16.58,
+      "end": 16.88
+    },
+    "gorilla": {
+      "start": 17.28,
+      "end": 17.98
+    },
+    "orangutan": {
+      "start": 18.38,
+      "end": 19.08
+    },
+    "octopus": {
+      "start": 19.48,
+      "end": 19.84
+    },
+    "turtle": {
+      "start": 20.24,
+      "end": 20.6
+    },
+    "whale": {
+      "start": 21,
+      "end": 21.76
+    },
+    "crab": {
+      "start": 22.16,
+      "end": 22.46
+    },
+    "penguin": {
+      "start": 22.86,
+      "end": 23.2
+    },
+    "otter": {
+      "start": 23.6,
+      "end": 23.82
+    },
+    "seal": {
+      "start": 24.22,
+      "end": 24.56
+    },
+    "lobster": {
+      "start": 24.96,
+      "end": 25.26
+    },
+    "jellyfish": {
+      "start": 25.66,
+      "end": 26.02
+    },
+    "owl": {
+      "start": 26.42,
+      "end": 26.78
+    },
+    "peacock": {
+      "start": 27.18,
+      "end": 27.44
+    },
+    "eagle": {
+      "start": 27.84,
+      "end": 28.06
+    },
+    "flamingo": {
+      "start": 28.46,
+      "end": 28.8
+    },
+    "dove": {
+      "start": 29.2,
+      "end": 29.56
+    },
+    "frog": {
+      "start": 29.96,
+      "end": 30.28
+    },
+    "snake": {
+      "start": 30.68,
+      "end": 31.04
+    },
+    "lizard": {
+      "start": 31.44,
+      "end": 31.68
+    },
+    "butterfly": {
+      "start": 32.08,
+      "end": 32.3
+    },
+    "snail": {
+      "start": 32.7,
+      "end": 33.06
+    },
+    "ant": {
+      "start": 33.46,
+      "end": 33.76
+    },
+    "donut": {
+      "start": 34.16,
+      "end": 34.46
+    },
+    "microbe": {
+      "start": 34.86,
+      "end": 35.16
+    },
+    "trex": {
+      "start": 35.56,
+      "end": 36.32
+    },
+    "sauropod": {
+      "start": 36.72,
+      "end": 37.48
+    },
+    "robot": {
+      "start": 37.88,
+      "end": 38.24
+    },
+    "alien": {
+      "start": 38.64,
+      "end": 39.1
+    },
+    "ghost": {
+      "start": 39.5,
+      "end": 40.14
+    },
+    "poop": {
+      "start": 40.54,
+      "end": 40.9
+    },
+    "unicorn": {
+      "start": 41.3,
+      "end": 41.92
+    }
+  }
+}
