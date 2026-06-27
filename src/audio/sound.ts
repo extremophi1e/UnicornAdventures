@@ -7,7 +7,6 @@ export class Sound {
   private _lastMusicKey: string | null = null;
   private _current?: Phaser.Sound.BaseSound;
   private _playlist: readonly string[] = MUSIC_KEYS;
-  private _voices?: Phaser.Sound.BaseSound; // retained audiosprite instance (cut-off-previous)
 
   constructor(private scene: Phaser.Scene) {}
 
@@ -49,11 +48,9 @@ export class Sound {
     this.scene.sound.play("tada", { volume: 0.8 });
   }
 
-  // Play one creature voice from the baked audio sprite; stops any voice already
-  // playing so the latest tap always wins (no pile-up on rapid tapping).
-  voice(marker: string, volume = 0.7): void {
-    if (!this._voices) this._voices = this.scene.sound.addAudioSprite("animalvoices");
-    this._voices.stop();
-    (this._voices as Phaser.Sound.HTML5AudioSound | Phaser.Sound.WebAudioSound).play(marker, { volume });
+  // Play one fun musical note from the soundboard audio sprite. Fire-and-forget /
+  // polyphonic so rapid taps overlap and ring out into music (no cut-off).
+  voice(marker: string, volume = 0.55): void {
+    this.scene.sound.playAudioSprite("animalvoices", marker, { volume });
   }
 }
